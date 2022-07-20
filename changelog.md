@@ -38,3 +38,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Removed swipe controls in day view due to problems with the form
+
+## [2.2.0] - 2022-07-20
+### Added
+- import/export events in ICS format trough the clipboard
+- export single event button in event card
+
