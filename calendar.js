@@ -1,4 +1,3 @@
-
 var cal = {
 	// (A) PROPERTIES
 	// (A1) COMMON CALENDAR
@@ -25,6 +24,10 @@ var cal = {
 	sYear: 0, // Current selected day, month, year
 
 	// (A3) COMMON HTML ELEMENTS
+	now: null,
+	nowMth: null,
+	nowYear: null,
+	nowDay: null,
 	nxt: null,
 	prev: null,
 	nxtDay: null,
@@ -54,6 +57,7 @@ var cal = {
 	importScrBtn: null,
 	importArea: null,
 	closeImportBtn: null,
+	todayBtn: null,
 
 	// (B) INIT CALENDAR
 	init: () => {
@@ -76,7 +80,7 @@ var cal = {
 		document.getElementById("evt-close").onclick = cal.close;
 		cal.hfSave.onclick = cal.save;
 		cal.events = [];
-		events= cal.events; //link to the export var
+		events = cal.events; //link to the export var
 		cal.eventsView = document.getElementById("eventsDay");
 		cal.eventsView.classList.add("ninja");
 		cal.evCards = document.getElementById("evt-cards");
@@ -107,6 +111,17 @@ var cal = {
 		cal.importArea = document.getElementById("importArea");
 		cal.closeImportBtn = document.getElementById("closeImport");
 		cal.closeImportBtn.onclick = cal.closeImport;
+		cal.now = new Date(); // current date
+		cal.nowMth = cal.now.getMonth(); // current month
+		cal.nowYear = parseInt(cal.now.getFullYear()); // current year
+		cal.nowDay = cal.now.getDate();
+		cal.todayBtn = document.getElementById("today");
+		cal.todayBtn.onclick = () => {
+			cal.sDay = cal.nowDay;
+			cal.sMth = cal.nowMth;
+			cal.sYear = cal.nowYear;
+			cal.show(cal.nowYear, cal.nowMth, cal.nowDay);
+		};
 
 		// swipe listeners for mobile
 		cal.container.addEventListener(
@@ -129,27 +144,6 @@ var cal = {
 			},
 			false
 		);
-
-		// cal.eventsView.addEventListener(
-		// 	"touchstart",
-		// 	function (event) {
-		// 		cal.touchstartX = event.changedTouches[0].screenX;
-		// 	},
-		// 	false
-		// );
-
-		// cal.eventsView.addEventListener(
-		// 	"touchend",
-		// 	function (event) {
-		// 		cal.touchendX = event.changedTouches[0].screenX;
-		// 		if (cal.touchendX < cal.touchstartX - 100) {
-		// 			cal.nextDay();
-		// 		} else if (cal.touchendX > cal.touchstartX + 100) {
-		// 			cal.previousDay();
-		// 		}
-		// 	},
-		// 	false
-		// );
 
 		// handle past and future state updates
 		window.webxdc.setUpdateListener(function (update) {
@@ -267,20 +261,7 @@ var cal = {
 		cal.sYear = parseInt(cal.hYear.value); // selected year
 		let daysInMth = new Date(cal.sYear, cal.sMth + 1, 0).getDate(), // number of days in selected month
 			startDay = new Date(cal.sYear, cal.sMth, 1).getDay(), // first day of the month
-			endDay = new Date(cal.sYear, cal.sMth, daysInMth).getDay(), // last day of the month
-			now = new Date(), // current date
-			nowMth = now.getMonth(), // current month
-			nowYear = parseInt(now.getFullYear()), // current year
-			nowDay =
-				cal.sMth == nowMth && cal.sYear == nowYear ? now.getDate() : null;
-
-		// (C2) LOAD DATA FROM LOCALSTORAGE
-		// cal.mthEvents = [];
-
-		// //get this month events from the updates
-		// cal.mthEvents = cal.events.filter((event) => {
-		// 	return event.month == cal.sMth && event.year == cal.sYear;
-		// });
+			endDay = new Date(cal.sYear, cal.sMth, daysInMth).getDay(); // last day of the month
 
 		// (C3) DRAWING CALCULATIONS
 		// Blank squares before start of month
@@ -342,7 +323,7 @@ var cal = {
 			if (day == "b") {
 				cCell.classList.add("blank");
 			} else {
-				if (nowDay == day) {
+				if (cal.nowDay == day) {
 					cCell.classList.add("today");
 				} else {
 					cCell.classList.add("day");
@@ -483,7 +464,7 @@ var cal = {
 			var info =
 				window.webxdc.selfName +
 				" created the event " +
-				cal.hfTxt.value.replace(/\n/g, ' ') +
+				cal.hfTxt.value.replace(/\n/g, " ") +
 				" on " +
 				cal.mName[cal.sMth] +
 				" " +
@@ -555,16 +536,20 @@ var cal = {
 
 	openImport: () => {
 		cal.importScreen.classList.remove("ninja");
+		cal.container.classList.add("ninja");
 	},
 
 	closeImport: () => {
 		cal.importArea.value = "";
 		cal.importScreen.classList.add("ninja");
-		cal.close();
+		cal.container.classList.remove("ninja");
+		// cal.close();
 	},
 
 	exportOne: (id) => {
-		let event = cal.events.filter((ev)=> {return Number.parseInt(ev.id) === Number.parseInt(id)});
+		let event = cal.events.filter((ev) => {
+			return Number.parseInt(ev.id) === Number.parseInt(id);
+		});
 		let icsString = makeString(event);
 		cal.importScreen.classList.remove("ninja");
 		cal.eventsView.classList.add("ninja");

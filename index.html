@@ -17,22 +17,30 @@
 	<body>
 		<div id="cal-wrap" class="block">
 			<!-- (A) PERIOD SELECTOR -->
+
 			<div id="cal">
+				<button class="import" id="evt-imp-exp">Import/export events</button>
+
 				<div id="cal-date" class="flex-between">
-					<button id="prevMonth">&#10094;</button>
+					<button id="prevMonth" class="arrows">&#10094;</button>
 					<h1 id="date"></h1>
-					<button id="nxtMonth">&#10095;</button>
+					<button id="nxtMonth" class="arrows">&#10095;</button>
 				</div>
 
 				<!-- (B) CALENDAR -->
 				<div id="cal-container"></div>
 			</div>
+
 			<!-- (D) EVENTS PER DAY -->
 			<div id="eventsDay">
+				<div class="header">
+					<button class="import" id="today">Today</button>
+					<span id="evt-close">&#x2715</span>
+				</div>
 				<div class="flex-between block">
-					<button id="prevDay">&#10094;</button>
+					<button id="prevDay" class="arrows">&#10094;</button>
 					<h1 id="evt-date" class="block"></h1>
-					<button id="nxtDay">&#10095;</button>
+					<button id="nxtDay" class="arrows">&#10095;</button>
 				</div>
 				<div id="evt-cards"></div>
 				<textarea
@@ -51,26 +59,28 @@
 					</button>
 				</div>
 				<button class="eventBtn" id="evt-save">Add event</button>
-				<button class="eventBtn" id="evt-close">Close</button>
-				<button class="eventBtn" id="evt-imp-exp">Import/export events</button>
 			</div>
-
+			<!-- /// IMPORT SCREEN //// -->
 			<div id="importScreen">
+				<div class="header">
+					<span id="closeImport">&#x2715</span>
+				</div>
 				<h1>Import/export data</h1>
 				<p>Paste some data in ICS format to import the events or click "export" to get your current events in ICS format</p>
 				<textarea id="importArea"></textarea>
 				<button class="eventBtn" id="evt-import">Import ICS data</button>
 				<button class="eventBtn" id="evt-export">Export data to ICS file</button>
-				<button class="eventBtn" id="closeImport">Close</button>
 			</div>
-
+			<!-- /////  DATE SELECTION ///// -->
 			<div id="dateSel">
-				<div class="block">
+				<div class="header">
+					<span id="cancelDate">&#x2715</span>
+				</div>
+				<div class="block centerY">
 					<select id="cal-mth"></select>
 					<select id="cal-yr"></select>
 				</div>
 				<button class="eventBtn" id="okDate">Go</button>
-				<button class="eventBtn" id="cancelDate">Cancel</button>
 			</div>
 		</div>
 	</body>
