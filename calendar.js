@@ -381,16 +381,16 @@ var cal = {
 			var author = document.createElement("p");
 			var lilHeader = document.createElement("div");
 
-			exportBtn.innerHTML = "Export";
+			exportBtn.innerHTML = '<svg id="i-export" data-id="' + dayEvents[i].id + '" viewBox="0 0 32 32" width="18" height="18" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"><path d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" /></svg>';
 			exportBtn.setAttribute("data-id", dayEvents[i].id);
 			exportBtn.setAttribute("class", "event-export");
 			exportBtn.onclick = (ev) => {
 				cal.exportOne(ev.target.getAttribute("data-id"));
 			};
-			remove.innerHTML = "&#x2715";
+			remove.innerHTML = "<svg id='i-close' data-id='" + dayEvents[i].id + "' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
 			remove.setAttribute("data-id", dayEvents[i].id);
 			remove.onclick = (ev) => {
-				cal.del(ev.target.getAttribute("data-id"));
+				cal.del(ev.target.parentElement.getAttribute("data-id"));
 			};
 			author.textContent = dayEvents[i].creator;
 			author.classList.add("evt-view-name");
@@ -426,8 +426,10 @@ var cal = {
 			for (let i = 0; i < buttons.length; i++) {
 				if (buttons[i].getAttribute("data-color") == cal.color) {
 					buttons[i].style.backgroundColor = cal.color;
+					buttons[i].style.color = "white";
 				} else {
 					buttons[i].style.backgroundColor = "transparent";
+					buttons[i].style.color = "#333652";
 				}
 			}
 		}
