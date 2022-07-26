@@ -377,20 +377,32 @@ var cal = {
 			var eventBox = document.createElement("div");
 			var remove = document.createElement("span");
 			var exportBtn = document.createElement("span");
+			// exportBtn.setAttribute("viewBox", "0 0 32 32");
+			// exportBtn.setAttribute("width","18");
+			// exportBtn.setAttribute("height","18");
+			// exportBtn.setAttribute("fill","none");
+			// exportBtn.setAttribute("stroke","currentcolor");
+			// exportBtn.setAttribute("stroke-linecap", "round");
+			// exportBtn.setAttribute("stroke-linejoin", "round");
+			// exportBtn.setAttribute("stroke-width", "3.5");
+
 			var data = document.createElement("p");
 			var author = document.createElement("p");
 			var lilHeader = document.createElement("div");
 
-			exportBtn.innerHTML = '<svg id="i-export" data-id="' + dayEvents[i].id + '" viewBox="0 0 32 32" width="18" height="18" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"><path d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" /></svg>';
+			exportBtn.innerHTML = '<svg id="i-export" viewBox="0 0 32 32" width="18" height="18" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"><path d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" /></svg>';
+			// exportBtn.innerHTML = '<svg id="i-export" data-id="' + dayEvents[i].id + '" viewBox="0 0 32 32" width="18" height="18" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"><path data-id="' + dayEvents[i].id + '" d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" /></svg>';
 			exportBtn.setAttribute("data-id", dayEvents[i].id);
 			exportBtn.setAttribute("class", "event-export");
 			exportBtn.onclick = (ev) => {
-				cal.exportOne(ev.target.getAttribute("data-id"));
+				cal.exportOne(ev.currentTarget.getAttribute("data-id"));
 			};
-			remove.innerHTML = "<svg id='i-close' data-id='" + dayEvents[i].id + "' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
+			// remove.innerHTML = "<svg id='i-close' data-id='" + dayEvents[i].id + "' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path data-id='" + dayEvents[i].id + "' d='M2 30 L30 2 M30 30 L2 2' /></svg>";
+			remove.innerHTML = "<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
 			remove.setAttribute("data-id", dayEvents[i].id);
 			remove.onclick = (ev) => {
-				cal.del(ev.target.parentElement.getAttribute("data-id"));
+				console.log(ev);
+				cal.del(ev.currentTarget.getAttribute("data-id"));
 			};
 			author.textContent = dayEvents[i].creator;
 			author.classList.add("evt-view-name");
