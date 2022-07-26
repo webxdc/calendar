@@ -58,6 +58,9 @@ var cal = {
 	importArea: null,
 	closeImportBtn: null,
 	todayBtn: null,
+	addEvent: null,
+	addEventDetails: null,
+	addEventClose: null,
 
 	// (B) INIT CALENDAR
 	init: () => {
@@ -111,6 +114,10 @@ var cal = {
 		cal.importArea = document.getElementById("importArea");
 		cal.closeImportBtn = document.getElementById("closeImport");
 		cal.closeImportBtn.onclick = cal.closeImport;
+		cal.addEventDetails = document.getElementById("addEventDetails");
+		cal.addEventDetails.classList.add("ninja");
+		cal.addEvent = document.getElementById("addEvent");
+		cal.addEvent.onclick = cal.showAddEvent;
 		cal.now = new Date(); // current date
 		cal.nowMth = cal.now.getMonth(); // current month
 		cal.nowYear = parseInt(cal.now.getFullYear()); // current year
@@ -122,6 +129,8 @@ var cal = {
 			cal.sYear = cal.nowYear;
 			cal.show(cal.nowYear, cal.nowMth, cal.nowDay);
 		};
+		cal.addEventClose = document.getElementById("addEvent-close");
+		cal.addEventClose.onclick = cal.closeAddEventDetails;
 
 		// swipe listeners for mobile
 		cal.container.addEventListener(
@@ -456,11 +465,23 @@ var cal = {
 		} ${year}`;
 	},
 
+	showAddEvent: () => {
+		cal.evCards.classList.add("ninja");
+		cal.addEventDetails.classList.remove("ninja");
+		cal.addEvent.classList.add("ninja");
+	},
+
+	closeAddEventDetails: () => {
+		cal.evCards.classList.remove("ninja");
+		cal.addEventDetails.classList.add("ninja");
+		cal.addEvent.classList.remove("ninja");
+	},
+
 	// (E) CLOSE EVENT DOCKET
 	close: () => {
 		cal.eventsView.classList.add("ninja");
 		cal.container.classList.remove("ninja");
-		// cal.list();
+		cal.closeAddEventDetails();
 	},
 
 	// GET ALL EVENTS FROM A DAY

@@ -227,6 +227,10 @@ select {
   margin: 15px;
 }
 
+#evt-cards {
+  margin-bottom: 80px;
+}
+
 textarea {
   font-size: 1.3em;
   margin-top: 2.5vw;
@@ -236,6 +240,18 @@ textarea {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 10px;
+}
+
+#addEvent {
+  width: 70px;
+  height: 70px;
+  color: white;
+  background-color: #333652;
+  border-radius: 50%;
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  box-shadow: rgba(0,0,0,0.8) 0 0 10px;;
 }
 
 .eventBtn {
@@ -336,6 +352,13 @@ button {
 
   #evt-date, .colorBtns {
     font-size: 20px;
+  }
+
+  #addEvent {
+    right: 40px;
+    bottom: 40px;
+    width: 55px;
+    height: 55px;
   }
 
 }

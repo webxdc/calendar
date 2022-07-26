@@ -47,22 +47,30 @@
 					<button id="nxtDay" class="arrows">&#10095;</button>
 				</div>
 				<div id="evt-cards"></div>
-				<textarea
+				<div id="addEventDetails">
+					<textarea
 					id="evt-details"
 					class="block"
 					placeholder="Add a new event..."
-				></textarea>
-				<div class="block" id="colorBtns">
-					<button class="colorBtns" id="yellow" data-color="#FAD02C">
-						Yellow
-					</button>
-					<button class="colorBtns" id="red" data-color="#c74646">Red</button>
-					<button class="colorBtns" id="blue" data-color="#333652">Blue</button>
-					<button class="colorBtns" id="green" data-color="#00cc00">
+					></textarea>
+					<div class="block" id="colorBtns">
+						<button class="colorBtns" id="yellow" data-color="#FAD02C">
+							Yellow
+						</button>
+						<button class="colorBtns" id="red" data-color="#c74646">Red</button>
+						<button class="colorBtns" id="blue" data-color="#333652">Blue</button>
+						<button class="colorBtns" id="green" data-color="#00cc00">
 						Green
-					</button>
+						</button>
+					</div>
+					<button class="eventBtn" id="evt-save">Add event</button>
+					<button class="eventBtn" id="addEvent-close">Cancel</button>
 				</div>
-				<button class="eventBtn" id="evt-save">Add event</button>
+				<button id="addEvent"><svg id="i-plus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+					<path d="M16 2 L16 30 M2 16 L30 16" />
+				</svg></button>
+			</div>
+				
 			</div>
 			<!-- /// IMPORT SCREEN //// -->
 			<div id="importScreen">
