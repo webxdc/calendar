@@ -254,6 +254,22 @@ textarea {
   box-shadow: rgba(0,0,0,0.8) 0 0 10px;;
 }
 
+#getExport {
+  background-color: #90ADC6;
+  border-radius: 10px;
+  color:#333652;
+  width: 90vw;
+  position: relative;
+  padding: 10px;
+}
+
+#i-clipboard {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+}
+
 .eventBtn {
   cursor: pointer;
   width: 42.5vw;

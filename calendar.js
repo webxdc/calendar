@@ -61,6 +61,9 @@ var cal = {
 	addEvent: null,
 	addEventDetails: null,
 	addEventClose: null,
+	addImport: null,
+	getExport: null,
+	copyBtn: null,
 
 	// (B) INIT CALENDAR
 	init: () => {
@@ -105,7 +108,7 @@ var cal = {
 		};
 		cal.export = document.getElementById("evt-export");
 		cal.export.onclick = () => {
-			cal.importArea.value = setClipboard();
+			cal.exporter();
 		};
 		cal.importScreen = document.getElementById("importScreen");
 		cal.importScreen.classList.add("ninja");
@@ -131,6 +134,11 @@ var cal = {
 		};
 		cal.addEventClose = document.getElementById("addEvent-close");
 		cal.addEventClose.onclick = cal.closeAddEventDetails;
+		cal.addImport = document.getElementById("addImport");
+		cal.getExport = document.getElementById("getExport");
+		cal.copyBtn = document.getElementById("i-clipboard");
+		cal.copyBtn.onclick = cal.copyExporter;
+
 
 		// swipe listeners for mobile
 		cal.container.addEventListener(
@@ -386,28 +394,19 @@ var cal = {
 			var eventBox = document.createElement("div");
 			var remove = document.createElement("span");
 			var exportBtn = document.createElement("span");
-			// exportBtn.setAttribute("viewBox", "0 0 32 32");
-			// exportBtn.setAttribute("width","18");
-			// exportBtn.setAttribute("height","18");
-			// exportBtn.setAttribute("fill","none");
-			// exportBtn.setAttribute("stroke","currentcolor");
-			// exportBtn.setAttribute("stroke-linecap", "round");
-			// exportBtn.setAttribute("stroke-linejoin", "round");
-			// exportBtn.setAttribute("stroke-width", "3.5");
-
 			var data = document.createElement("p");
 			var author = document.createElement("p");
 			var lilHeader = document.createElement("div");
 
-			exportBtn.innerHTML = '<svg id="i-export" viewBox="0 0 32 32" width="18" height="18" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"><path d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" /></svg>';
-			// exportBtn.innerHTML = '<svg id="i-export" data-id="' + dayEvents[i].id + '" viewBox="0 0 32 32" width="18" height="18" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"><path data-id="' + dayEvents[i].id + '" d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" /></svg>';
+			exportBtn.innerHTML =
+				'<svg id="i-export" viewBox="0 0 32 32" width="18" height="18" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"><path d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" /></svg>';
 			exportBtn.setAttribute("data-id", dayEvents[i].id);
 			exportBtn.setAttribute("class", "event-export");
 			exportBtn.onclick = (ev) => {
-				cal.exportOne(ev.currentTarget.getAttribute("data-id"));
+				cal.exporter(ev.currentTarget.getAttribute("data-id"));
 			};
-			// remove.innerHTML = "<svg id='i-close' data-id='" + dayEvents[i].id + "' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path data-id='" + dayEvents[i].id + "' d='M2 30 L30 2 M30 30 L2 2' /></svg>";
-			remove.innerHTML = "<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
+			remove.innerHTML =
+				"<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
 			remove.setAttribute("data-id", dayEvents[i].id);
 			remove.onclick = (ev) => {
 				console.log(ev);
@@ -571,7 +570,10 @@ var cal = {
 
 	openImport: () => {
 		cal.importScreen.classList.remove("ninja");
+		cal.getExport.firstChild.innerHTML = "";
+		cal.getExport.classList.add("ninja");
 		cal.container.classList.add("ninja");
+		cal.addImport.classList.remove("ninja");
 	},
 
 	closeImport: () => {
@@ -581,14 +583,28 @@ var cal = {
 		// cal.close();
 	},
 
-	exportOne: (id) => {
-		let event = cal.events.filter((ev) => {
-			return Number.parseInt(ev.id) === Number.parseInt(id);
-		});
-		let icsString = makeString(event);
-		cal.importScreen.classList.remove("ninja");
-		cal.eventsView.classList.add("ninja");
-		cal.importArea.value = icsString;
+	exporter: (id) => {
+		cal.copyBtn.style.color = "#333652";
+		cal.addImport.classList.add("ninja");
+		//check if id is one or more events
+		if (id === undefined) {
+			cal.getExport.classList.remove("ninja");
+			cal.getExport.firstChild.innerHTML = setClipboard();
+		} else {
+			let event = cal.events.filter((ev) => {
+				return Number.parseInt(ev.id) === Number.parseInt(id);
+			});
+			let icsString = makeString(event);
+			cal.importScreen.classList.remove("ninja");
+			cal.eventsView.classList.add("ninja");
+			cal.getExport.classList.remove("ninja");
+			cal.getExport.firstChild.innerHTML = icsString;
+		}
+	},
+
+	copyExporter: () => {
+		navigator.clipboard.writeText(cal.getExport.firstChild.innerHTML);
+		cal.copyBtn.style.color = "#FAD02C";
 	},
 };
 window.addEventListener("load", cal.init);
