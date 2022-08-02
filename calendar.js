@@ -105,6 +105,7 @@ var cal = {
 		cal.import = document.getElementById("evt-import");
 		cal.import.onclick = () => {
 			getClipboard(cal.importArea.value);
+			cal.closeImport();
 		};
 		cal.export = document.getElementById("evt-export");
 		cal.export.onclick = () => {
@@ -514,6 +515,7 @@ var cal = {
 						color: cal.color,
 						addition: true,
 						creator: window.webxdc.selfName,
+						//send timezone?
 					},
 					info,
 				},

@@ -44,3 +44,16 @@ All notable changes to this project will be documented in this file.
 - import/export events in ICS format trough the clipboard
 - export single event button in event card
 
+## [3.0.0] - 2022
+### Added
+- new icons
+- "Today" button for going to current day in day view
+- copy button in export box
+
+### Changed
+- adding events layout
+- import/export layout
+
+
+### Fixed 
+- import ics bug

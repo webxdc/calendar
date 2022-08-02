@@ -40,6 +40,7 @@ function parseIcsToJSON(icsData) {
 	const LOCATION = "LOCATION";
 	const ALARM = "VALARM";
 	const UID = "UID"; //then I can get this for the ID of the event in the calendar
+	const TZID = "TZID";
 
 	const keyMap = {
 		[UID]: "uid",
@@ -48,6 +49,7 @@ function parseIcsToJSON(icsData) {
 		[DESCRIPTION]: "description",
 		[SUMMARY]: "summary",
 		[LOCATION]: "location",
+		[TZID]: "timeZone",
 	};
 
 	const clean = (string) => unescape(string).trim();
@@ -65,12 +67,15 @@ function parseIcsToJSON(icsData) {
 		const lineData = line.split(":");
 
 		let key = lineData[0];
+		let keyParam = "";
 		const value = lineData[1];
+
 
 		if (key.indexOf(";") !== -1) {
 			const keyParts = key.split(";");
 			key = keyParts[0];
 			// Maybe do something with that second part later
+			keyParam = keyParts[1];
 		}
 
 		if (lineData.length < 2) {
@@ -97,7 +102,11 @@ function parseIcsToJSON(icsData) {
 			case UID:
                 // currentObj[keyMap[UID]] = clean(value);
 				currentObj[keyMap[UID]] = clean(Math.floor((Math.random() * 10000) + 1)); //calendar webxdc is not able to delete events if their id isn't a number
+				break;
 			case START_DATE:
+				//save the timezone
+				keyParam = keyParam.split("=");
+				currentObj[keyMap[TZID]] = keyParam[1];
 				//try to get the date value
 				currentObj[keyMap[START_DATE]] = calenDate(value); //JSON.stringify(calenDate(value));
 				break;
@@ -125,14 +134,12 @@ function parseIcsToJSON(icsData) {
 }
 
 function parseJSONToWebxdcUpdate(JSON) {
-    // const data = JSON.parse(JSON);
-    // console.log(JSON);
     for(const evt in JSON){
         let event = JSON[evt];
-        // console.log(event);
         let date = new Date(event.startDate);
-        let info = window.webxdc.selfName + " added data from ics file";
+        let info = window.webxdc.selfName + " imported an event on " + date.toDateString();
         let color = "black";
+		let timeZone = event.timeZone; //time zone of the imported event!!
         window.webxdc.sendUpdate(
             {
                 payload: {
@@ -144,6 +151,7 @@ function parseJSONToWebxdcUpdate(JSON) {
                     color: color,
                     addition: true,
                     creator: window.webxdc.selfName,
+					// timeZone: timeZone,
                 },
                 info,
             },

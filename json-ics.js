@@ -32,7 +32,8 @@ function makeString(events) {
    
 	icsString +=
 		"VERSION:2.0" + SEPARATOR +
-		"PRODID:-//calendar/webxdc//EN" + SEPARATOR;
+		"PRODID:-//calendar/webxdc//EN" + SEPARATOR + 
+		"X-WR-CALNAME:" + window.webxdc.selfName + " calendar" + SEPARATOR;
 	for (const i in events) {
         let dateStart = new Date(events[i].year, events[i].month, events[i].day);
         let dateEnd = new Date(dateStart.getTime() + 86400000);
