@@ -146,11 +146,11 @@ var cal = {
 		cal.multiDayCheck.onchange = (ev) => {
 			//set the default date in form
 			if (ev.target.checked) {
-				for(const i in cal.multiDayForm){
+				for (let i = 0; i < cal.multiDayForm.length; i++) {
 					cal.multiDayForm[i].style.display = "block";
 				}
 			} else {
-				for(const i in cal.multiDayForm){
+				for (let i = 0; i < cal.multiDayForm.length; i++) {
 					cal.multiDayForm[i].style.display = "none";
 				}
 			}
@@ -516,7 +516,7 @@ var cal = {
 	//if gets an eventObject as a parameter it can be reused for imports
 	save: () => {
 		const ONE_DAY_MS = 1000 * 60 * 60 * 24;
-		let dateSt, dateEnd, daysInMilisec,days,color,data,info;
+		let dateSt, dateEnd, daysInMilisec, days, color, data, info;
 
 		if (cal.importEventObj === undefined) {
 			dateSt = new Date(document.getElementById("start-day").value);
@@ -701,13 +701,13 @@ var cal = {
 		// cal.close();
 	},
 
-	exporter: (id) => {
+	exporter: (id = undefined) => {
 		cal.copyBtn.style.color = "#333652";
 		cal.addImport.classList.add("ninja");
 		//check if id is one or more events
 		if (id === undefined) {
 			cal.getExport.classList.remove("ninja");
-			cal.getExport.firstChild.innerHTML = setClipboard();
+			document.querySelector("#exportData").innerHTML = setClipboard();
 		} else {
 			let event = cal.events.filter((ev) => {
 				return Number.parseInt(ev.id) === Number.parseInt(id);
