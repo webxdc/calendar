@@ -521,7 +521,7 @@ var cal = {
 	//if gets an eventObject as a parameter it can be reused for imports
 	save: () => {
 		const ONE_DAY_MS = 1000 * 60 * 60 * 24;
-		let dateSt, dateEnd, daysInMilisec, days, color, data, info;
+		let dateSt, dateEnd, daysInMilisec, days, color, data, info, id;
 
 		//if is not an imported event
 		if (cal.importEventObj === undefined) {
@@ -555,6 +555,7 @@ var cal = {
 
 		daysInMilisec = dateEnd.getTime() - dateSt.getTime();
 		days = daysInMilisec / ONE_DAY_MS;
+		id = Date.now();
 		// console.log(days + " días");
 
 		do {
@@ -562,7 +563,7 @@ var cal = {
 			window.webxdc.sendUpdate(
 				{
 					payload: {
-						id: Date.now(),
+						id: id,
 						day: dateSt.getDate(),
 						month: dateSt.getMonth(),
 						year: dateSt.getFullYear(),
