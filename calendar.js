@@ -184,10 +184,15 @@ var cal = {
 			if (update.payload.addition) {
 				cal.events.push(update.payload);
 			} else {
-				var index = cal.events.findIndex((obj) => {
-					return Number.parseInt(obj.id) === Number.parseInt(update.payload.id);
-				});
-				cal.events.splice(index, 1);
+				let index = 0;
+				while (index != -1) {
+					index = cal.events.findIndex((obj) => {
+						return (
+							Number.parseInt(obj.id) === Number.parseInt(update.payload.id)
+						);
+					});
+					if(index != -1) cal.events.splice(index, 1);
+				}
 			}
 			cal.list();
 		});
@@ -518,6 +523,7 @@ var cal = {
 		const ONE_DAY_MS = 1000 * 60 * 60 * 24;
 		let dateSt, dateEnd, daysInMilisec, days, color, data, info;
 
+		//if is not an imported event
 		if (cal.importEventObj === undefined) {
 			dateSt = new Date(document.getElementById("start-day").value);
 			dateEnd = new Date(document.getElementById("end-day").value);
@@ -532,6 +538,7 @@ var cal = {
 				" " +
 				dateSt.getDate();
 		} else {
+			//if is an imported event
 			dateSt = new Date(cal.importEventObj.startDate);
 			dateEnd = new Date(cal.importEventObj.endDate);
 			data = cal.importEventObj.summary;
@@ -559,6 +566,7 @@ var cal = {
 						day: dateSt.getDate(),
 						month: dateSt.getMonth(),
 						year: dateSt.getFullYear(),
+						endDate: dateEnd.getTime(),
 						data: data,
 						color: color,
 						addition: true,
@@ -721,7 +729,9 @@ var cal = {
 	},
 
 	copyExporter: () => {
-		navigator.clipboard.writeText(cal.getExport.firstChild.innerHTML);
+		navigator.clipboard.writeText(
+			document.querySelector("#exportData").innerHTML
+		);
 		cal.copyBtn.style.color = "#FAD02C";
 	},
 };

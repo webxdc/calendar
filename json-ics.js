@@ -28,26 +28,48 @@ function makeICS(start, end, title = "", location = "") {
  */
 function makeString(events) {
 	let icsString = "BEGIN:VCALENDAR" + SEPARATOR;
-    // console.log(events);
-   
+	// console.log(events);
+
 	icsString +=
-		"VERSION:2.0" + SEPARATOR +
-		"PRODID:-//calendar/webxdc//EN" + SEPARATOR + 
-		"X-WR-CALNAME:" + window.webxdc.selfName + " calendar" + SEPARATOR;
+		"VERSION:2.0" +
+		SEPARATOR +
+		"PRODID:-//calendar/webxdc//EN" +
+		SEPARATOR +
+		"X-WR-CALNAME:" +
+		window.webxdc.selfName +
+		" calendar" +
+		SEPARATOR;
+		let lastID = 0;
 	for (const i in events) {
-        let dateStart = new Date(events[i].year, events[i].month, events[i].day);
-        let dateEnd = new Date(dateStart.getTime() + 86400000);
-		icsString += "BEGIN:VEVENT" + SEPARATOR +
-			`UID:${events[i].id}` + SEPARATOR +
-			`DTSTAMP:${toDateTime(new Date())}` + SEPARATOR +
-            `CREATED:${toDateTime(new Date())}` + SEPARATOR +
-			`DTSTART;VALUE=DATE:${toDateTime(dateStart)}` + SEPARATOR +
-            //maybe do something with this longer than a day events later
-			`DTEND;VALUE=DATE:${toDateTime(dateEnd)}` + SEPARATOR +
-			`SUMMARY:${events[i].data}` + SEPARATOR +
-            `DESCRIPTION:${events[i].data}` + SEPARATOR + 
- 			`LOCATION:${events[i][location]? events[i].location : ""}` + SEPARATOR +
-			"END:VEVENT" + SEPARATOR;
+		//if is the same ID is a multi-day event, so skip iteration
+		if (events[i].id === lastID) continue;
+		//compound the event in ics format
+			lastID = events[i].id;
+			let dateStart = new Date(events[i].year, events[i].month, events[i].day);
+			let dateEnd = new Date(events[i].endDate);
+			icsString +=
+				"BEGIN:VEVENT" +
+				SEPARATOR +
+				`UID:${lastID}` +
+				SEPARATOR +
+				`DTSTAMP:${toDateTime(new Date())}` +
+				SEPARATOR +
+				`CREATED:${toDateTime(new Date())}` +
+				SEPARATOR +
+				`DTSTART;VALUE=DATE:${toDateTime(dateStart)}` +
+				SEPARATOR +
+				//maybe do something with this longer than a day events later
+				`DTEND;VALUE=DATE:${toDateTime(dateEnd)}` +
+				SEPARATOR +
+				`SUMMARY:${events[i].data}` +
+				SEPARATOR +
+				`DESCRIPTION:${events[i].data}` +
+				SEPARATOR +
+				`LOCATION:${events[i][location] ? events[i].location : ""}` +
+				SEPARATOR +
+				"END:VEVENT" +
+				SEPARATOR;
+		
 	}
 	icsString += "END:VCALENDAR";
 	return icsString;
@@ -61,15 +83,15 @@ function toDateTime(date) {
 }
 
 // Set info in the clipboard
-function setClipboard(){
-    let data = makeString(events);
-    console.log(data);
-    // navigator.clipboard.writeText(data);
+function setClipboard() {
+	let data = makeString(events);
+	console.log(data);
+	// navigator.clipboard.writeText(data);
 	return data;
 }
 
 // window.webxdc.setUpdateListener(function (update) {
 //     if (update.payload.addition) {
 //         events.push(update.payload);
-//     } 
+//     }
 // });
