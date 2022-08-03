@@ -516,34 +516,42 @@ var cal = {
 	//if gets an eventObject as a parameter it can be reused for imports
 	save: () => {
 		const ONE_DAY_MS = 1000 * 60 * 60 * 24;
-		let dateSt, dateEnd, daysInMilisec,days,color,data;
+		let dateSt, dateEnd, daysInMilisec,days,color,data,info;
 
 		if (cal.importEventObj === undefined) {
 			dateSt = new Date(document.getElementById("start-day").value);
 			dateEnd = new Date(document.getElementById("end-day").value);
 			data = cal.hfTxt.value;
 			color = cal.color;
-		} else {
-			dateSt = new Date(cal.importEventObj.startDate);
-			dateEnd = new Date(cal.importEventObj.endDate);
-			data = cal.importEventObj.summary;
-			color = "black";
-		}
-
-		daysInMilisec = dateEnd.getTime() - dateSt.getTime();
-		days = daysInMilisec / ONE_DAY_MS;
-		console.log(days + " días");
-
-		do {
-			// send new updates
-			var info =
+			info =
 				window.webxdc.selfName +
-				" created the event " +
+				" created an event " +
 				cal.hfTxt.value.replace(/\n/g, " ") +
 				" on " +
 				cal.mName[dateSt.getMonth()] +
 				" " +
 				dateSt.getDate();
+		} else {
+			dateSt = new Date(cal.importEventObj.startDate);
+			dateEnd = new Date(cal.importEventObj.endDate);
+			data = cal.importEventObj.summary;
+			color = "black";
+			info =
+				window.webxdc.selfName +
+				" imported an event " +
+				cal.hfTxt.value.replace(/\n/g, " ") +
+				" on " +
+				cal.mName[dateSt.getMonth()] +
+				" " +
+				dateSt.getDate();
+		}
+
+		daysInMilisec = dateEnd.getTime() - dateSt.getTime();
+		days = daysInMilisec / ONE_DAY_MS;
+		// console.log(days + " días");
+
+		do {
+			// send new updates
 			window.webxdc.sendUpdate(
 				{
 					payload: {
