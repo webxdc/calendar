@@ -49,7 +49,7 @@ All notable changes to this project will be documented in this file.
 - new icons
 - "Today" button for going to current day in day view
 - copy button in export box
-- multi-day events and imports
+- multi-day events, imports and exports from ics files
 
 ### Changed
 - adding events layout

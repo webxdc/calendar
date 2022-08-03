@@ -42,7 +42,7 @@ function makeString(events) {
 		let lastID = 0;
 	for (const i in events) {
 		//if is the same ID is a multi-day event, so skip iteration
-		if (events[i].id === lastID) continue;
+		if (Number.parseInt(events[i].id) === Number.parseInt(lastID)) continue;
 		//compound the event in ics format
 			lastID = events[i].id;
 			let dateStart = new Date(events[i].year, events[i].month, events[i].day);

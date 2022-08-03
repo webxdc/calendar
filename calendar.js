@@ -488,6 +488,9 @@ var cal = {
 		cal.addEventDetails.classList.remove("ninja");
 		cal.addEvent.classList.add("ninja");
 		cal.multiDayCheck.checked = false;
+		for (let i = 0; i < cal.multiDayForm.length; i++) {
+			cal.multiDayForm[i].style.display = "none";
+		}
 		document.getElementById("start-day").value = `${cal.sYear}-${
 			cal.sMth + 1 < 10 ? "0" + (cal.sMth + 1) : cal.sMth + 1
 		}-${cal.sDay < 10 ? "0" + cal.sDay : cal.sDay}`;
