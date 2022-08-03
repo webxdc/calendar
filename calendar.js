@@ -62,6 +62,7 @@ var cal = {
 	addEventDetails: null,
 	addEventClose: null,
 	addImport: null,
+	importEventObj: undefined,
 	getExport: null,
 	copyBtn: null,
 	multiDayCheck: null,
@@ -145,12 +146,16 @@ var cal = {
 		cal.multiDayCheck.onchange = (ev) => {
 			//set the default date in form
 			if (ev.target.checked) {
-				cal.multiDayForm.style.display = "block";
+				for(const i in cal.multiDayForm){
+					cal.multiDayForm[i].style.display = "block";
+				}
 			} else {
-				cal.multiDayForm.style.display = "none";
+				for(const i in cal.multiDayForm){
+					cal.multiDayForm[i].style.display = "none";
+				}
 			}
 		};
-		cal.multiDayForm = document.getElementById("multi-day-form");
+		cal.multiDayForm = document.getElementsByClassName("multi-day-form"); //watch out is an array!
 
 		// swipe listeners for mobile
 		cal.container.addEventListener(
@@ -508,12 +513,25 @@ var cal = {
 	},
 
 	// (F) SAVE EVENT
+	//if gets an eventObject as a parameter it can be reused for imports
 	save: () => {
-		let dateSt = new Date(document.getElementById("start-day").value);
-		let dateEnd = new Date(document.getElementById("end-day").value);
-		let daysInMilisec = dateEnd.getTime() - dateSt.getTime();
 		const ONE_DAY_MS = 1000 * 60 * 60 * 24;
-		let days = daysInMilisec / ONE_DAY_MS;
+		let dateSt, dateEnd, daysInMilisec,days,color,data;
+
+		if (cal.importEventObj === undefined) {
+			dateSt = new Date(document.getElementById("start-day").value);
+			dateEnd = new Date(document.getElementById("end-day").value);
+			data = cal.hfTxt.value;
+			color = cal.color;
+		} else {
+			dateSt = new Date(cal.importEventObj.startDate);
+			dateEnd = new Date(cal.importEventObj.endDate);
+			data = cal.importEventObj.summary;
+			color = "black";
+		}
+
+		daysInMilisec = dateEnd.getTime() - dateSt.getTime();
+		days = daysInMilisec / ONE_DAY_MS;
 		console.log(days + " días");
 
 		do {
@@ -533,8 +551,8 @@ var cal = {
 						day: dateSt.getDate(),
 						month: dateSt.getMonth(),
 						year: dateSt.getFullYear(),
-						data: cal.hfTxt.value,
-						color: cal.color,
+						data: data,
+						color: color,
 						addition: true,
 						creator: window.webxdc.selfName,
 						//send timezone?
@@ -543,11 +561,11 @@ var cal = {
 				},
 				info
 			);
-				//add one more day in milliseconds
-				dateSt = new Date(dateSt.getTime() + ONE_DAY_MS);
+			//add one more day in milliseconds
+			dateSt = new Date(dateSt.getTime() + ONE_DAY_MS);
 
-				//substract one day
-				days--;
+			//substract one day
+			days--;
 		} while (days >= 0);
 
 		//if is a single day event send a single update, otherwise send several updates

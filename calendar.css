@@ -231,6 +231,11 @@ select {
   margin-bottom: 80px;
 }
 
+#multi {
+  width: 90vw;
+  margin-bottom: 2.5vw;
+}
+
 textarea {
   font-size: 1.3em;
   margin-top: 2.5vw;
@@ -312,7 +317,7 @@ button {
   background-color: #FAD02C;
 }
 
-#multi-day-form {
+.multi-day-form {
   display: none;
 }
 

@@ -49,11 +49,13 @@ All notable changes to this project will be documented in this file.
 - new icons
 - "Today" button for going to current day in day view
 - copy button in export box
+- multi-day events and imports
 
 ### Changed
 - adding events layout
 - import/export layout
-
+- save events function now is used for import and new events, saving code
 
 ### Fixed 
 - import ics bug
+- css layout in add event screen

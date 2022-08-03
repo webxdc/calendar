@@ -143,28 +143,30 @@ function parseIcsToJSON(icsData) {
 
 function parseJSONToWebxdcUpdate(JSON) {
 	for (const evt in JSON) {
-		let event = JSON[evt];
-		let date = new Date(event.startDate);
-		let info =
-			window.webxdc.selfName + " imported an event on " + date.toDateString();
-		let color = "black";
-		let timeZone = event.timeZone; //time zone of the imported event!!
-		window.webxdc.sendUpdate(
-			{
-				payload: {
-					id: event.uid,
-					day: date.getDate(),
-					month: date.getMonth(),
-					year: date.getFullYear(),
-					data: event.summary,
-					color: color,
-					addition: true,
-					creator: window.webxdc.selfName,
-					// timeZone: timeZone,
-				},
-				info,
-			},
-			info
-		);
+		cal.importEventObj = JSON[evt];
+		cal.save();
+		// let date = new Date(event.startDate);
+		// let info =
+		// 	window.webxdc.selfName + " imported an event on " + date.toDateString();
+		// let color = "black";
+		// let timeZone = event.timeZone; //time zone of the imported event!!
+		// window.webxdc.sendUpdate(
+		// 	{
+		// 		payload: {
+		// 			id: event.uid,
+		// 			day: date.getDate(),
+		// 			month: date.getMonth(),
+		// 			year: date.getFullYear(),
+		// 			data: event.summary,
+		// 			color: color,
+		// 			addition: true,
+		// 			creator: window.webxdc.selfName,
+		// 			// timeZone: timeZone,
+		// 		},
+		// 		info,
+		// 	},
+		// 	info
+		// );
 	}
+	cal.importEventObj = undefined;
 }

@@ -56,13 +56,21 @@
 			<!--   ADD NEW EVENT    -->
 			<div id="addEventDetails">
 				<textarea id="evt-details" class="block" placeholder="Add a new event..."></textarea>
-				<input type="checkbox" id="multi-day" name="multi-day" value="multi">
-				<label for="multi-day"> Multiple days</label>
-				<div id="multi-day-form">
-					<label for="start-day">From </label>
-					<input type="date" id="start-day" name="start-day">
-					<label for="end-day">To </label>
-					<input type="date" id="end-day" name="end-day">
+				<div class="block" id="multi">
+					<div class="flex-between">
+						<div>
+							<input type="checkbox" id="multi-day" name="multi-day" value="multi">
+							<label for="multi-day"> Multiple days</label>
+						</div>
+						<div class="multi-day-form">
+							<label for="start-day">From </label>
+							<input type="date" id="start-day" name="start-day">
+						</div>
+						<div class="multi-day-form">
+							<label for="end-day">To </label>
+							<input type="date" id="end-day" name="end-day">
+						</div>
+					</div>
 				</div>
 				<div class="block" id="colorBtns">
 					<button class="colorBtns" id="yellow" data-color="#FAD02C">
