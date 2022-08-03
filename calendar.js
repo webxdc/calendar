@@ -64,6 +64,8 @@ var cal = {
 	addImport: null,
 	getExport: null,
 	copyBtn: null,
+	multiDayCheck: null,
+	multiDayForm: null,
 
 	// (B) INIT CALENDAR
 	init: () => {
@@ -139,7 +141,16 @@ var cal = {
 		cal.getExport = document.getElementById("getExport");
 		cal.copyBtn = document.getElementById("i-clipboard");
 		cal.copyBtn.onclick = cal.copyExporter;
-
+		cal.multiDayCheck = document.getElementById("multi-day");
+		cal.multiDayCheck.onchange = (ev) => {
+			//set the default date in form
+			if (ev.target.checked) {
+				cal.multiDayForm.style.display = "block";
+			} else {
+				cal.multiDayForm.style.display = "none";
+			}
+		};
+		cal.multiDayForm = document.getElementById("multi-day-form");
 
 		// swipe listeners for mobile
 		cal.container.addEventListener(
@@ -225,7 +236,6 @@ var cal = {
 				cal.show(cal.sYear, cal.sMth, daysInMonth());
 			}
 		}
-		console.log(cal.sYear + "-" + cal.sMth + "-" + cal.sDay);
 	},
 
 	//NEXT DAY
@@ -245,7 +255,6 @@ var cal = {
 				cal.show(cal.sYear, cal.sMth, 1);
 			}
 		}
-		console.log(cal.sMth + "-" + cal.sDay);
 	},
 
 	//PREVIOUS MONTH
@@ -410,7 +419,6 @@ var cal = {
 				"<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
 			remove.setAttribute("data-id", dayEvents[i].id);
 			remove.onclick = (ev) => {
-				console.log(ev);
 				cal.del(ev.currentTarget.getAttribute("data-id"));
 			};
 			author.textContent = dayEvents[i].creator;
@@ -469,6 +477,13 @@ var cal = {
 		cal.evCards.classList.add("ninja");
 		cal.addEventDetails.classList.remove("ninja");
 		cal.addEvent.classList.add("ninja");
+		cal.multiDayCheck.checked = false;
+		document.getElementById("start-day").value = `${cal.sYear}-${
+			cal.sMth + 1 < 10 ? "0" + (cal.sMth + 1) : cal.sMth + 1
+		}-${cal.sDay < 10 ? "0" + cal.sDay : cal.sDay}`;
+		document.getElementById("end-day").value = `${cal.sYear}-${
+			cal.sMth + 1 < 10 ? "0" + (cal.sMth + 1) : cal.sMth + 1
+		}-${cal.sDay < 10 ? "0" + cal.sDay : cal.sDay}`;
 	},
 
 	closeAddEventDetails: () => {
@@ -494,23 +509,30 @@ var cal = {
 
 	// (F) SAVE EVENT
 	save: () => {
-		if (cal.hfTxt.value !== "") {
+		let dateSt = new Date(document.getElementById("start-day").value);
+		let dateEnd = new Date(document.getElementById("end-day").value);
+		let daysInMilisec = dateEnd.getTime() - dateSt.getTime();
+		const ONE_DAY_MS = 1000 * 60 * 60 * 24;
+		let days = daysInMilisec / ONE_DAY_MS;
+		console.log(days + " días");
+
+		do {
 			// send new updates
 			var info =
 				window.webxdc.selfName +
 				" created the event " +
 				cal.hfTxt.value.replace(/\n/g, " ") +
 				" on " +
-				cal.mName[cal.sMth] +
+				cal.mName[dateSt.getMonth()] +
 				" " +
-				cal.sDay;
+				dateSt.getDate();
 			window.webxdc.sendUpdate(
 				{
 					payload: {
 						id: Date.now(),
-						day: cal.sDay,
-						month: cal.sMth,
-						year: cal.sYear,
+						day: dateSt.getDate(),
+						month: dateSt.getMonth(),
+						year: dateSt.getFullYear(),
 						data: cal.hfTxt.value,
 						color: cal.color,
 						addition: true,
@@ -521,9 +543,77 @@ var cal = {
 				},
 				info
 			);
-			cal.close();
-			return false;
-		}
+				//add one more day in milliseconds
+				dateSt = new Date(dateSt.getTime() + ONE_DAY_MS);
+
+				//substract one day
+				days--;
+		} while (days >= 0);
+
+		//if is a single day event send a single update, otherwise send several updates
+		// if (daysInMilisec === 0) {
+		// 	// send new updates
+		// 	var info =
+		// 		window.webxdc.selfName +
+		// 		" created the event " +
+		// 		cal.hfTxt.value.replace(/\n/g, " ") +
+		// 		" on " +
+		// 		cal.mName[cal.sMth] +
+		// 		" " +
+		// 		cal.sDay;
+		// 	window.webxdc.sendUpdate(
+		// 		{
+		// 			payload: {
+		// 				id: Date.now(),
+		// 				day: cal.sDay,
+		// 				month: cal.sMth,
+		// 				year: cal.sYear,
+		// 				data: cal.hfTxt.value,
+		// 				color: cal.color,
+		// 				addition: true,
+		// 				creator: window.webxdc.selfName,
+		// 				//send timezone?
+		// 			},
+		// 			info,
+		// 		},
+		// 		info
+		// 	);
+
+		// } else {
+		// 	//calculate date for day it starts
+		// 	let dateUpload = dateSt;
+		// 	//send an update for every day the event continues
+		// 	for (let i = 0; i < days; i++)
+
+		// 		var info =
+		// 			window.webxdc.selfName +
+		// 			" created the event " +
+		// 			cal.hfTxt.value.replace(/\n/g, " ") +
+		// 			" on " +
+		// 			cal.mName[cal.sMth] +
+		// 			" " +
+		// 			cal.sDay;
+		// 		window.webxdc.sendUpdate(
+		// 			{
+		// 				payload: {
+		// 					id: Date.now()+i,
+		// 					day: ,
+		// 					month: ,
+		// 					year: ,
+		// 					data: cal.hfTxt.value,
+		// 					color: cal.color,
+		// 					addition: true,
+		// 					creator: window.webxdc.selfName,
+		// 					//send timezone?
+		// 				},
+		// 				info,
+		// 			},
+		// 			info
+		// 		);
+		// 	}
+		// }
+		cal.close();
+		return false;
 	},
 
 	// (G) DELETE EVENT FOR SELECTED DATE

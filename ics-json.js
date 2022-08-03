@@ -2,17 +2,17 @@
 
 //get text from the clipboard
 function getClipboard(text) {
-		if (text !== "") {
-			// console.log(responseText);
-			console.log(parseIcsToJSON(text));
-		} else {
-			console.log("No text on the clipboard!");
-		}
+	if (text !== "") {
+		// console.log(responseText);
+		console.log(parseIcsToJSON(text));
+	} else {
+		console.log("No text on the clipboard!");
+	}
 }
 
 //transform ics dates to Date timestamps
 //ics dates are YYYYMMDDTHHmmSS format
-function calenDate(icalStr) {
+function calenDate(icalStr, timezone) {
 	// icalStr = '20110914T184000Z'
 	var strYear = icalStr.substr(0, 4);
 	var strMonth = parseInt(icalStr.substr(4, 2), 10) - 1;
@@ -23,13 +23,22 @@ function calenDate(icalStr) {
 
 	var oDate = new Date(strYear, strMonth, strDay, strHour, strMin, strSec);
 
+	//convert to local time if timezone is not undefined
+	// if (timezone != undefined) {
+	// // 	const dateString = oDate.toISOString(); //example "2019-05-05T10:30:00Z"
+	// // 	const userOffset = new Date().getTimezoneOffset() * 60 * 1000;
+	// // 	const localDate = new Date(dateString);
+	// // 	const utcDate = new Date(localDate.getTime() + userOffset);
+	// 	const timezones = JSON.parse("./timezones.json");
+
+	// }
+
 	return oDate.getTime();
 }
 
 //parse ics file into JSON
 function parseIcsToJSON(icsData) {
 	const NEW_LINE = /\r\n|\n|\r/;
-
 	const EVENT = "VEVENT";
 	const EVENT_START = "BEGIN";
 	const EVENT_END = "END";
@@ -70,7 +79,6 @@ function parseIcsToJSON(icsData) {
 		let keyParam = "";
 		const value = lineData[1];
 
-
 		if (key.indexOf(";") !== -1) {
 			const keyParts = key.split(";");
 			key = keyParts[0];
@@ -100,15 +108,15 @@ function parseIcsToJSON(icsData) {
 				if (value === EVENT) array.push(currentObj);
 				break;
 			case UID:
-                // currentObj[keyMap[UID]] = clean(value);
-				currentObj[keyMap[UID]] = clean(Math.floor((Math.random() * 10000) + 1)); //calendar webxdc is not able to delete events if their id isn't a number
+				// currentObj[keyMap[UID]] = clean(value);
+				currentObj[keyMap[UID]] = clean(Math.floor(Math.random() * 10000 + 1)); //calendar webxdc is not able to delete events if their id isn't a number
 				break;
 			case START_DATE:
 				//save the timezone
 				keyParam = keyParam.split("=");
 				currentObj[keyMap[TZID]] = keyParam[1];
 				//try to get the date value
-				currentObj[keyMap[START_DATE]] = calenDate(value); //JSON.stringify(calenDate(value));
+				currentObj[keyMap[START_DATE]] = calenDate(value, keyParam[1]); //JSON.stringify(calenDate(value));
 				break;
 			case END_DATE:
 				currentObj[keyMap[END_DATE]] = calenDate(value);
@@ -125,8 +133,8 @@ function parseIcsToJSON(icsData) {
 				continue;
 		}
 	}
-    parseJSONToWebxdcUpdate(array);
-    //to return a json object
+	parseJSONToWebxdcUpdate(array);
+	//to return a json object
 	// return JSON.stringify(array);
 	// };
 
@@ -134,28 +142,29 @@ function parseIcsToJSON(icsData) {
 }
 
 function parseJSONToWebxdcUpdate(JSON) {
-    for(const evt in JSON){
-        let event = JSON[evt];
-        let date = new Date(event.startDate);
-        let info = window.webxdc.selfName + " imported an event on " + date.toDateString();
-        let color = "black";
+	for (const evt in JSON) {
+		let event = JSON[evt];
+		let date = new Date(event.startDate);
+		let info =
+			window.webxdc.selfName + " imported an event on " + date.toDateString();
+		let color = "black";
 		let timeZone = event.timeZone; //time zone of the imported event!!
-        window.webxdc.sendUpdate(
-            {
-                payload: {
-                    id: event.uid,
-                    day: date.getDate(),
-                    month: date.getMonth(),
-                    year: date.getFullYear(),
-                    data: event.summary,
-                    color: color,
-                    addition: true,
-                    creator: window.webxdc.selfName,
+		window.webxdc.sendUpdate(
+			{
+				payload: {
+					id: event.uid,
+					day: date.getDate(),
+					month: date.getMonth(),
+					year: date.getFullYear(),
+					data: event.summary,
+					color: color,
+					addition: true,
+					creator: window.webxdc.selfName,
 					// timeZone: timeZone,
-                },
-                info,
-            },
-            info
-        );
-    }
+				},
+				info,
+			},
+			info
+		);
+	}
 }

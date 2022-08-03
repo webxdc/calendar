@@ -312,6 +312,10 @@ button {
   background-color: #FAD02C;
 }
 
+#multi-day-form {
+  display: none;
+}
+
 /* MOBILE SCREENS */
 @media screen and (max-width: 768px) {
   #cal-wrap {

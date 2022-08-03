@@ -53,9 +53,17 @@
 			</div>
 			<div id="evt-cards"></div>
 
-			<!-- ADD NEW EVENT -->
+			<!--   ADD NEW EVENT    -->
 			<div id="addEventDetails">
 				<textarea id="evt-details" class="block" placeholder="Add a new event..."></textarea>
+				<input type="checkbox" id="multi-day" name="multi-day" value="multi">
+				<label for="multi-day"> Multiple days</label>
+				<div id="multi-day-form">
+					<label for="start-day">From </label>
+					<input type="date" id="start-day" name="start-day">
+					<label for="end-day">To </label>
+					<input type="date" id="end-day" name="end-day">
+				</div>
 				<div class="block" id="colorBtns">
 					<button class="colorBtns" id="yellow" data-color="#FAD02C">
 						Yellow
@@ -92,9 +100,12 @@
 				<button class="eventBtn" id="evt-import">Import ICS data</button>
 				<button class="eventBtn" id="evt-export">Export data to ICS file</button>
 			</div>
-			<div id="getExport" class="block"><pre></pre><svg id="i-clipboard" viewBox="0 0 32 32" width="27" height="27" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
-				<path d="M12 2 L12 6 20 6 20 2 12 2 Z M11 4 L6 4 6 30 26 30 26 4 21 4" />
-			</svg></div>
+			<div id="getExport" class="block">
+				<pre></pre><svg id="i-clipboard" viewBox="0 0 32 32" width="27" height="27" fill="none"
+					stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+					<path d="M12 2 L12 6 20 6 20 2 12 2 Z M11 4 L6 4 6 30 26 30 26 4 21 4" />
+				</svg>
+			</div>
 		</div>
 
 		<!-- /////  DATE SELECTION ///// -->
