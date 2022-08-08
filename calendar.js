@@ -728,7 +728,7 @@ var cal = {
 			cal.importScreen.classList.remove("ninja");
 			cal.eventsView.classList.add("ninja");
 			cal.getExport.classList.remove("ninja");
-			cal.getExport.firstChild.innerHTML = icsString;
+			document.querySelector("#exportData").innerHTML = icsString;
 		}
 	},
 
