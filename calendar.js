@@ -128,12 +128,15 @@ var cal = {
 		cal.now = new Date(); // current date
 		cal.nowMth = cal.now.getMonth(); // current month
 		cal.nowYear = parseInt(cal.now.getFullYear()); // current year
-		cal.nowDay = cal.now.getDate();
+		cal.nowDay = cal.now.getDate(); //current day
 		cal.todayBtn = document.getElementById("today");
 		cal.todayBtn.onclick = () => {
 			cal.sDay = cal.nowDay;
 			cal.sMth = cal.nowMth;
 			cal.sYear = cal.nowYear;
+			cal.hMth.value = cal.nowMth;
+			cal.hYear.value = cal.nowYear;
+			cal.list();
 			cal.show(cal.nowYear, cal.nowMth, cal.nowDay);
 		};
 		cal.addEventClose = document.getElementById("addEvent-close");
@@ -191,7 +194,7 @@ var cal = {
 							Number.parseInt(obj.id) === Number.parseInt(update.payload.id)
 						);
 					});
-					if(index != -1) cal.events.splice(index, 1);
+					if (index != -1) cal.events.splice(index, 1);
 				}
 			}
 			cal.list();
@@ -360,7 +363,11 @@ var cal = {
 			if (day == "b") {
 				cCell.classList.add("blank");
 			} else {
-				if (cal.nowDay == day) {
+				if (
+					cal.nowDay == day &&
+					cal.nowMth == cal.sMth &&
+					cal.nowYear == cal.sYear
+				) {
 					cCell.classList.add("today");
 				} else {
 					cCell.classList.add("day");
@@ -422,12 +429,16 @@ var cal = {
 				'<svg id="i-export" viewBox="0 0 32 32" width="18" height="18" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"><path d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" /></svg>';
 			exportBtn.setAttribute("data-id", dayEvents[i].id);
 			exportBtn.setAttribute("class", "event-export");
+
+			// ------ EXPORT BUTTON
 			exportBtn.onclick = (ev) => {
 				cal.exporter(ev.currentTarget.getAttribute("data-id"));
 			};
 			remove.innerHTML =
 				"<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
 			remove.setAttribute("data-id", dayEvents[i].id);
+
+			// ------ REMOVE BUTTON
 			remove.onclick = (ev) => {
 				cal.del(ev.currentTarget.getAttribute("data-id"));
 			};
@@ -528,8 +539,13 @@ var cal = {
 
 		//if is not an imported event
 		if (cal.importEventObj === undefined) {
-			dateSt = new Date(document.getElementById("start-day").value);
-			dateEnd = new Date(document.getElementById("end-day").value);
+			if (cal.multiDayCheck.checked) {
+				dateSt = new Date(document.getElementById("start-day").value);
+				dateEnd = new Date(document.getElementById("end-day").value);
+			} else {
+				dateSt = new Date(cal.sYear, cal.sMth, cal.sDay);
+				dateEnd = dateSt;
+			}
 			data = cal.hfTxt.value;
 			color = cal.color;
 			info =
@@ -656,31 +672,57 @@ var cal = {
 
 	// (G) DELETE EVENT FOR SELECTED DATE
 	del: (id) => {
-		// send new updates
-		var info =
-			window.webxdc.selfName +
-			" deleted an event from " +
-			cal.mName[cal.sMth] +
-			" " +
-			cal.sDay;
-		window.webxdc.sendUpdate(
-			{
-				payload: {
-					id: id,
-					day: cal.sDay,
-					month: cal.sMth,
-					year: cal.sYear,
-					data: cal.hfTxt.value,
-					addition: false,
-					deleter: window.webxdc.selfName,
+		let eventToDelete = cal.events.find((evnt) => evnt.id == id);
+		//ask for confirmation
+		let confirmationBox = document.querySelector("#confirmation");
+		confirmationBox.innerHTML = "";
+		confirmationBox.style.display = "block";
+
+		let confirmationText = document.createElement("p");
+		confirmationText.textContent =
+			"Do you really want to delete '" + eventToDelete.data + "'?";
+		confirmationBox.appendChild(confirmationText);
+
+		let btnYes = document.createElement("button");
+		btnYes.classList.add("eventBtn");
+		btnYes.innerHTML = "Yes";
+		btnYes.onclick = () => {
+			// send new updates
+			var info =
+				window.webxdc.selfName +
+				" deleted an event from " +
+				cal.mName[cal.sMth] +
+				" " +
+				cal.sDay;
+			window.webxdc.sendUpdate(
+				{
+					payload: {
+						id: id,
+						day: cal.sDay,
+						month: cal.sMth,
+						year: cal.sYear,
+						data: cal.hfTxt.value,
+						addition: false,
+						deleter: window.webxdc.selfName,
+					},
+					info,
 				},
-				info,
-			},
-			info
-		);
-		document
-			.querySelector('[data-id="' + id + '"]')
-			.parentElement.parentElement.remove();
+				info
+			);
+			document
+				.querySelector('[data-id="' + id + '"]')
+				.parentElement.parentElement.remove();
+			confirmationBox.style.display = "none";
+		};
+		confirmationBox.appendChild(btnYes);
+
+		let btnNo = document.createElement("button");
+		btnNo.classList.add("eventBtn");
+		btnNo.innerHTML = "No";
+		btnNo.onclick = () => {
+			confirmationBox.style.display = "none";
+		};
+		confirmationBox.appendChild(btnNo);
 	},
 
 	showDateSel: () => {

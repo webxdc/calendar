@@ -48,7 +48,7 @@ h1, p, span{
 
 /* (C) PERIOD SELECTOR */
 #eventsDay,
-#dateSel, #importScreen {
+#dateSel, #importScreen, #confirmation{
   position: absolute;
   top: 0;
   left: 0;
@@ -317,6 +317,11 @@ button {
 
 #yellow {
   background-color: #FAD02C;
+}
+
+#confirmation {
+  display: none;
+  padding-top: 200px;
 }
 
 .multi-day-form {

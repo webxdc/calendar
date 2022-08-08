@@ -55,7 +55,9 @@ All notable changes to this project will be documented in this file.
 - adding events layout
 - import/export layout
 - save events function now is used for import and new events, saving code
+- asking for confirmation deleting an event
 
 ### Fixed 
 - import ics bug
+- import single event bug
 - css layout in add event screen
