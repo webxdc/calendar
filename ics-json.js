@@ -1,9 +1,6 @@
-// let icsText = "";
-
 //get text from the clipboard
 function getClipboard(text) {
 	if (text !== "") {
-		// console.log(responseText);
 		console.log(parseIcsToJSON(text));
 	} else {
 		console.log("No text on the clipboard!");
@@ -48,7 +45,7 @@ function parseIcsToJSON(icsData) {
 	const SUMMARY = "SUMMARY";
 	const LOCATION = "LOCATION";
 	const ALARM = "VALARM";
-	const UID = "UID"; //then I can get this for the ID of the event in the calendar
+	const UID = "UID";
 	const TZID = "TZID";
 
 	const keyMap = {
@@ -108,7 +105,6 @@ function parseIcsToJSON(icsData) {
 				if (value === EVENT) array.push(currentObj);
 				break;
 			case UID:
-				// currentObj[keyMap[UID]] = clean(value);
 				currentObj[keyMap[UID]] = clean(Math.floor(Math.random() * 10000 + 1)); //calendar webxdc is not able to delete events if their id isn't a number
 				break;
 			case START_DATE:
@@ -116,7 +112,7 @@ function parseIcsToJSON(icsData) {
 				keyParam = keyParam.split("=");
 				currentObj[keyMap[TZID]] = keyParam[1];
 				//try to get the date value
-				currentObj[keyMap[START_DATE]] = calenDate(value, keyParam[1]); //JSON.stringify(calenDate(value));
+				currentObj[keyMap[START_DATE]] = calenDate(value, keyParam[1]);
 				break;
 			case END_DATE:
 				currentObj[keyMap[END_DATE]] = calenDate(value);
@@ -134,39 +130,12 @@ function parseIcsToJSON(icsData) {
 		}
 	}
 	parseJSONToWebxdcUpdate(array);
-	//to return a json object
-	// return JSON.stringify(array);
-	// };
-
-	// export default icsToJson;
 }
 
 function parseJSONToWebxdcUpdate(JSON) {
 	for (const evt in JSON) {
 		cal.importEventObj = JSON[evt];
 		cal.save();
-		// let date = new Date(event.startDate);
-		// let info =
-		// 	window.webxdc.selfName + " imported an event on " + date.toDateString();
-		// let color = "black";
-		// let timeZone = event.timeZone; //time zone of the imported event!!
-		// window.webxdc.sendUpdate(
-		// 	{
-		// 		payload: {
-		// 			id: event.uid,
-		// 			day: date.getDate(),
-		// 			month: date.getMonth(),
-		// 			year: date.getFullYear(),
-		// 			data: event.summary,
-		// 			color: color,
-		// 			addition: true,
-		// 			creator: window.webxdc.selfName,
-		// 			// timeZone: timeZone,
-		// 		},
-		// 		info,
-		// 	},
-		// 	info
-		// );
 	}
 	cal.importEventObj = undefined;
 }

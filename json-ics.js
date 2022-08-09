@@ -2,24 +2,24 @@ let events;
 const SEPARATOR = "\r\n";
 // const SEPARATOR = "\\n"; //to import in Outlook calendar
 
-/**
- * Write ICS to a file in the current directory called event.ics
- * @param {Date} start - Starting time of the event.
- * @param {Date} end - Ending time of the event.
- * @param {String} title - Title of the event.
- * @param {String} location - Location of the event.
- */
-function makeICS(start, end, title = "", location = "") {
-	fs.writeFile(
-		__dirname + "/calendar-events.ics",
-		makeString(startDate, endDate, title, location),
-		function (err) {
-			if (err) {
-				return console.log(err);
-			}
-		}
-	);
-}
+// /**
+//  * Write ICS to a file in the current directory called event.ics
+//  * @param {Date} start - Starting time of the event.
+//  * @param {Date} end - Ending time of the event.
+//  * @param {String} title - Title of the event.
+//  * @param {String} location - Location of the event.
+//  */
+// function makeICS(start, end, title = "", location = "") {
+// 	fs.writeFile(
+// 		__dirname + "/calendar-events.ics",
+// 		makeString(startDate, endDate, title, location),
+// 		function (err) {
+// 			if (err) {
+// 				return console.log(err);
+// 			}
+// 		}
+// 	);
+// }
 
 /**
  * Output ICS as a string
@@ -28,7 +28,7 @@ function makeICS(start, end, title = "", location = "") {
  */
 function makeString(events) {
 	let icsString = "BEGIN:VCALENDAR" + SEPARATOR;
-	// console.log(events);
+	console.log(events);
 
 	icsString +=
 		"VERSION:2.0" +
@@ -45,7 +45,7 @@ function makeString(events) {
 		if (Number.parseInt(events[i].id) === Number.parseInt(lastID)) continue;
 		//compound the event in ics format
 			lastID = events[i].id;
-			let dateStart = new Date(events[i].year, events[i].month, events[i].day);
+			let dateStart = new Date(events[i].startDate);
 			let dateEnd = new Date(events[i].endDate);
 			icsString +=
 				"BEGIN:VEVENT" +
@@ -86,12 +86,5 @@ function toDateTime(date) {
 function setClipboard() {
 	let data = makeString(events);
 	console.log(data);
-	// navigator.clipboard.writeText(data);
 	return data;
 }
-
-// window.webxdc.setUpdateListener(function (update) {
-//     if (update.payload.addition) {
-//         events.push(update.payload);
-//     }
-// });

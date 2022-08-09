@@ -18,16 +18,17 @@ var cal = {
 	], // Month Names
 
 	// (A2) CALENDAR DATA
-	// mthEvents: {}, // Events for the selected period
 	sDay: 0,
 	sMth: 0,
 	sYear: 0, // Current selected day, month, year
 
 	// (A3) COMMON HTML ELEMENTS
+	//current date
 	now: null,
 	nowMth: null,
 	nowYear: null,
 	nowDay: null,
+
 	nxt: null,
 	prev: null,
 	nxtDay: null,
@@ -38,7 +39,7 @@ var cal = {
 	hfDate: null,
 	container: null,
 	hfTxt: null, //event form
-	hfSave: null,
+	btnSave: null,
 	events: null,
 	eventsView: null,
 	evCards: null,
@@ -71,6 +72,12 @@ var cal = {
 	// (B) INIT CALENDAR
 	init: () => {
 		// (B1) GET + SET COMMON HTML ELEMENTS
+		// current date
+		cal.now = new Date(); 
+		cal.nowMth = cal.now.getMonth(); // current month
+		cal.nowYear = parseInt(cal.now.getFullYear()); // current year
+		cal.nowDay = cal.now.getDate(); //current day
+
 		cal.container = document.getElementById("cal-container");
 		cal.nxtDay = document.getElementById("nxtDay");
 		cal.nxtDay.onclick = cal.nextDay;
@@ -84,10 +91,10 @@ var cal = {
 		cal.hYear = document.getElementById("cal-yr");
 		cal.hfDate = document.getElementById("evt-date");
 		cal.hfTxt = document.getElementById("evt-details");
-		cal.hfSave = document.getElementById("evt-save");
-		cal.hfSave.classList.add("unclickable");
+		cal.btnSave = document.getElementById("evt-save");
+		cal.btnSave.classList.add("unclickable");
 		document.getElementById("evt-close").onclick = cal.close;
-		cal.hfSave.onclick = cal.save;
+		cal.btnSave.onclick = cal.save;
 		cal.events = [];
 		events = cal.events; //link to the export var
 		cal.eventsView = document.getElementById("eventsDay");
@@ -125,10 +132,6 @@ var cal = {
 		cal.addEventDetails.classList.add("ninja");
 		cal.addEvent = document.getElementById("addEvent");
 		cal.addEvent.onclick = cal.showAddEvent;
-		cal.now = new Date(); // current date
-		cal.nowMth = cal.now.getMonth(); // current month
-		cal.nowYear = parseInt(cal.now.getFullYear()); // current year
-		cal.nowDay = cal.now.getDate(); //current day
 		cal.todayBtn = document.getElementById("today");
 		cal.todayBtn.onclick = () => {
 			cal.sDay = cal.nowDay;
@@ -187,42 +190,33 @@ var cal = {
 			if (update.payload.addition) {
 				cal.events.push(update.payload);
 			} else {
-				let index = 0;
-				while (index != -1) {
-					index = cal.events.findIndex((obj) => {
-						return (
-							Number.parseInt(obj.id) === Number.parseInt(update.payload.id)
-						);
-					});
-					if (index != -1) cal.events.splice(index, 1);
-				}
+				let index = cal.events.findIndex((obj) => {
+					return Number.parseInt(obj.id) === Number.parseInt(update.payload.id);
+				});
+				if (index != -1) cal.events.splice(index, 1);
 			}
+
 			cal.list();
 		});
-
-		// (B2) DATE NOW
-		let now = new Date(),
-			nowMth = now.getMonth(),
-			nowYear = parseInt(now.getFullYear());
 
 		// (B3) APPEND MONTHS SELECTOR
 		for (let i = 0; i < 12; i++) {
 			let opt = document.createElement("option");
 			opt.value = i;
 			opt.innerHTML = cal.mName[i];
-			if (i == nowMth) {
+			if (i == cal.nowMth) {
 				opt.selected = true;
 			}
 			cal.hMth.appendChild(opt);
 		}
 
 		// (B4) APPEND YEARS SELECTOR
-		// Set to 10 years range. Change this as you like.
-		for (let i = nowYear - 30; i <= nowYear + 30; i++) {
+		// Set to 30 years range. Change this as you like.
+		for (let i = cal.nowYear - 30; i <= cal.nowYear + 30; i++) {
 			let opt = document.createElement("option");
 			opt.value = i;
 			opt.innerHTML = i;
-			if (i == nowYear) {
+			if (i == cal.nowYear) {
 				opt.selected = true;
 			}
 			cal.hYear.appendChild(opt);
@@ -375,7 +369,9 @@ var cal = {
 				cCell.innerHTML = `<div class="dd">${day}</div>`;
 
 				//retrieve events for this day
-				var eventsDay = cal.getEvents(cal.sYear, cal.sMth, day);
+				var todayTime = new Date(cal.sYear, cal.sMth, day);
+				todayTime = todayTime.getTime();
+				var eventsDay = cal.getEvents(todayTime);
 				if (eventsDay.length !== 0) {
 					for (let j = 0; j < eventsDay.length; j++) {
 						var evt = document.createElement("div");
@@ -403,16 +399,16 @@ var cal = {
 	show: (year, month, day) => {
 		// (D1) FETCH EXISTING DATA
 		cal.sDay = day;
-		let dayEvents = cal.getEvents(year, month, day);
+		let dayEvents = cal.getEvents(new Date(year, month, day).getTime());
 
 		//ADD EVENT BOXES
 		cal.hfTxt.value = "";
-		cal.hfSave.classList.add("unclickable");
+		cal.btnSave.classList.add("unclickable");
 		cal.hfTxt.addEventListener("input", () => {
 			if (cal.hfTxt.value.trim() != "") {
-				cal.hfSave.classList.remove("unclickable");
+				cal.btnSave.classList.remove("unclickable");
 			} else {
-				cal.hfSave.classList.add("unclickable");
+				cal.btnSave.classList.add("unclickable");
 			}
 		});
 
@@ -524,9 +520,9 @@ var cal = {
 	},
 
 	// GET ALL EVENTS FROM A DAY
-	getEvents: (year, month, day) => {
+	getEvents: (milliseconds) => {
 		var events = cal.events.filter((event) => {
-			return event.day == day && event.year == year && event.month == month;
+			return event.endDate >= milliseconds && event.startDate <= milliseconds;
 		});
 		return events;
 	},
@@ -534,8 +530,7 @@ var cal = {
 	// (F) SAVE EVENT
 	//if gets an eventObject as a parameter it can be reused for imports
 	save: () => {
-		const ONE_DAY_MS = 1000 * 60 * 60 * 24;
-		let dateSt, dateEnd, daysInMilisec, days, color, data, info, id;
+		let dateSt, dateEnd, color, data, info, id;
 
 		//if is not an imported event
 		if (cal.importEventObj === undefined) {
@@ -556,6 +551,7 @@ var cal = {
 				cal.mName[dateSt.getMonth()] +
 				" " +
 				dateSt.getDate();
+			id = Date.now();
 		} else {
 			//if is an imported event
 			dateSt = new Date(cal.importEventObj.startDate);
@@ -570,102 +566,26 @@ var cal = {
 				cal.mName[dateSt.getMonth()] +
 				" " +
 				dateSt.getDate();
+			id = cal.importEventObj.uid;
 		}
 
-		daysInMilisec = dateEnd.getTime() - dateSt.getTime();
-		days = daysInMilisec / ONE_DAY_MS;
-		id = Date.now();
-		// console.log(days + " días");
-
-		do {
-			// send new updates
-			window.webxdc.sendUpdate(
-				{
-					payload: {
-						id: id,
-						day: dateSt.getDate(),
-						month: dateSt.getMonth(),
-						year: dateSt.getFullYear(),
-						endDate: dateEnd.getTime(),
-						data: data,
-						color: color,
-						addition: true,
-						creator: window.webxdc.selfName,
-						//send timezone?
-					},
-					info,
+		// send new updates
+		window.webxdc.sendUpdate(
+			{
+				payload: {
+					id: id,
+					startDate: dateSt.getTime(),
+					endDate: dateEnd.getTime(),
+					data: data,
+					color: color,
+					addition: true,
+					creator: window.webxdc.selfName,
+					//send timezone?
 				},
-				info
-			);
-			//add one more day in milliseconds
-			dateSt = new Date(dateSt.getTime() + ONE_DAY_MS);
-
-			//substract one day
-			days--;
-		} while (days >= 0);
-
-		//if is a single day event send a single update, otherwise send several updates
-		// if (daysInMilisec === 0) {
-		// 	// send new updates
-		// 	var info =
-		// 		window.webxdc.selfName +
-		// 		" created the event " +
-		// 		cal.hfTxt.value.replace(/\n/g, " ") +
-		// 		" on " +
-		// 		cal.mName[cal.sMth] +
-		// 		" " +
-		// 		cal.sDay;
-		// 	window.webxdc.sendUpdate(
-		// 		{
-		// 			payload: {
-		// 				id: Date.now(),
-		// 				day: cal.sDay,
-		// 				month: cal.sMth,
-		// 				year: cal.sYear,
-		// 				data: cal.hfTxt.value,
-		// 				color: cal.color,
-		// 				addition: true,
-		// 				creator: window.webxdc.selfName,
-		// 				//send timezone?
-		// 			},
-		// 			info,
-		// 		},
-		// 		info
-		// 	);
-
-		// } else {
-		// 	//calculate date for day it starts
-		// 	let dateUpload = dateSt;
-		// 	//send an update for every day the event continues
-		// 	for (let i = 0; i < days; i++)
-
-		// 		var info =
-		// 			window.webxdc.selfName +
-		// 			" created the event " +
-		// 			cal.hfTxt.value.replace(/\n/g, " ") +
-		// 			" on " +
-		// 			cal.mName[cal.sMth] +
-		// 			" " +
-		// 			cal.sDay;
-		// 		window.webxdc.sendUpdate(
-		// 			{
-		// 				payload: {
-		// 					id: Date.now()+i,
-		// 					day: ,
-		// 					month: ,
-		// 					year: ,
-		// 					data: cal.hfTxt.value,
-		// 					color: cal.color,
-		// 					addition: true,
-		// 					creator: window.webxdc.selfName,
-		// 					//send timezone?
-		// 				},
-		// 				info,
-		// 			},
-		// 			info
-		// 		);
-		// 	}
-		// }
+				info,
+			},
+			info
+		);
 		cal.close();
 		return false;
 	},
@@ -698,10 +618,6 @@ var cal = {
 				{
 					payload: {
 						id: id,
-						day: cal.sDay,
-						month: cal.sMth,
-						year: cal.sYear,
-						data: cal.hfTxt.value,
 						addition: false,
 						deleter: window.webxdc.selfName,
 					},
@@ -752,7 +668,6 @@ var cal = {
 		cal.importArea.value = "";
 		cal.importScreen.classList.add("ninja");
 		cal.container.classList.remove("ninja");
-		// cal.close();
 	},
 
 	exporter: (id = undefined) => {
