@@ -369,9 +369,7 @@ var cal = {
 				cCell.innerHTML = `<div class="dd">${day}</div>`;
 
 				//retrieve events for this day
-				var todayTime = new Date(cal.sYear, cal.sMth, day);
-				todayTime = todayTime.getTime();
-				var eventsDay = cal.getEvents(todayTime);
+				var eventsDay = cal.getEvents(cal.sYear, cal.sMth, day);
 				if (eventsDay.length !== 0) {
 					for (let j = 0; j < eventsDay.length; j++) {
 						var evt = document.createElement("div");
@@ -399,7 +397,7 @@ var cal = {
 	show: (year, month, day) => {
 		// (D1) FETCH EXISTING DATA
 		cal.sDay = day;
-		let dayEvents = cal.getEvents(new Date(year, month, day).getTime());
+		let dayEvents = cal.getEvents(year, month, day);
 
 		//ADD EVENT BOXES
 		cal.hfTxt.value = "";
@@ -520,9 +518,11 @@ var cal = {
 	},
 
 	// GET ALL EVENTS FROM A DAY
-	getEvents: (milliseconds) => {
+	getEvents: (year,month,day) => {
 		var events = cal.events.filter((event) => {
-			return event.endDate >= milliseconds && event.startDate <= milliseconds;
+			let startDate = new Date(event.startDate);
+			let endDate = new Date(event.endDate);
+			return startDate.getFullYear() <= year && startDate.getMonth() <= month && startDate.getDate() <= day && endDate.getFullYear() >= year && endDate.getMonth() >= month && endDate.getDate() >= day;
 		});
 		return events;
 	},
@@ -691,10 +691,18 @@ var cal = {
 		}
 	},
 
+	//CAN'T USE CLIPBOARD API IN DELTACHAT NOR 
 	copyExporter: () => {
-		navigator.clipboard.writeText(
-			document.querySelector("#exportData").innerHTML
-		);
+		// navigator.clipboard.writeText(
+		// 	document.querySelector("#exportData").innerHTML
+		// );
+		const temp = document.createElement("input");
+		const text = document.getElementById("exportData").innerHTML;
+		temp.setAttribute("value", text);
+		document.body.appendChild(temp);
+		temp.select();
+		document.execCommand("copy");
+		document.body.removeChild(temp);
 		cal.copyBtn.style.color = "#FAD02C";
 	},
 };
