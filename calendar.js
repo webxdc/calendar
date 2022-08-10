@@ -535,7 +535,9 @@ var cal = {
 		//if is not an imported event
 		if (cal.importEventObj === undefined) {
 			if (cal.multiDayCheck.checked) {
+				// console.log(document.getElementById("start-day").value);
 				dateSt = new Date(document.getElementById("start-day").value);
+				// console.log(document.getElementById("end-day").value);
 				dateEnd = new Date(document.getElementById("end-day").value);
 			} else {
 				dateSt = new Date(cal.sYear, cal.sMth, cal.sDay);
