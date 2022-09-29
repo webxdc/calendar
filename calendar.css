@@ -237,6 +237,7 @@ select {
 
 #multi {
   width: 90vw;
+  text-align: left;
 }
 
 textarea {

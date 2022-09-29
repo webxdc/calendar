@@ -68,12 +68,13 @@ var cal = {
 	copyBtn: null,
 	multiDayCheck: null,
 	multiDayForm: null,
+	recurringCheck: null,
 
 	// (B) INIT CALENDAR
 	init: () => {
 		// (B1) GET + SET COMMON HTML ELEMENTS
 		// current date
-		cal.now = new Date(); 
+		cal.now = new Date();
 		cal.nowMth = cal.now.getMonth(); // current month
 		cal.nowYear = parseInt(cal.now.getFullYear()); // current year
 		cal.nowDay = cal.now.getDate(); //current day
@@ -162,6 +163,7 @@ var cal = {
 			}
 		};
 		cal.multiDayForm = document.getElementsByClassName("multi-day-form"); //watch out is an array!
+		cal.recurringCheck = document.getElementById("recurring");
 
 		// swipe listeners for mobile
 		cal.container.addEventListener(
@@ -483,9 +485,8 @@ var cal = {
 
 		// // (D2) UPDATE EVENT FORM
 		let fullDate = new Date(year, month, day);
-		cal.hfDate.innerHTML = `${cal.days[fullDate.getDay()]} ${day} ${
-			cal.mName[month]
-		} ${year}`;
+		cal.hfDate.innerHTML = `${cal.days[fullDate.getDay()]} ${day} ${cal.mName[month]
+			} ${year}`;
 	},
 
 	showAddEvent: () => {
@@ -496,12 +497,10 @@ var cal = {
 		for (let i = 0; i < cal.multiDayForm.length; i++) {
 			cal.multiDayForm[i].style.display = "none";
 		}
-		document.getElementById("start-day").value = `${cal.sYear}-${
-			cal.sMth + 1 < 10 ? "0" + (cal.sMth + 1) : cal.sMth + 1
-		}-${cal.sDay < 10 ? "0" + cal.sDay : cal.sDay}`;
-		document.getElementById("end-day").value = `${cal.sYear}-${
-			cal.sMth + 1 < 10 ? "0" + (cal.sMth + 1) : cal.sMth + 1
-		}-${cal.sDay < 10 ? "0" + cal.sDay : cal.sDay}`;
+		document.getElementById("start-day").value = `${cal.sYear}-${cal.sMth + 1 < 10 ? "0" + (cal.sMth + 1) : cal.sMth + 1
+			}-${cal.sDay < 10 ? "0" + cal.sDay : cal.sDay}`;
+		document.getElementById("end-day").value = `${cal.sYear}-${cal.sMth + 1 < 10 ? "0" + (cal.sMth + 1) : cal.sMth + 1
+			}-${cal.sDay < 10 ? "0" + cal.sDay : cal.sDay}`;
 	},
 
 	closeAddEventDetails: () => {
@@ -518,7 +517,7 @@ var cal = {
 	},
 
 	// GET ALL EVENTS FROM A DAY
-	getEvents: (year,month,day) => {
+	getEvents: (year, month, day) => {
 		var events = cal.events.filter((event) => {
 			let startDate = new Date(event.startDate);
 			let endDate = new Date(event.endDate);
@@ -569,6 +568,40 @@ var cal = {
 				" " +
 				dateSt.getDate();
 			id = cal.importEventObj.uid;
+		}
+
+		//if is a recurring event
+		if (cal.recurringCheck.checked) {
+			let dateInR = dateSt;
+			let dateEndR = dateEnd;
+			console.log("date format " + dateInR);
+
+
+			for (let i = 0; i < 30; i++) {
+				//add years
+				dateInR.setFullYear(cal.sYear + i);
+				dateEndR.setFullYear(cal.sYear + i);
+				// send new updates
+				window.webxdc.sendUpdate(
+					{
+						payload: {
+							id: id,
+							startDate: dateInR,
+							endDate: dateEndR,
+							data: data,
+							color: color,
+							addition: true,
+							creator: window.webxdc.selfName,
+							//send timezone?
+						},
+						info,
+					},
+					info
+				);
+
+			}
+			cal.close();
+			return;
 		}
 
 		// send new updates
