@@ -617,7 +617,8 @@ var cal = {
 					creator: window.webxdc.selfName,
 					//send timezone?
 				},
-				info,
+				info: info,
+				summary: "" + (cal.events.length+1) + " events"
 			},
 			info
 		);
@@ -656,7 +657,8 @@ var cal = {
 						addition: false,
 						deleter: window.webxdc.selfName,
 					},
-					info,
+					info: info,
+					summary: "" + (cal.events.length-1) + " events"
 				},
 				info
 			);
