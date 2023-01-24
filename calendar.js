@@ -546,9 +546,9 @@ var cal = {
 			color = cal.color;
 			info =
 				window.webxdc.selfName +
-				" created an event " +
+				" created \"" +
 				cal.hfTxt.value.replace(/\n/g, " ") +
-				" on " +
+				"\" on " +
 				cal.mName[dateSt.getMonth()] +
 				" " +
 				dateSt.getDate();
@@ -645,7 +645,7 @@ var cal = {
 			// send new updates
 			var info =
 				window.webxdc.selfName +
-				" deleted an event from " +
+				" deleted \"" + eventToDelete.data + "\" from " +
 				cal.mName[cal.sMth] +
 				" " +
 				cal.sDay;
