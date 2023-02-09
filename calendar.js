@@ -6,25 +6,72 @@ function removeAllChildren(el) {
 		el.removeChild(el.lastChild);
 	}
 }
+function getShortMonthNames() {
+	try {
+		const format = new Intl.DateTimeFormat(undefined, {
+			month: "short",
+			timeZone: "UTC",
+		});
+		const monthNames = [];
+		for (let i = 0; i < 12; i++) {
+			const date = Date.UTC(2023, i, 1);
+			const month = format
+				.formatToParts(date)
+				.find(p => p.type === "month")
+				.value;
+			monthNames.push(month);
+		}
+		return monthNames;
+	} catch (e) {
+		return [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"May",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Oct",
+			"Nov",
+			"Dec",
+		];
+	}
+}
+function getShortWeekdayNamesStartingFromSun() {
+	try {
+		const format = new Intl.DateTimeFormat(undefined, {
+			weekday: "short",
+			timeZone: "UTC",
+		});
+		const weekdayNames = [];
+		for (let i = 0; i < 7; i++) {
+			// 2023-01-01 is a known Sunday.
+			const date = Date.UTC(2023, 0, 1 + i);
+			const weekday = format
+				.formatToParts(date)
+				.find(p => p.type === "weekday")
+				.value;
+			weekdayNames.push(weekday);
+		}
+		return weekdayNames;
+	} catch (e) {
+		return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+	}
+}
+function getShortWeekdayNamesStartingFromMon() {
+	const arr = getShortWeekdayNamesStartingFromSun();
+	const sun = arr.shift();
+	arr.push(sun);
+	return arr;
+}
 
 var cal = {
 	// (A) PROPERTIES
 	// (A1) COMMON CALENDAR
 	sMon: true, // Week start on Monday?
-	mName: [
-		"Jan",
-		"Feb",
-		"Mar",
-		"Apr",
-		"May",
-		"Jun",
-		"Jul",
-		"Aug",
-		"Sep",
-		"Oct",
-		"Nov",
-		"Dec",
-	], // Month Names
+	mName: getShortMonthNames(),
 
 	// (A2) CALENDAR DATA
 	sDay: 0,
@@ -119,7 +166,7 @@ var cal = {
 		cal.cancelDate = document.getElementById("cancelDate");
 		cal.cancelDate.onclick = cal.closeDateSel;
 		cal.color = "#FAD02C";
-		cal.days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+		cal.days = getShortWeekdayNamesStartingFromSun();
 		cal.calendar = document.getElementById("cal");
 		cal.calendar.classList.add("ninja");
 		cal.import = document.getElementById("evt-import");
@@ -348,7 +395,7 @@ var cal = {
 
 		// First row - Day names
 		let week = document.createElement("div");
-		let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+		let days = getShortWeekdayNamesStartingFromMon();
 		for (let d of days) {
 			let cCell = document.createElement("div");
 			cCell.textContent = d;
