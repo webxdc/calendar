@@ -66,11 +66,24 @@ function getShortWeekdayNamesStartingFromMon() {
 	arr.push(sun);
 	return arr;
 }
+/**
+ * 1 is Monday, 7 is Sunday, like in
+ * https://tc39.es/proposal-intl-locale-info/#sec-week-info-of-locale
+ */
+function getWeekFirstDay() {
+	try {
+		// Looks dumb, I haven't found a proper way.
+		const currLocale = (new Intl.DateTimeFormat()).resolvedOptions().locale;
+		return (new Intl.Locale(currLocale)).weekInfo.firstDay;
+	} catch (e) {
+		return 1;
+	}
+}
 
 var cal = {
 	// (A) PROPERTIES
 	// (A1) COMMON CALENDAR
-	sMon: true, // Week start on Monday?
+	sMon: getWeekFirstDay() === 1, // Week start on Monday?
 	mName: getShortMonthNames(),
 
 	// (A2) CALENDAR DATA
@@ -395,7 +408,9 @@ var cal = {
 
 		// First row - Day names
 		let week = document.createElement("div");
-		let days = getShortWeekdayNamesStartingFromMon();
+		let days = cal.sMon
+			? getShortWeekdayNamesStartingFromMon()
+			: getShortWeekdayNamesStartingFromSun();
 		for (let d of days) {
 			let cCell = document.createElement("div");
 			cCell.textContent = d;
