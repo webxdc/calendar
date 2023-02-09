@@ -1,3 +1,12 @@
+/**
+ * @param {HTMLElement} el
+ */
+function removeAllChildren(el) {
+	while (el.lastChild) {
+		el.removeChild(el.lastChild);
+	}
+}
+
 var cal = {
 	// (A) PROPERTIES
 	// (A1) COMMON CALENDAR
@@ -205,7 +214,7 @@ var cal = {
 		for (let i = 0; i < 12; i++) {
 			let opt = document.createElement("option");
 			opt.value = i;
-			opt.innerHTML = cal.mName[i];
+			opt.textContent = cal.mName[i];
 			if (i == cal.nowMth) {
 				opt.selected = true;
 			}
@@ -217,7 +226,7 @@ var cal = {
 		for (let i = cal.nowYear - 30; i <= cal.nowYear + 30; i++) {
 			let opt = document.createElement("option");
 			opt.value = i;
-			opt.innerHTML = i;
+			opt.textContent = i;
 			if (i == cal.nowYear) {
 				opt.selected = true;
 			}
@@ -335,21 +344,21 @@ var cal = {
 
 		// (C4) DRAW HTML CALENDAR
 		// Get container reset
-		cal.container.innerHTML = "";
+		removeAllChildren(cal.container);
 
 		// First row - Day names
 		let week = document.createElement("div");
 		let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 		for (let d of days) {
 			let cCell = document.createElement("div");
-			cCell.innerHTML = d;
+			cCell.textContent = d;
 			week.appendChild(cCell);
 		}
 		cal.container.appendChild(week);
 		week.classList.add("head");
 
 		// Today's date
-		cal.date.innerHTML = cal.mName[cal.sMth] + " " + cal.sYear;
+		cal.date.textContent = cal.mName[cal.sMth] + " " + cal.sYear;
 
 		// Days in Month
 		let total = squares.length;
@@ -368,7 +377,10 @@ var cal = {
 				} else {
 					cCell.classList.add("day");
 				}
-				cCell.innerHTML = `<div class="dd">${day}</div>`;
+				const dayEl = document.createElement('div');
+				dayEl.classList.add("dd");
+				dayEl.textContent = day;
+				cCell.appendChild(dayEl);
 
 				//retrieve events for this day
 				var eventsDay = cal.getEvents(cal.sYear, cal.sMth, day);
@@ -392,7 +404,7 @@ var cal = {
 
 	// (D) SHOW EDIT EVENT DOCKET FOR SELECTED DAY
 	getDayToShow: (el) => {
-		let day = Number.parseInt(el.getElementsByClassName("dd")[0].innerHTML);
+		let day = Number.parseInt(el.getElementsByClassName("dd")[0].textContent);
 		cal.show(cal.sYear, cal.sMth, day);
 	},
 
@@ -412,7 +424,7 @@ var cal = {
 			}
 		});
 
-		cal.evCards.innerHTML = "";
+		removeAllChildren(cal.evCards);
 		for (const i in dayEvents) {
 			var eventBox = document.createElement("div");
 			var remove = document.createElement("span");
@@ -485,7 +497,7 @@ var cal = {
 
 		// // (D2) UPDATE EVENT FORM
 		let fullDate = new Date(year, month, day);
-		cal.hfDate.innerHTML = `${cal.days[fullDate.getDay()]} ${day} ${cal.mName[month]
+		cal.hfDate.textContent = `${cal.days[fullDate.getDay()]} ${day} ${cal.mName[month]
 			} ${year}`;
 	},
 
@@ -631,7 +643,7 @@ var cal = {
 		let eventToDelete = cal.events.find((evnt) => evnt.id == id);
 		//ask for confirmation
 		let confirmationBox = document.querySelector("#confirmation");
-		confirmationBox.innerHTML = "";
+		removeAllChildren(confirmationBox);
 		confirmationBox.style.display = "block";
 
 		let confirmationText = document.createElement("p");
@@ -641,7 +653,7 @@ var cal = {
 
 		let btnYes = document.createElement("button");
 		btnYes.classList.add("eventBtn");
-		btnYes.innerHTML = "Yes";
+		btnYes.textContent = "Yes";
 		btnYes.onclick = () => {
 			// send new updates
 			var info =
@@ -671,7 +683,7 @@ var cal = {
 
 		let btnNo = document.createElement("button");
 		btnNo.classList.add("eventBtn");
-		btnNo.innerHTML = "No";
+		btnNo.textContent = "No";
 		btnNo.onclick = () => {
 			confirmationBox.style.display = "none";
 		};
@@ -695,7 +707,7 @@ var cal = {
 
 	openImport: () => {
 		cal.importScreen.classList.remove("ninja");
-		cal.getExport.firstChild.innerHTML = "";
+		removeAllChildren(cal.getExport.firstChild);
 		cal.getExport.classList.add("ninja");
 		cal.container.classList.add("ninja");
 		cal.addImport.classList.remove("ninja");
@@ -713,7 +725,7 @@ var cal = {
 		//check if id is one or more events
 		if (id === undefined) {
 			cal.getExport.classList.remove("ninja");
-			document.querySelector("#exportData").innerHTML = setClipboard();
+			document.querySelector("#exportData").textContent = setClipboard();
 		} else {
 			let event = cal.events.filter((ev) => {
 				return Number.parseInt(ev.id) === Number.parseInt(id);
@@ -722,17 +734,17 @@ var cal = {
 			cal.importScreen.classList.remove("ninja");
 			cal.eventsView.classList.add("ninja");
 			cal.getExport.classList.remove("ninja");
-			document.querySelector("#exportData").innerHTML = icsString;
+			document.querySelector("#exportData").textContent = icsString;
 		}
 	},
 
 	//CAN'T USE CLIPBOARD API IN DELTACHAT NOR 
 	copyExporter: () => {
 		// navigator.clipboard.writeText(
-		// 	document.querySelector("#exportData").innerHTML
+		// 	document.querySelector("#exportData").textContent
 		// );
 		const temp = document.createElement("input");
-		const text = document.getElementById("exportData").innerHTML;
+		const text = document.getElementById("exportData").textContent;
 		temp.setAttribute("value", text);
 		document.body.appendChild(temp);
 		temp.select();
