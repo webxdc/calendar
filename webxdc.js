@@ -1,6 +1,6 @@
 // debug friend: document.writeln(JSON.stringify(value));
 //@ts-check
-/** @type {import('./webxdc').Webxdc<any>} */
+/** @type {import('./webxdc.d').Webxdc<any>} */
 window.webxdc = (() => {
     var updateListener = (_) => {};
     var updatesKey = "__xdcUpdatesKey__";
@@ -22,7 +22,8 @@ window.webxdc = (() => {
     }
 
     var params = new URLSearchParams(window.location.hash.substr(1));
-    return {
+    /** @type {import('./webxdc.d').Webxdc<any>} */
+    const webxdc =  {
         selfAddr: params.get("addr") || "device0@local.host",
         selfName: params.get("name") || "device0",
         setUpdateListener: (cb, serial = 0) => {
@@ -51,7 +52,64 @@ window.webxdc = (() => {
             console.log('[Webxdc] description="' + description + '", ' + JSON.stringify(_update));
             updateListener(_update);
         },
+        sendToChat: async (content) => {
+            if (!content.file && !content.text) {
+              alert("🚨 Error: either file or text need to be set. (or both)");
+              return Promise.reject(
+                "Error from sendToChat: either file or text need to be set"
+              );
+            }
+            const confirmed = confirm(
+              `now the user would select a chat to send this message. (the user can also abort then the sendToChat promise resolves with false):\n${JSON.stringify(
+                content
+              )}`
+            );
+
+            if (confirmed) {
+              if (content.file) {
+                var element = document.createElement("a");
+                const base64Content = await (() =>
+                  new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(content.file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(reader.error);
+                  }))();
+                element.setAttribute(
+                  "href",
+                  "data:" +
+                    (content.file.type || "application/octet-stream") +
+                    ";base64;" +
+                    base64Content
+                );
+                element.setAttribute("download", content.file.name);
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+              }
+              return Promise.resolve(true);
+            } else {
+              return Promise.resolve(false);
+            }
+        },
+        importFiles: (filters) => {
+            // simon: please don't copy this hacky code for android
+            return new Promise((resolve, reject)=>{
+                var element = document.createElement("input");
+                element.accept = [...filters.extentions, ...filters.mimeTypes].join(',')
+                element.multiple = filters.multiple || false
+                element.onchange = (ev)=>{
+                    console.log("element.files", element.files)
+                    const files = [...element.files]
+                    document.body.removeChild(element);
+                    resolve(files)
+                }
+                element.style.display="none"
+                element.click()
+            })
+        }
     };
+    return webxdc
 })();
 
 window.addXdcPeer = () => {

@@ -1,3 +1,5 @@
+//@ts-check
+/** @typedef {import('./webxdc').Webxdc} Webxdc */
 /**
  * @param {HTMLElement} el
  */
@@ -135,6 +137,7 @@ var cal = {
 	importEventObj: undefined,
 	getExport: null,
 	copyBtn: null,
+	exportToDCBtn: null,
 	multiDayCheck: null,
 	multiDayForm: null,
 	recurringCheck: null,
@@ -218,6 +221,8 @@ var cal = {
 		cal.getExport = document.getElementById("getExport");
 		cal.copyBtn = document.getElementById("i-clipboard");
 		cal.copyBtn.onclick = cal.copyExporter;
+		cal.exportToDCBtn = document.getElementById("export-to-dc");
+		cal.exportToDCBtn.onclick = cal.chatExporter;
 		cal.multiDayCheck = document.getElementById("multi-day");
 		cal.multiDayCheck.onchange = (ev) => {
 			//set the default date in form
@@ -788,6 +793,7 @@ var cal = {
 		if (id === undefined) {
 			cal.getExport.classList.remove("ninja");
 			document.querySelector("#exportData").textContent = setClipboard();
+			document.querySelector("#exportTitle").textContent = "";
 		} else {
 			let event = cal.events.filter((ev) => {
 				return Number.parseInt(ev.id) === Number.parseInt(id);
@@ -797,6 +803,9 @@ var cal = {
 			cal.eventsView.classList.add("ninja");
 			cal.getExport.classList.remove("ninja");
 			document.querySelector("#exportData").textContent = icsString;
+			if (event.length == 1) {
+				document.querySelector("#exportTitle").textContent = event[0].data;
+			}
 		}
 	},
 
@@ -813,6 +822,23 @@ var cal = {
 		document.execCommand("copy");
 		document.body.removeChild(temp);
 		cal.copyBtn.style.color = "#FAD02C";
+	},
+
+	chatExporter: async () => {
+		const data = document.getElementById("exportData").textContent;
+		const title = document.getElementById("exportTitle").textContent;
+		const file = new File([data], "event.ics", {
+			type: "text/calendar",
+		});
+		try {
+			if (await window.webxdc.sendToChat({ file, text: title })) {
+				console.info("exported successfully");
+			} else {
+				console.info("export was aborted by user");
+			}
+		} catch (error) {
+			console.error("export failed", error);
+		}
 	},
 };
 window.addEventListener("load", cal.init);
