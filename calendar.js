@@ -805,9 +805,9 @@ var cal = {
 		// navigator.clipboard.writeText(
 		// 	document.querySelector("#exportData").textContent
 		// );
-		const temp = document.createElement("input");
+		const temp = document.createElement("textarea");
 		const text = document.getElementById("exportData").textContent;
-		temp.setAttribute("value", text);
+		temp.innerHTML = text;
 		document.body.appendChild(temp);
 		temp.select();
 		document.execCommand("copy");

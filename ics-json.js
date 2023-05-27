@@ -1,7 +1,9 @@
 //get text from the clipboard
 function getClipboard(text) {
 	if (text !== "") {
-		console.log(parseIcsToJSON(text));
+		const events = parseIcsToJSON(text)
+		console.log(events);
+		parseJSONToWebxdcUpdate(events);
 	} else {
 		console.log("No text on the clipboard!");
 	}
@@ -129,12 +131,12 @@ function parseIcsToJSON(icsData) {
 				continue;
 		}
 	}
-	parseJSONToWebxdcUpdate(array);
+	return array
 }
 
-function parseJSONToWebxdcUpdate(JSON) {
-	for (const evt in JSON) {
-		cal.importEventObj = JSON[evt];
+function parseJSONToWebxdcUpdate(events) {
+	for (const evt in events) {
+		cal.importEventObj = events[evt];
 		cal.save();
 	}
 	cal.importEventObj = undefined;
