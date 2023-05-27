@@ -94,19 +94,25 @@ window.webxdc = (() => {
         },
         importFiles: (filters) => {
             // simon: please don't copy this hacky code for android
-            return new Promise((resolve, reject)=>{
-                var element = document.createElement("input");
-                element.accept = [...filters.extentions, ...filters.mimeTypes].join(',')
-                element.multiple = filters.multiple || false
-                element.onchange = (ev)=>{
-                    console.log("element.files", element.files)
-                    const files = [...element.files]
-                    document.body.removeChild(element);
-                    resolve(files)
-                }
-                element.style.display="none"
-                element.click()
-            })
+            var element = document.createElement("input");
+            element.type = "file";
+            element.accept = [...filters.extentions, ...filters.mimeTypes].join(
+              ","
+            );
+            element.multiple = filters.multiple || false;
+            const promise = new Promise((resolve, _reject) => {
+              element.onchange = (_ev) => {
+                console.log("element.files", element.files);
+                const files = [...element.files];
+                document.body.removeChild(element);
+                resolve(files);
+              };
+            });
+            // element.style.display = "none"
+            document.body.appendChild(element);
+            element.click();
+            console.log(element);
+            return promise;
         }
     };
     return webxdc

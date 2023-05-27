@@ -124,6 +124,7 @@ var cal = {
 	touchendX: 0,
 	calendar: null,
 	import: null,
+	importFromFile: null,
 	export: null,
 	importScreen: null,
 	importScrBtn: null,
@@ -190,6 +191,8 @@ var cal = {
 			getClipboard(cal.importArea.value);
 			cal.closeImport();
 		};
+		cal.importFromFile = document.getElementById("evt-import-from-dc");
+		cal.importFromFile.onclick = cal.chatImporter
 		cal.export = document.getElementById("evt-export");
 		cal.export.onclick = () => {
 			cal.exporter();
@@ -840,5 +843,18 @@ var cal = {
 			console.error("export failed", error);
 		}
 	},
+
+	chatImporter: async () => {
+		const [file] = await window.webxdc.importFiles({
+			mimeTypes: ["text/calendar"],
+			extentions: [".ics"],
+		});
+		const text = await file.text();
+		const events = parseIcsToJSON(text);
+		console.log(events);
+		parseJSONToWebxdcUpdate(events);
+		cal.closeImport();
+	}
+	
 };
 window.addEventListener("load", cal.init);
