@@ -60,7 +60,7 @@ window.webxdc = (() => {
               );
             }
             const confirmed = confirm(
-              `now the user would select a chat to send this message. (the user can also abort then the sendToChat promise resolves with false):\n${JSON.stringify(
+              `now app would close and the user would select a chat to send this message.:\n${JSON.stringify(
                 content
               )}`
             );
@@ -87,9 +87,6 @@ window.webxdc = (() => {
                 element.click();
                 document.body.removeChild(element);
               }
-              return Promise.resolve(true);
-            } else {
-              return Promise.resolve(false);
             }
         },
         importFiles: (filters) => {

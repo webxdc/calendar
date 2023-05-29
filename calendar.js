@@ -834,11 +834,7 @@ var cal = {
 			type: "text/calendar",
 		});
 		try {
-			if (await window.webxdc.sendToChat({ file, text: title })) {
-				console.info("exported successfully");
-			} else {
-				console.info("export was aborted by user");
-			}
+			await window.webxdc.sendToChat({ file, text: title })
 		} catch (error) {
 			console.error("export failed", error);
 		}
