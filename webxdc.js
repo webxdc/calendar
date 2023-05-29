@@ -75,13 +75,7 @@ window.webxdc = (() => {
                     reader.onload = () => resolve(reader.result);
                     reader.onerror = () => reject(reader.error);
                   }))();
-                element.setAttribute(
-                  "href",
-                  "data:" +
-                    (content.file.type || "application/octet-stream") +
-                    ";base64;" +
-                    base64Content
-                );
+                element.setAttribute("href", base64Content);
                 element.setAttribute("download", content.file.name);
                 document.body.appendChild(element);
                 element.click();
