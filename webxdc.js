@@ -60,7 +60,7 @@ window.webxdc = (() => {
               );
             }
             const confirmed = confirm(
-              `now app would close and the user would select a chat to send this message.:\n${JSON.stringify(
+              `The app would now close and the user would select a chat to send this message:\n${JSON.stringify(
                 content
               )}`
             );
