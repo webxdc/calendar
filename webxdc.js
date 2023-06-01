@@ -65,17 +65,64 @@ window.webxdc = (() => {
               )}`
             );
 
+            /** @type {(file: Blob) => Promise<string>} */
+            const blob_to_base64 = (file) => {
+              const data_start = ";base64,";
+              return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                  /** @type {string} */
+                  //@ts-ignore
+                  let data = reader.result;
+                  resolve(
+                    data.slice(data.indexOf(data_start) + data_start.length)
+                  );
+                };
+                reader.onerror = () => reject(reader.error);
+              });
+            };
+
             if (confirmed) {
               if (content.file) {
+                if (!content.file.name) {
+                  return Promise.reject("file name is missing");
+                }
+                if (
+                  Object.keys(content.file).filter((key) =>
+                    ["blob", "base64", "plainText"].includes(key)
+                  ).length > 1
+                ) {
+                  return Promise.reject(
+                    "you can only set one of `blob`, `base64` or `plainText`, not multiple ones"
+                  );
+                }
+                let base64Content;
+                // @ts-ignore - needed because typescript imagines that blob would not exist
+                if (content.file.blob instanceof Blob) {
+                  // @ts-ignore - needed because typescript imagines that blob would not exist
+                  base64Content = await blob_to_base64(content.file.blob);
+                  // @ts-ignore - needed because typescript imagines that base64 would not exist
+                } else if (typeof content.file.base64 === "string") {
+                  // @ts-ignore - needed because typescript imagines that base64 would not exist
+                  base64Content = content.file.base64;
+                  // @ts-ignore - needed because typescript imagines that plainText would not exist
+                } else if (typeof content.file.plainText === "string") {
+                  base64Content = await blob_to_base64(
+                    // @ts-ignore - needed because typescript imagines that plainText would not exist
+                    new Blob([content.file.plainText])
+                  );
+                } else {
+                  return Promise.reject(
+                    "data is not set or wrong format, set one of `blob`, `base64` or `plainText`, see webxdc documentation for sendToChat"
+                  );
+                }
+
                 var element = document.createElement("a");
-                const base64Content = await (() =>
-                  new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(content.file);
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(reader.error);
-                  }))();
-                element.setAttribute("href", base64Content);
+                element.setAttribute(
+                  "href",
+                  "data:application/octet-stream;base64," + base64Content
+                );
                 element.setAttribute("download", content.file.name);
                 document.body.appendChild(element);
                 element.click();
@@ -84,7 +131,6 @@ window.webxdc = (() => {
             }
         },
         importFiles: (filters) => {
-            // simon: please don't copy this hacky code for android
             var element = document.createElement("input");
             element.type = "file";
             element.accept = [...filters.extentions, ...filters.mimeTypes].join(
@@ -109,6 +155,7 @@ window.webxdc = (() => {
     return webxdc
 })();
 
+//@ts-ignore
 window.addXdcPeer = () => {
     var loc = window.location;
     // get next peer ID
@@ -124,12 +171,12 @@ window.addXdcPeer = () => {
     params.set("next_peer", String(peerId + 1));
     window.location.hash = "#" + params.toString();
 }
-
+//@ts-ignore
 window.clearXdcStorage = () => {
     window.localStorage.clear();
     window.location.reload();
 }
-
+//@ts-ignore
 window.alterXdcApp = () => {
     var styleControlPanel = 'position: fixed; bottom:1em; left:1em; background-color: #000; opacity:0.8; padding:.5em; font-size:16px; font-family: sans-serif; color:#fff; z-index: 9999';
     var styleMenuLink = 'color:#fff; text-decoration: none; vertical-align: middle';
@@ -165,5 +212,5 @@ window.alterXdcApp = () => {
         document.getElementsByTagName('body')[0].append(controlPanel);
     }
 }
-
+//@ts-ignore
 window.addEventListener("load", window.alterXdcApp);

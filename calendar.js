@@ -831,10 +831,13 @@ var cal = {
 		const data = document.getElementById("exportData").textContent;
 		const title = document.getElementById("exportTitle").textContent;
 		const file = new File([data], "event.ics", {
-			type: "text/calendar",
+   			type: "text/calendar",
 		});
 		try {
-			await window.webxdc.sendToChat({ file, text: title })
+			await window.webxdc.sendToChat({
+				file: { name: file.name, blob: file },
+				text: title,
+			});
 		} catch (error) {
 			console.error("export failed", error);
 		}
