@@ -1,7 +1,6 @@
 //@ts-check
 /** @typedef {import('./webxdc').Webxdc} Webxdc */
-
-/** @typedef {{id: any, color: string, startDate, endDate, }} CalEvent */
+/** @typedef {import('./types').CalEvent} CalEvent */
 
 /**
  * @param {HTMLElement} el
@@ -174,7 +173,6 @@ var cal = {
 		document.getElementById("evt-close").onclick = cal.close;
 		cal.btnSave.onclick = cal.save;
 		cal.events = [];
-		events = cal.events; //link to the export var
 		cal.eventsView = document.getElementById("eventsDay");
 		cal.eventsView.classList.add("ninja");
 		cal.evCards = document.getElementById("evt-cards");
@@ -806,7 +804,7 @@ var cal = {
 		//check if id is one or more events
 		if (id === undefined) {
 			cal.getExport.classList.remove("ninja");
-			document.querySelector("#exportData").textContent = setClipboard();
+			document.querySelector("#exportData").textContent = makeString(cal.events);
 			document.querySelector("#exportTitle").textContent = "";
 		} else {
 			let event = cal.events.filter((ev) => {
