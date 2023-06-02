@@ -1,5 +1,8 @@
 //@ts-check
 /** @typedef {import('./webxdc').Webxdc} Webxdc */
+
+/** @typedef {{id: any, color: string, startDate, endDate, }} CalEvent */
+
 /**
  * @param {HTMLElement} el
  */
@@ -111,6 +114,7 @@ var cal = {
 	container: null,
 	hfTxt: null, //event form
 	btnSave: null,
+	/** @type {CalEvent[]} */
 	events: null,
 	eventsView: null,
 	evCards: null,
@@ -281,7 +285,7 @@ var cal = {
 		// (B3) APPEND MONTHS SELECTOR
 		for (let i = 0; i < 12; i++) {
 			let opt = document.createElement("option");
-			opt.value = i;
+			opt.value = String(i);
 			opt.textContent = cal.mName[i];
 			if (i == cal.nowMth) {
 				opt.selected = true;
@@ -293,8 +297,8 @@ var cal = {
 		// Set to 30 years range. Change this as you like.
 		for (let i = cal.nowYear - 30; i <= cal.nowYear + 30; i++) {
 			let opt = document.createElement("option");
-			opt.value = i;
-			opt.textContent = i;
+			opt.value = String(i);
+			opt.textContent = String(i);
 			if (i == cal.nowYear) {
 				opt.selected = true;
 			}
@@ -449,7 +453,7 @@ var cal = {
 				}
 				const dayEl = document.createElement('div');
 				dayEl.classList.add("dd");
-				dayEl.textContent = day;
+				dayEl.textContent = String(day);
 				cCell.appendChild(dayEl);
 
 				//retrieve events for this day
@@ -599,6 +603,13 @@ var cal = {
 	},
 
 	// GET ALL EVENTS FROM A DAY
+	/**
+	 * 
+	 * @param {number} year 
+	 * @param {number} month 
+	 * @param {number} day 
+	 * @returns {CalEvent[]}
+	 */
 	getEvents: (year, month, day) => {
 		var events = cal.events.filter((event) => {
 			let startDate = new Date(event.startDate);
@@ -640,7 +651,7 @@ var cal = {
 			dateSt = new Date(cal.importEventObj.startDate);
 			dateEnd = new Date(cal.importEventObj.endDate);
 			data = cal.importEventObj.summary;
-			color = "black";
+			color =  cal.importEventObj.color;
 			info =
 				window.webxdc.selfName +
 				" imported an event " +

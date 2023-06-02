@@ -67,6 +67,8 @@ function makeString(events) {
 				SEPARATOR +
 				`LOCATION:${events[i][location] ? events[i].location : ""}` +
 				SEPARATOR +
+				`X-CALENDAR-XDC-COLOR:${escape(events[i].color)}` +
+				SEPARATOR +
 				"END:VEVENT" +
 				SEPARATOR;
 		

@@ -49,6 +49,7 @@ function parseIcsToJSON(icsData) {
 	const ALARM = "VALARM";
 	const UID = "UID";
 	const TZID = "TZID";
+	const X_COLOR = "X-CALENDAR-XDC-COLOR"
 
 	const keyMap = {
 		[UID]: "uid",
@@ -58,6 +59,7 @@ function parseIcsToJSON(icsData) {
 		[SUMMARY]: "summary",
 		[LOCATION]: "location",
 		[TZID]: "timeZone",
+		[X_COLOR]: "color"
 	};
 
 	const clean = (string) => unescape(string).trim();
@@ -127,6 +129,8 @@ function parseIcsToJSON(icsData) {
 				break;
 			case LOCATION:
 				currentObj[keyMap[LOCATION]] = clean(value);
+			case X_COLOR:
+				currentObj[keyMap[X_COLOR]] = clean(value);
 			default:
 				continue;
 		}
