@@ -1,14 +1,3 @@
-//get text from the clipboard
-function getClipboard(text) {
-	if (text !== "") {
-		const events = parseIcsToJSON(text)
-		console.log(events);
-		parseJSONToWebxdcUpdate(events);
-	} else {
-		console.log("No text on the clipboard!");
-	}
-}
-
 //transform ics dates to Date timestamps
 //ics dates are YYYYMMDDTHHmmSS format
 function calenDate(icalStr, timezone) {

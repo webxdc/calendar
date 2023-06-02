@@ -190,7 +190,9 @@ var cal = {
 		cal.calendar.classList.add("ninja");
 		cal.import = document.getElementById("evt-import");
 		cal.import.onclick = () => {
-			getClipboard(cal.importArea.value);
+			const events = parseIcsToJSON(cal.importArea.value)
+			console.log("import" + events);
+			parseJSONToWebxdcUpdate(events);
 			cal.closeImport();
 		};
 		cal.importFromFile = document.getElementById("evt-import-from-dc");

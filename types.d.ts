@@ -6,4 +6,5 @@ export type CalEvent = {
   /** used for summary and for description */
   data: string;
   location;
+  creator: string;
 };
