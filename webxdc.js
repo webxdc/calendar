@@ -1,6 +1,6 @@
 // debug friend: document.writeln(JSON.stringify(value));
 //@ts-check
-/** @type {import('./webxdc.d').Webxdc<any>} */
+/** @type {import('./webxdc').Webxdc<any>} */
 window.webxdc = (() => {
     var updateListener = (_) => {};
     var updatesKey = "__xdcUpdatesKey__";
@@ -22,8 +22,7 @@ window.webxdc = (() => {
     }
 
     var params = new URLSearchParams(window.location.hash.substr(1));
-    /** @type {import('./webxdc.d').Webxdc<any>} */
-    const webxdc =  {
+    return {
         selfAddr: params.get("addr") || "device0@local.host",
         selfName: params.get("name") || "device0",
         setUpdateListener: (cb, serial = 0) => {
@@ -113,53 +112,31 @@ window.webxdc = (() => {
                 );
               }
             }
-            const confirmed = confirm(
-              `The app would now close and the user would select a chat to send this message:\nText: ${
+            const msg = `The app would now close and the user would select a chat to send this message:\nText: ${
                 content.text ? `"${content.text}"` : "No Text"
               }\nFile: ${
-                content.file
-                  ? `${content.file.name} - ${base64Content.length} bytes`
-                  : "No File"
-              }`
-            );
-            if (confirmed && content.file) {
-              var element = document.createElement("a");
-              element.setAttribute(
-                "href",
-                "data:application/octet-stream;base64," + base64Content
-              );
-              element.setAttribute("download", content.file.name);
-              document.body.appendChild(element);
-              element.click();
-              document.body.removeChild(element);
-            }
-        },
-        importFiles: (filters) => {
-            var element = document.createElement("input");
-            element.type = "file";
-            element.accept = [...filters.extentions, ...filters.mimeTypes].join(
-              ","
-            );
-            element.multiple = filters.multiple || false;
-            const promise = new Promise((resolve, _reject) => {
-              element.onchange = (_ev) => {
-                console.log("element.files", element.files);
-                const files = [...element.files];
+                content.file ? `${content.file.name} - ${base64Content.length} bytes` : "No File"
+              }`;
+            if (content.file) {
+              const confirmed = confirm(msg + '\n\nDownload the file in the browser instead?');
+              if (confirmed) {
+                var element = document.createElement("a");
+                element.setAttribute(
+                  "href",
+                  "data:application/octet-stream;base64," + base64Content
+                );
+                element.setAttribute("download", content.file.name);
+                document.body.appendChild(element);
+                element.click();
                 document.body.removeChild(element);
-                resolve(files);
-              };
-            });
-            // element.style.display = "none"
-            document.body.appendChild(element);
-            element.click();
-            console.log(element);
-            return promise;
+              }
+            } else {
+              alert(msg);
+            }
         }
     };
-    return webxdc
 })();
 
-//@ts-ignore
 window.addXdcPeer = () => {
     var loc = window.location;
     // get next peer ID
@@ -175,12 +152,12 @@ window.addXdcPeer = () => {
     params.set("next_peer", String(peerId + 1));
     window.location.hash = "#" + params.toString();
 }
-//@ts-ignore
+
 window.clearXdcStorage = () => {
     window.localStorage.clear();
     window.location.reload();
 }
-//@ts-ignore
+
 window.alterXdcApp = () => {
     var styleControlPanel = 'position: fixed; bottom:1em; left:1em; background-color: #000; opacity:0.8; padding:.5em; font-size:16px; font-family: sans-serif; color:#fff; z-index: 9999';
     var styleMenuLink = 'color:#fff; text-decoration: none; vertical-align: middle';
@@ -216,5 +193,5 @@ window.alterXdcApp = () => {
         document.getElementsByTagName('body')[0].append(controlPanel);
     }
 }
-//@ts-ignore
+
 window.addEventListener("load", window.alterXdcApp);

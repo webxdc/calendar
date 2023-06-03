@@ -34,7 +34,7 @@ type ReceivedStatusUpdate<T> = {
   summary?: string;
 };
 
-export type XDCFile = {
+type XDCFile = {
   /** name of the file */
   name: string;
 } & (
@@ -97,15 +97,6 @@ interface Webxdc<T> {
    * @returns returns a promise that never resolves (because the xdc closes), but is rejected on error.
    */
   sendToChat(content: sendOptions): Promise<void>;
-  /**
-   * TODO
-   */
-  importFiles(filters: {
-    mimeTypes?: string[];
-    extentions?: string[];
-    /** false by default, whether to allow multiple files to be selected */
-    multiple?: boolean;
-  }): Promise<File[]>;
 }
 
 ////////// ANCHOR: global
@@ -117,3 +108,12 @@ declare global {
 ////////// ANCHOR_END: global
 
 export { SendingStatusUpdate, ReceivedStatusUpdate, Webxdc, XDCFile };
+
+/* Types for the Simulator */
+declare global {
+  interface Window {
+    addXdcPeer: () => void;
+    clearXdcStorage: () => void;
+    alterXdcApp: () => void;
+  }
+}
