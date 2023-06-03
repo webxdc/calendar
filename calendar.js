@@ -1,3 +1,7 @@
+//@ts-check
+/** @typedef {import('./webxdc').Webxdc} Webxdc */
+/** @typedef {import('./types').CalEvent} CalEvent */
+
 /**
  * @param {HTMLElement} el
  */
@@ -109,6 +113,7 @@ var cal = {
 	container: null,
 	hfTxt: null, //event form
 	btnSave: null,
+	/** @type {CalEvent[]} */
 	events: null,
 	eventsView: null,
 	evCards: null,
@@ -122,6 +127,7 @@ var cal = {
 	touchendX: 0,
 	calendar: null,
 	import: null,
+	importFromFile: null,
 	export: null,
 	importScreen: null,
 	importScrBtn: null,
@@ -135,6 +141,7 @@ var cal = {
 	importEventObj: undefined,
 	getExport: null,
 	copyBtn: null,
+	exportToDCBtn: null,
 	multiDayCheck: null,
 	multiDayForm: null,
 	recurringCheck: null,
@@ -166,7 +173,6 @@ var cal = {
 		document.getElementById("evt-close").onclick = cal.close;
 		cal.btnSave.onclick = cal.save;
 		cal.events = [];
-		events = cal.events; //link to the export var
 		cal.eventsView = document.getElementById("eventsDay");
 		cal.eventsView.classList.add("ninja");
 		cal.evCards = document.getElementById("evt-cards");
@@ -184,9 +190,13 @@ var cal = {
 		cal.calendar.classList.add("ninja");
 		cal.import = document.getElementById("evt-import");
 		cal.import.onclick = () => {
-			getClipboard(cal.importArea.value);
+			const events = parseIcsToJSON(cal.importArea.value)
+			console.log("import" + events);
+			parseJSONToWebxdcUpdate(events);
 			cal.closeImport();
 		};
+		cal.importFromFile = document.getElementById("evt-import-from-dc");
+		cal.importFromFile.onclick = cal.chatImporter
 		cal.export = document.getElementById("evt-export");
 		cal.export.onclick = () => {
 			cal.exporter();
@@ -218,6 +228,8 @@ var cal = {
 		cal.getExport = document.getElementById("getExport");
 		cal.copyBtn = document.getElementById("i-clipboard");
 		cal.copyBtn.onclick = cal.copyExporter;
+		cal.exportToDCBtn = document.getElementById("export-to-dc");
+		cal.exportToDCBtn.onclick = cal.chatExporter;
 		cal.multiDayCheck = document.getElementById("multi-day");
 		cal.multiDayCheck.onchange = (ev) => {
 			//set the default date in form
@@ -273,7 +285,7 @@ var cal = {
 		// (B3) APPEND MONTHS SELECTOR
 		for (let i = 0; i < 12; i++) {
 			let opt = document.createElement("option");
-			opt.value = i;
+			opt.value = String(i);
 			opt.textContent = cal.mName[i];
 			if (i == cal.nowMth) {
 				opt.selected = true;
@@ -285,8 +297,8 @@ var cal = {
 		// Set to 30 years range. Change this as you like.
 		for (let i = cal.nowYear - 30; i <= cal.nowYear + 30; i++) {
 			let opt = document.createElement("option");
-			opt.value = i;
-			opt.textContent = i;
+			opt.value = String(i);
+			opt.textContent = String(i);
 			if (i == cal.nowYear) {
 				opt.selected = true;
 			}
@@ -441,7 +453,7 @@ var cal = {
 				}
 				const dayEl = document.createElement('div');
 				dayEl.classList.add("dd");
-				dayEl.textContent = day;
+				dayEl.textContent = String(day);
 				cCell.appendChild(dayEl);
 
 				//retrieve events for this day
@@ -591,6 +603,13 @@ var cal = {
 	},
 
 	// GET ALL EVENTS FROM A DAY
+	/**
+	 * 
+	 * @param {number} year 
+	 * @param {number} month 
+	 * @param {number} day 
+	 * @returns {CalEvent[]}
+	 */
 	getEvents: (year, month, day) => {
 		var events = cal.events.filter((event) => {
 			let startDate = new Date(event.startDate);
@@ -632,7 +651,7 @@ var cal = {
 			dateSt = new Date(cal.importEventObj.startDate);
 			dateEnd = new Date(cal.importEventObj.endDate);
 			data = cal.importEventObj.summary;
-			color = "black";
+			color =  cal.importEventObj.color;
 			info =
 				window.webxdc.selfName +
 				" imported an event " +
@@ -787,7 +806,8 @@ var cal = {
 		//check if id is one or more events
 		if (id === undefined) {
 			cal.getExport.classList.remove("ninja");
-			document.querySelector("#exportData").textContent = setClipboard();
+			document.querySelector("#exportData").textContent = makeString(cal.events);
+			document.querySelector("#exportTitle").textContent = "";
 		} else {
 			let event = cal.events.filter((ev) => {
 				return Number.parseInt(ev.id) === Number.parseInt(id);
@@ -797,6 +817,9 @@ var cal = {
 			cal.eventsView.classList.add("ninja");
 			cal.getExport.classList.remove("ninja");
 			document.querySelector("#exportData").textContent = icsString;
+			if (event.length === 1) {
+				document.querySelector("#exportTitle").textContent = event[0].data;
+			}
 		}
 	},
 
@@ -805,14 +828,43 @@ var cal = {
 		// navigator.clipboard.writeText(
 		// 	document.querySelector("#exportData").textContent
 		// );
-		const temp = document.createElement("input");
+		const temp = document.createElement("textarea");
 		const text = document.getElementById("exportData").textContent;
-		temp.setAttribute("value", text);
+		temp.innerHTML = text;
 		document.body.appendChild(temp);
 		temp.select();
 		document.execCommand("copy");
 		document.body.removeChild(temp);
 		cal.copyBtn.style.color = "#FAD02C";
 	},
+
+	chatExporter: async () => {
+		const data = document.getElementById("exportData").textContent;
+		const title = document.getElementById("exportTitle").textContent;
+		const file = new File([data], "event.ics", {
+   			type: "text/calendar",
+		});
+		try {
+			await window.webxdc.sendToChat({
+				file: { name: file.name, blob: file },
+				text: title,
+			});
+		} catch (error) {
+			console.error("export failed", error);
+		}
+	},
+
+	chatImporter: async () => {
+		const [file] = await window.webxdc.importFiles({
+			mimeTypes: ["text/calendar"],
+			extentions: [".ics"],
+		});
+		const text = await file.text();
+		const events = parseIcsToJSON(text);
+		console.log(events);
+		parseJSONToWebxdcUpdate(events);
+		cal.closeImport();
+	}
+	
 };
 window.addEventListener("load", cal.init);

@@ -1,12 +1,3 @@
-//get text from the clipboard
-function getClipboard(text) {
-	if (text !== "") {
-		console.log(parseIcsToJSON(text));
-	} else {
-		console.log("No text on the clipboard!");
-	}
-}
-
 //transform ics dates to Date timestamps
 //ics dates are YYYYMMDDTHHmmSS format
 function calenDate(icalStr, timezone) {
@@ -47,6 +38,7 @@ function parseIcsToJSON(icsData) {
 	const ALARM = "VALARM";
 	const UID = "UID";
 	const TZID = "TZID";
+	const X_COLOR = "X-CALENDAR-XDC-COLOR"
 
 	const keyMap = {
 		[UID]: "uid",
@@ -56,6 +48,7 @@ function parseIcsToJSON(icsData) {
 		[SUMMARY]: "summary",
 		[LOCATION]: "location",
 		[TZID]: "timeZone",
+		[X_COLOR]: "color"
 	};
 
 	const clean = (string) => unescape(string).trim();
@@ -125,16 +118,18 @@ function parseIcsToJSON(icsData) {
 				break;
 			case LOCATION:
 				currentObj[keyMap[LOCATION]] = clean(value);
+			case X_COLOR:
+				currentObj[keyMap[X_COLOR]] = clean(value);
 			default:
 				continue;
 		}
 	}
-	parseJSONToWebxdcUpdate(array);
+	return array
 }
 
-function parseJSONToWebxdcUpdate(JSON) {
-	for (const evt in JSON) {
-		cal.importEventObj = JSON[evt];
+function parseJSONToWebxdcUpdate(events) {
+	for (const evt in events) {
+		cal.importEventObj = events[evt];
 		cal.save();
 	}
 	cal.importEventObj = undefined;
