@@ -817,7 +817,7 @@ var cal = {
 			cal.eventsView.classList.add("ninja");
 			cal.getExport.classList.remove("ninja");
 			document.querySelector("#exportData").textContent = icsString;
-			if (event.length == 1) {
+			if (event.length === 1) {
 				document.querySelector("#exportTitle").textContent = event[0].data;
 			}
 		}
