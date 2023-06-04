@@ -857,7 +857,7 @@ var cal = {
 	chatImporter: async () => {
 		const [file] = await window.webxdc.importFiles({
 			mimeTypes: ["text/calendar"],
-			extentions: [".ics"],
+			extensions: [".ics"],
 		});
 		const text = await file.text();
 		const events = parseIcsToJSON(text);
