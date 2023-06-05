@@ -7,7 +7,7 @@ const SEPARATOR = "\r\n";
  * @param {(import('./types').CalEvent)[]} events - The array of events
  * @returns {String} String representation of the ICS events
  */
-function makeString(events) {
+function createIcsData(events) {
 	let icsString = "BEGIN:VCALENDAR" + SEPARATOR;
 	console.log(events);
 
@@ -39,7 +39,6 @@ function makeString(events) {
 				SEPARATOR +
 				`DTSTART;VALUE=DATE:${toDateTime(dateStart)}` +
 				SEPARATOR +
-				//maybe do something with this longer than a day events later
 				`DTEND;VALUE=DATE:${toDateTime(dateEnd)}` +
 				SEPARATOR +
 				`SUMMARY:${event.data}` +

@@ -6,8 +6,9 @@
 	<title>Simple Javascript Calendar</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
 	<script src="webxdc.js"></script>
-	<script async src="ics-json.js"></script>
-	<script async src="json-ics.js"></script>
+	<script async src="ics-reader.js"></script>
+	<script async src="ics-reader.js"></script>
+	<script src="tools.js"></script>
 	<link href="calendar.css" rel="stylesheet" />
 	<script async src="calendar.js"></script>
 	<script src="inobounce.js"></script>
@@ -16,129 +17,100 @@
 <body>
 	<div id="cal-wrap" class="block">
 
-		<!-- PERIOD SELECTOR -->
-		<div id="cal">
-			<button class="import" id="evt-imp-exp"><svg id="i-export" viewBox="0 0 32 32" width="20" height="20"
-					fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5">
-					<path d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" />
-				</svg> Export/Import</button>
-
+		<div id="monthScreen" class="hidden">
+			<button class="import" id="evt-imp-exp">Export/Import</button>
 			<div id="cal-date" class="flex-between">
 				<button id="prevMonth" class="arrows">&#10094;</button>
-				<h1 id="date"></h1>
-				<button id="nxtMonth" class="arrows">&#10095;</button>
+				<h1 id="monthTitle"></h1>
+				<button id="nextMonth" class="arrows">&#10095;</button>
 			</div>
-
-			<!-- CALENDAR -->
-			<div id="cal-container"></div>
+			<div id="daysGrid"></div>
 		</div>
 
-		<!-- EVENTS PER DAY -->
-		<div id="eventsDay">
+		<div id="monthSelScreen" class="hidden">
+			<div class="header">
+				<span id="monthSelCancelButton">&#x2715</span>
+			</div>
+			<div class="block centerY">
+				<select id="monthSelMonth"></select>
+				<select id="monthSelYear"></select>
+			</div>
+			<button class="eventBtn" id="monthSelOkButton">Go</button>
+		</div>
+
+		<div id="dayScreen" class="hidden">
 			<div class="header">
 				<button class="import" id="today"><svg id="i-calendar" viewBox="0 0 32 32" width="22" height="22"
 						fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"
 						stroke-width="3.5">
 						<path d="M2 6 L2 30 30 30 30 6 Z M2 15 L30 15 M7 3 L7 9 M13 3 L13 9 M19 3 L19 9 M25 3 L25 9" />
-					</svg></button>
-				<span id="evt-close"><svg id='i-close' viewBox='0 0 32 32' width='20' height='20' fill='none'
+				</svg></button>
+				<span id="dayScreenCloseButton"><svg id='i-close' viewBox='0 0 32 32' width='20' height='20' fill='none'
 						stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='4'>
 						<path d='M2 30 L30 2 M30 30 L2 2' />
-					</svg></span>
+				</svg></span>
 			</div>
 			<div class="flex-between block">
 				<button id="prevDay" class="arrows">&#10094;</button>
-				<h1 id="evt-date" class="block"></h1>
-				<button id="nxtDay" class="arrows">&#10095;</button>
+				<h1 id="dayTitle" class="block"></h1>
+				<button id="nextDay" class="arrows">&#10095;</button>
 			</div>
-			<div id="evt-cards"></div>
-			<div id="confirmation">
-			
-			</div>
-
-			<!--   ADD NEW EVENT    -->
-			<div id="addEventDetails">
-				<textarea id="evt-details" class="block bottomMargin" placeholder="Add a new event..."></textarea>
+			<div id="eventBoxes"></div>
+			<button id="addEventFloatingButton"><svg id="i-plus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32"
+													 height="32" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+				<path d="M16 2 L16 30 M2 16 L30 16" />
+			</svg></button>
+			<div id="addEventDetailsDiv" class="hidden">
+				<textarea id="addEventText" class="block bottomMargin" placeholder="Add a new event..."></textarea>
 				<div class="block" id="multi" style="display: none;">
 					<div class="flex-between bottomMargin">
 						<div>
-							<input type="checkbox" id="multi-day" name="multi-day" value="multi">
-							<label for="multi-day"> Multiple days</label>
+							<input type="checkbox" id="multiDayCheckbox" name="multiDayCheckbox" value="multi">
+							<label for="multiDayCheckbox"> Multiple days</label>
 						</div>
-						<div class="multi-day-form">
+						<div class="multiDayForm">
 							<label for="start-day">From </label>
 							<input type="date" id="start-day" name="start-day">
 						</div>
-						<div class="multi-day-form">
+						<div class="multiDayForm">
 							<label for="end-day">To </label>
 							<input type="date" id="end-day" name="end-day">
 						</div>
 					</div>
-					<div style="display: none;" class="bottomMargin">
-						<div>
-							<input type="checkbox" id="recurring" name="recurring" value="recurring">
-							<label for="recurring"> Recurring event</label>
-						</div>
-					</div>
 				</div>
 				<div class="block bottomMargin" id="colorBtns">
-					<button class="colorBtns" id="yellow" data-color="#FAD02C">
-						Yellow
-					</button>
+					<button class="colorBtns" id="yellow" data-color="#FAD02C">Yellow</button>
 					<button class="colorBtns" id="red" data-color="#c74646">Red</button>
 					<button class="colorBtns" id="blue" data-color="#333652">Blue</button>
-					<button class="colorBtns" id="green" data-color="#00cc00">
-						Green
-					</button>
+					<button class="colorBtns" id="green" data-color="#00cc00">Green</button>
 				</div>
-				<button class="eventBtn" id="evt-save">Add event</button>
-				<button class="eventBtn" id="addEvent-close">Cancel</button>
+				<button class="eventBtn" id="addEventOkButton">Add event</button>
+				<button class="eventBtn" id="addEventCancelButton">Cancel</button>
 			</div>
-			<button id="addEvent"><svg id="i-plus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32"
-					height="32" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"
-					stroke-width="2">
-					<path d="M16 2 L16 30 M2 16 L30 16" />
-				</svg></button>
+			<div id="confirmation"></div>
 		</div>
 
-		<!-- /// IMPORT SCREEN //// -->
-		<div id="importScreen">
+		<div id="importScreen" class="hidden">
 			<div class="header">
-				<span id="closeImport"><svg viewBox='0 0 32 32' width='20' height='20' fill='none' stroke='currentcolor'
+				<span id="importCloseButton"><svg viewBox='0 0 32 32' width='20' height='20' fill='none' stroke='currentcolor'
 						stroke-linecap='round' stroke-linejoin='round' stroke-width='4'>
 						<path d='M2 30 L30 2 M30 30 L2 2' />
 					</svg></span>
 			</div>
 			<h1>Import/export data</h1>
-			<div id="addImport">
+			<div id="importDiv">
 				<p>Paste some data in ICS format to import the events or click "export" to get your current events in
 					ICS format</p>
-				<textarea id="importArea" placeholder="ICS format input..."></textarea>
-				<button class="eventBtn" id="evt-import">Import ICS data</button>
-				<button class="eventBtn" id="evt-import-from-dc">Import ICS File</button>
-				<button class="eventBtn" id="evt-export">Export data to ICS file</button>
+				<textarea id="importTextarea" placeholder="ICS format input..."></textarea>
+				<button class="eventBtn" id="importFromTextareaButton">Import ICS data</button>
+				<button class="eventBtn" id="importFromFileButton">Import ICS File</button>
+				<button class="eventBtn" id="exportButton">Export data to ICS file</button>
 			</div>
-			<div id="getExport" class="block bottomMargin">
+			<div id="exportDiv" class="block bottomMargin">
 				<h2 id="exportTitle"></h2>
 				<pre id="exportData"></pre>
-				<svg id="i-clipboard" viewBox="0 0 32 32" width="27" height="27" fill="none"
-					stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
-					<path d="M12 2 L12 6 20 6 20 2 12 2 Z M11 4 L6 4 6 30 26 30 26 4 21 4" />
-				</svg>
-				<button id="export-to-dc" class="eventBtn">Export to Chat</button>
+				<button id="exportToChatButton" class="eventBtn">Export to Chat</button>
 			</div>
-		</div>
-
-		<!-- /////  DATE SELECTION ///// -->
-		<div id="dateSel">
-			<div class="header">
-				<span id="cancelDate">&#x2715</span>
-			</div>
-			<div class="block centerY">
-				<select id="cal-mth"></select>
-				<select id="cal-yr"></select>
-			</div>
-			<button class="eventBtn" id="okDate">Go</button>
 		</div>
 	</div>
 </body>

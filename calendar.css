@@ -1,397 +1,382 @@
 /* (A) ENTIRE PAGE */
 #cal-wrap * {
-  font-family: helvetica, arial, sans-serif;
+    font-family: helvetica, arial, sans-serif;
 }
 
 h1, p, span{
-  color: #333652;
+    color: #333652;
 }
 
 .block {
-  display: block;
-  margin-right: auto;
-  margin-left: auto;
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 .bottomMargin{
-  margin-bottom: 2.5vw;
+    margin-bottom: 2.5vw;
 }
 
 .centerY {
-  margin-top: 35vh;
+    margin-top: 35vh;
 }
 
-.ninja {
-  display: none !important;
+.hidden {
+    display: none !important;
 }
 
 .flex-between {
-  display: flex;
-  justify-content: space-between;
-  color: #333652;
+    display: flex;
+    justify-content: space-between;
+    color: #333652;
 }
 
-#eventsDay .flex-between {
-  width: 90vw;
+#dayScreen .flex-between {
+    width: 90vw;
 }
 
 /* CALENDAR CONTAINER */
 #cal-wrap {
-  max-width: 900px;
+    max-width: 900px;
 }
 
 .arrows {
-  min-width: 40px;
-  font-size: 28px;
-  color: #333652;
+      min-width: 40px;
+      font-size: 28px;
+      color: #333652;
 }
 
 /* (C) PERIOD SELECTOR */
-#eventsDay,
-#dateSel, #importScreen, #confirmation{
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-color: #E9EAEC;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  /* overflow-y: auto;
-  overflow-x:none; */
-  overflow: auto;
-  max-height: 100%;
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-select {
-  width: auto;
-  margin: 0;
-  padding: .75em 1.5em;
-  outline: none;
-  cursor: pointer;
-  border: none;
-  border-radius: 10px;
-  background-color: white;
-}
-
-#cal-mth,
-#cal-yr {
-  box-sizing: border-box;
-  padding: 10px 20px;
-  font-size: 1.5em;
-  border: 0;
-}
-
-#date {
-  cursor: pointer;
-}
-
-/* (D) CALENDAR */
-#cal-container>.head {
-  display: flex;
-  justify-content: space-around;
-  font-weight: bold;
-  text-transform: uppercase;
-  color: #fff;
-  background: linear-gradient(#4f547e, #333652);
-  padding: 15px;
-  text-align: center;
-  grid-column: 1/-1;
-  grid-row: 1/1;
-  height: 25px;
-  border-radius: 10px 10px 0px 0px;
-}
-
-#cal-container {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px 5px;
-  height: 80vh;
-}
-
-#cal-container>div {
-  height: 90px;
-  border-radius: 10px;
-  padding-top: 5px;
-}
-
-.day:hover {
-  background: #E9EAEC;
-  cursor: pointer;
-}
-
-.today {
-  background: #E9EAEC;
-}
-
-.day, .today {
-  overflow: hidden;
-}
-
-.dd {
-  display: block;
-  width: 85%;
-  text-align: right;
-  font-size: 1.2em;
-  color: #90ADC6;
-  padding-right: 15%;
-}
-
-.evt {
-  margin-top: 5px;
-  font-size: 0.8em;
-  font-weight: bold;
-  overflow: hidden;
-  background-color: #FAD02C;
-  color: white;
-  border-radius: 10px;
-  padding-left: 5px;
-}
-
-.import {
-  color: #90ADC6;
-  font-size: 1em;
-}
-
-.header .import {
-  color: #333652;
-}
-
-/* EVENT PAGE  */
-.evt-view {
-  width: 90vw;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  font-size: 20px;
-  font-weight: bold;
-  background: #FAD02C;
-  color: white;
-  border-radius: 10px;
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-.evt-view-name{
-  font-size: 12px;
-  margin: 0;
-  padding: 0;
-  width: 60%;
-  float: left;
-  text-align: left;
-}
-
-.evt-data {
-  width: 100%;
-  text-align: left;
-  overflow: hidden;
-  margin-top: 25px;
-  word-break: break-all;
-}
-
-.evt-view p, .evt-view span {
-  color: white;
-}
-
-.evt-view:hover {
-  background-color: #484d74;
-}
-
-.evt-view span {
-  margin-top: -3px;
-  font-size: 18px;
-  margin-left: 10px;
-  height: 25px;
-  float: right;
-  cursor: pointer;
-}
-
-.block>label {
-  color: #333652;
-  margin-top: 2.5vw;
-}
-
-.block>input {
-  margin-top: 2.5vw;
-}
-
-#evt-date {
-  margin-top: 2.5vh;
-  margin-bottom: 5vh;
-}
-
-.header {
-  margin-bottom: 20px;
-  text-align: right;
-}
-
-#evt-close, #closeImport, #cancelDate {
-  cursor: pointer;
-  font-size: 28px;
-  margin: 15px;
-}
-
-#evt-cards {
-  margin-bottom: 80px;
-}
-
-#multi {
-  width: 90vw;
-  text-align: left;
-}
-
-textarea {
-  font-size: 1.3em;
-  margin-top: 2.5vw;
-  box-sizing: border-box;
-  width: 90vw;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-}
-
-#addEvent {
-  width: 70px;
-  height: 70px;
-  color: white;
-  background-color: #333652;
-  border-radius: 50%;
-  position: fixed;
-  bottom: 50px;
-  right: 50px;
-  box-shadow: rgba(0,0,0,0.8) 0 0 10px;;
-}
-
-#getExport {
-  background-color: #90ADC6;
-  border-radius: 10px;
-  color:#333652;
-  width: 90vw;
-  position: relative;
-  padding: 10px;
-}
-
-#i-clipboard {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  cursor: pointer;
-}
-
-.eventBtn {
-  cursor: pointer;
-  width: 42.5vw;
-  padding: 10px;
-  margin: 2.5vw;
-  font-size: 1.2em;
-  border: 0;
-  background: linear-gradient(#4f547e, #333652);
-  color: #fff;
-  border-radius: 10px;
-}
-
-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.unclickable {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.colorBtns {
-  border-radius: 10px;
-  padding: 10px;
-  color: #333652;
-}
-
-#colorBtns {
-  display: flex;
-  justify-content: space-evenly;
-}
-
-#colorBtns button {
-  font-size: 16px;
-}
-
-#yellow {
-  background-color: #FAD02C;
-}
-
-#confirmation {
-  display: none;
-  padding-top: 200px;
-}
-
-.multi-day-form {
-  display: none;
-}
-
-/* MOBILE SCREENS */
-@media screen and (max-width: 768px) {
-  #cal-wrap {
-    width: 100%;
-    margin-right: 0;
-    margin-left: 0;
-  }
-
-
-
-  #cal-container>div {
-    font-size: 14px;
-    /* padding: 2px; */
-  }
-
-  .dd {
-    margin-right: 7px;
-  }
-
-  #cal-container>.head {
-    padding: 5px;
-    gap: 3px 3px;
-  }
-
-  #cal-event {
+#dayScreen, #monthSelScreen, #importScreen, #confirmation {
+    position: absolute;
     top: 0;
     left: 0;
+    background-color: #E9EAEC;
     width: 100%;
     height: 100%;
-  }
-
-  .eventBtn {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 90vw;
-  }
-
-  textarea {
-    margin-top: 50px;
-  }
-
-  #cal {
+    text-align: center;
+    /* overflow-y: auto;
+    overflow-x:none; */
     overflow: auto;
     max-height: 100%;
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
-  }
+}
 
+select {
+    width: auto;
+    margin: 0;
+    padding: .75em 1.5em;
+    outline: none;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+}
 
+#monthSelMonth, #monthSelYear {
+    box-sizing: border-box;
+    padding: 10px 20px;
+    font-size: 1.5em;
+    border: 0;
+}
+
+#monthTitle {
+    cursor: pointer;
+}
+
+/* (D) CALENDAR */
+#daysGrid > .weekdaysDiv {
+    display: flex;
+    justify-content: space-around;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(#4f547e, #333652);
+    padding: 15px;
+    text-align: center;
+    grid-column: 1/-1;
+    grid-row: 1/1;
+    height: 25px;
+    border-radius: 10px 10px 0px 0px;
+}
+
+#daysGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px 5px;
+    height: 80vh;
+}
+
+#daysGrid > div {
+    height: 90px;
+    border-radius: 10px;
+    padding-top: 5px;
+}
+
+.day:hover {
+    background: #E9EAEC;
+    cursor: pointer;
+}
+
+.today {
+    background: #E9EAEC;
+}
+
+.day, .today {
+    overflow: hidden;
+}
+
+.dd {
+    display: block;
+    width: 85%;
+    text-align: right;
+    font-size: 1.2em;
+    color: #90ADC6;
+    padding-right: 15%;
+}
+
+.evt {
+    margin-top: 5px;
+    font-size: 0.8em;
+    font-weight: bold;
+    overflow: hidden;
+    background-color: #FAD02C;
+    color: white;
+    border-radius: 10px;
+    padding-left: 5px;
+}
+
+.import {
+    color: #90ADC6;
+    font-size: 1em;
+}
+
+.header .import {
+    color: #333652;
+}
+
+/* EVENT PAGE  */
+.evt-view {
+    width: 90vw;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    background: #FAD02C;
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.evt-view-name{
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+    width: 60%;
+    float: left;
+    text-align: left;
+}
+
+.evt-data {
+    width: 100%;
+    text-align: left;
+    overflow: hidden;
+    margin-top: 25px;
+    word-break: break-all;
+}
+
+.evt-view p, .evt-view span {
+    color: white;
+}
+
+.evt-view:hover {
+    background-color: #484d74;
+}
+
+.evt-view span {
+    margin-top: -3px;
+    font-size: 18px;
+    margin-left: 10px;
+    height: 25px;
+    float: right;
+    cursor: pointer;
+}
+
+.block > label {
+    color: #333652;
+    margin-top: 2.5vw;
+}
+
+.block > input {
+    margin-top: 2.5vw;
+}
+
+#dayTitle {
+    margin-top: 2.5vh;
+    margin-bottom: 5vh;
+}
+
+.header {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+#dayScreenCloseButton, #importCloseButton, #monthSelCancelButton {
+    cursor: pointer;
+    font-size: 28px;
+    margin: 15px;
+}
+
+#eventBoxes {
+    margin-bottom: 80px;
+}
+
+#multi {
+    width: 90vw;
+    text-align: left;
+}
+
+textarea {
+    font-size: 1.3em;
+    margin-top: 2.5vw;
+    box-sizing: border-box;
+    width: 90vw;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+#addEventFloatingButton {
+    width: 70px;
+    height: 70px;
+    color: white;
+    background-color: #333652;
+    border-radius: 50%;
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    box-shadow: rgba(0,0,0,0.8) 0 0 10px;
+}
+
+#exportDiv {
+    background-color: #90ADC6;
+    border-radius: 10px;
+    color:#333652;
+    width: 90vw;
+    position: relative;
+    padding: 10px;
+}
+
+.eventBtn {
+    cursor: pointer;
+    width: 42.5vw;
+    padding: 10px;
+    margin: 2.5vw;
+    font-size: 1.2em;
+    border: 0;
+    background: linear-gradient(#4f547e, #333652);
+    color: #fff;
+    border-radius: 10px;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.colorBtns {
+    border-radius: 10px;
+    padding: 10px;
+    color: #333652;
+}
+
+#colorBtns {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#colorBtns button {
+    font-size: 16px;
+}
+
+#yellow {
+    background-color: #FAD02C;
+}
+
+#confirmation {
+    display: none;
+    padding-top: 200px;
+}
+
+.multiDayForm {
+    display: none;
+}
+
+/* MOBILE SCREENS */
+@media screen and (max-width: 768px) {
+    #cal-wrap {
+        width: 100%;
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    #daysGrid > div {
+        font-size: 14px;
+        /* padding: 2px; */
+    }
+
+    .dd {
+        margin-right: 7px;
+    }
+
+    #daysGrid > .weekdaysDiv {
+        padding: 5px;
+        gap: 3px 3px;
+    }
+
+    #cal-event {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .eventBtn {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 90vw;
+    }
+
+    textarea {
+        margin-top: 50px;
+    }
+
+    #monthScreen {
+        overflow: auto;
+        max-height: 100%;
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
 @media screen and (max-width: 600px) {
+    #dayTitle, .colorBtns {
+        font-size: 20px;
+    }
 
-  #evt-date, .colorBtns {
-    font-size: 20px;
-  }
-
-  #addEvent {
-    right: 40px;
-    bottom: 40px;
-    width: 55px;
-    height: 55px;
-  }
-
+    #addEventFloatingButton {
+        right: 40px;
+        bottom: 40px;
+        width: 55px;
+        height: 55px;
+    }
 }

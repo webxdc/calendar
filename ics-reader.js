@@ -130,7 +130,7 @@ function parseIcsToJSON(icsData) {
 function parseJSONToWebxdcUpdate(events) {
 	for (const evt in events) {
 		cal.importEventObj = events[evt];
-		cal.save();
+		cal.doAddEvent();
 	}
 	cal.importEventObj = undefined;
 }
