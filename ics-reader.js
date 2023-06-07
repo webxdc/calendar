@@ -1,15 +1,15 @@
-//transform ics dates to Date timestamps
-//ics dates are YYYYMMDDTHHmmSS format
-function calenDate(icalStr, timezone) {
-	// icalStr = '20110914T184000Z'
-	var strYear = icalStr.substr(0, 4);
-	var strMonth = parseInt(icalStr.substr(4, 2), 10) - 1;
-	var strDay = icalStr.substr(6, 2);
-	var strHour = icalStr.substr(9, 2);
-	var strMin = icalStr.substr(11, 2);
-	var strSec = icalStr.substr(13, 2);
 
-	var oDate = new Date(strYear, strMonth, strDay, strHour, strMin, strSec);
+// transform ics dates to Date timestamps;
+// ics dates are expected as YYYYMMDDTHHmmSS format in UTC (what else appears in the wild?)
+function icsDateToUnixTimestamp(icalStr, timezone) {
+    const year = icalStr.substr(0, 4);
+    const month = icalStr.substr(4, 2);
+    const day = icalStr.substr(6, 2);
+    const hour = icalStr.substr(9, 2);
+    const min = icalStr.substr(11, 2);
+    const sec = icalStr.substr(13, 2);
+    const isoStr = year + '-' + month + '-' + day + 'T' + hour + ':' + min + ':' + sec + '.000Z';
+    var oDate = new Date(isoStr);
 
 	//convert to local time if timezone is not undefined
 	// if (timezone != undefined) {
@@ -101,14 +101,13 @@ function parseIcsToJSON(icsData) {
 				currentObj[keyMap[UID]] = clean(Math.floor(Math.random() * 10000 + 1)); //calendar webxdc is not able to delete events if their id isn't a number
 				break;
 			case START_DATE:
-				//save the timezone
+				// parse TZID=<TIMEZONE>
 				keyParam = keyParam.split("=");
 				currentObj[keyMap[TZID]] = keyParam[1];
-				//try to get the date value
-				currentObj[keyMap[START_DATE]] = calenDate(value, keyParam[1]);
+				currentObj[keyMap[START_DATE]] = icsDateToUnixTimestamp(value, keyParam[1]);
 				break;
 			case END_DATE:
-				currentObj[keyMap[END_DATE]] = calenDate(value);
+				currentObj[keyMap[END_DATE]] = icsDateToUnixTimestamp(value);
 				break;
 			case DESCRIPTION:
 				if (!isAlarm) currentObj[keyMap[DESCRIPTION]] = clean(value);

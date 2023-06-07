@@ -37,9 +37,9 @@ function createIcsData(events) {
 				SEPARATOR +
 				`CREATED:${toDateTime(new Date())}` +
 				SEPARATOR +
-				`DTSTART;VALUE=DATE:${toDateTime(dateStart)}` +
+				`DTSTART:${toDateTime(dateStart)}` +
 				SEPARATOR +
-				`DTEND;VALUE=DATE:${toDateTime(dateEnd)}` +
+				`DTEND:${toDateTime(dateEnd)}` +
 				SEPARATOR +
 				`SUMMARY:${event.data}` +
 				SEPARATOR +
