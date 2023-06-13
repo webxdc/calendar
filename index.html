@@ -10,22 +10,22 @@
 	<script async src="ics-writer.js"></script>
 	<script src="tools.js"></script>
 	<link href="calendar.css" rel="stylesheet" />
-	<script async src="calendar.js"></script>
-	<script src="inobounce.js"></script>
 </head>
 
 <body>
-	<div id="cal-wrap" class="block">
 
-		<div id="monthScreen" class="hidden">
-			<button class="import" id="evt-imp-exp">Export/Import</button>
-			<div id="cal-date" class="flex-between">
-				<button id="prevMonth" class="arrows">&#10094;</button>
-				<h1 id="monthTitle"></h1>
-				<button id="nextMonth" class="arrows">&#10095;</button>
+	<table id="monthScreen">
+		<thead><tr><td colspan="7" nowrap class="overflow: hidden;">
+			<span id="mainmenu">☰</span>
+			<span id="monthTitle"></span>
+			<div style="float: right;">
+				<button id="prevMonth">&#10094;</button>
+				<button id="todayMonth">Today</button>
+				<button id="nextMonth">&#10095;</button>
 			</div>
-			<div id="daysGrid"></div>
-		</div>
+		</td></tr></thead>
+		<tbody id="daysGrid"></tbody>
+	</table>
 
 		<div id="monthSelScreen" class="hidden">
 			<div class="header">
@@ -40,7 +40,7 @@
 
 		<div id="dayScreen" class="hidden">
 			<div class="header">
-				<button class="import" id="today"><svg id="i-calendar" viewBox="0 0 32 32" width="22" height="22"
+				<button id="todayDayScreen"><svg id="i-calendar" viewBox="0 0 32 32" width="22" height="22"
 						fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"
 						stroke-width="3.5">
 						<path d="M2 6 L2 30 30 30 30 6 Z M2 15 L30 15 M7 3 L7 9 M13 3 L13 9 M19 3 L19 9 M25 3 L25 9" />
@@ -112,7 +112,7 @@
 				<button id="exportToChatButton" class="eventBtn">Export to Chat</button>
 			</div>
 		</div>
-	</div>
-</body>
 
+</body>
+<script src="calendar.js"></script>
 </html>

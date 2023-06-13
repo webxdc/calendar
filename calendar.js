@@ -30,6 +30,7 @@ var cal = {
     monthSelScreen: document.getElementById("monthSelScreen"),
     monthSelMonth: document.getElementById("monthSelMonth"),
     monthSelYear: document.getElementById("monthSelYear"),
+    possibleLines: -1,
 
     dayScreen: document.getElementById("dayScreen"),
     dayTitle: document.getElementById("dayTitle"),
@@ -78,18 +79,11 @@ var cal = {
         document.getElementById("exportButton").onclick = () => {
             cal.exporter();
         };
-        document.getElementById("evt-imp-exp").onclick = cal.openImport;
+        document.getElementById("mainmenu").onclick = cal.openImport;
         document.getElementById("importCloseButton").onclick = cal.closeImport;
         cal.addEventFloatingButton.onclick = cal.showAddEvent;
-        document.getElementById("today").onclick = () => {
-            cal.selDay = cal.nowDay;
-            cal.selMonth = cal.nowMonth;
-            cal.selYear = cal.nowYear;
-            cal.monthSelMonth.value = cal.nowMonth;
-            cal.monthSelYear.value = cal.nowYear;
-            cal.renderSelectedMonth();
-            cal.renderAndSelectDay(cal.nowYear, cal.nowMonth, cal.nowDay);
-        };
+        document.getElementById("todayMonth").onclick = cal.gotoToday;
+        document.getElementById("todayDayScreen").onclick = cal.gotoToday;
         document.getElementById("addEventCancelButton").onclick = cal.cancelAddEvent;
         document.getElementById("exportToChatButton").onclick = cal.exportToChat;
         cal.multiDayCheckbox.onchange = (ev) => {
@@ -117,6 +111,11 @@ var cal = {
                     cal.prevMonth();
                 }
             }, false);
+        addEventListener("resize", (event) => {
+            if (cal.possibleLines != -1 && cal.possibleLines != cal.calcPossibleLines()) {
+                cal.renderSelectedMonth();
+            }
+        });
 
         // init month and day selectors
         for (let i = 0; i < 12; i++) {
@@ -213,6 +212,24 @@ var cal = {
         cal.renderSelectedMonth();
     },
 
+    gotoToday: () => {
+        cal.selDay = cal.nowDay;
+        cal.selMonth = cal.nowMonth;
+        cal.selYear = cal.nowYear;
+        cal.monthSelMonth.value = cal.nowMonth;
+        cal.monthSelYear.value = cal.nowYear;
+        cal.renderSelectedMonth();
+        if (!dayScreen.classList.contains("hidden")) {
+            cal.renderAndSelectDay(cal.nowYear, cal.nowMonth, cal.nowDay);
+        }
+    },
+
+    calcPossibleLines: () => {
+        const allHeight = Math.max(1, cal.daysGrid.offsetHeight);
+        const lineHeight = Math.max(1, parseInt(cal.monthTitle.offsetHeight*.9)); // use sth. that is already on screen
+        return parseInt(allHeight / lineHeight);
+    },
+
     renderSelectedMonth: () => {
         // (C1) BASIC CALCULATIONS - DAYS IN MONTH, START + END DAY
         // Note - Jan is 0 & Dec is 11
@@ -257,63 +274,80 @@ var cal = {
             }
         }
 
-        // (C4) DRAW HTML CALENDAR
+        // draw month overview
         removeAllChildren(cal.daysGrid);
-
-        // First row - Day names
-        let weekdaysDiv = document.createElement("div");
-        weekdaysDiv.classList.add("weekdaysDiv");
-        for (let d of cal.weekdayNames) {
-            let cCell = document.createElement("div");
-            cCell.textContent = d;
-            weekdaysDiv.appendChild(cCell);
-        }
-        cal.daysGrid.appendChild(weekdaysDiv);
-
-        // Today's date
         cal.monthTitle.textContent = cal.monthNames[cal.selMonth] + " " + cal.selYear;
 
-        // Days in Month
-        let total = squares.length;
-        for (let i = 0; i < total; i++) {
+        // first row are day names
+        let weekdaysTr = document.createElement("tr");
+        weekdaysTr.classList.add("weekdays");
+        for (let d of cal.weekdayNames) {
+            let cCell = document.createElement("td");
+            cCell.textContent = d;
+            weekdaysTr.appendChild(cCell);
+        }
+        cal.daysGrid.appendChild(weekdaysTr);
+
+        // subsequent rows are a week with dayNumber and events each
+        let weekTr = null;
+        var daysAdded = 7; // 7 == out of range, start new row
+        const rowsCount = Math.ceil(squares.length / 7);
+        const rowHeightPercent = parseInt(87/rowsCount); // this "87" works for firefox/chrome/safari
+
+        cal.possibleLines = cal.calcPossibleLines();
+        const linesPerRow = parseInt(cal.possibleLines / rowsCount);
+        const maxEventLines = Math.max(1, linesPerRow - 1);
+        for (let i = 0; i < squares.length; i++) {
             var day = squares[i];
-            let cCell = document.createElement("div");
+            let cCell = document.createElement("td");
             if (day == "b") {
                 cCell.classList.add("blank");
             } else {
-                if (
-                    cal.nowDay == day &&
-                    cal.nowMonth == cal.selMonth &&
-                    cal.nowYear == cal.selYear
-                ) {
+                if (cal.nowDay === day && cal.nowMonth === cal.selMonth && cal.nowYear === cal.selYear) {
                     cCell.classList.add("today");
-                } else {
-                    cCell.classList.add("day");
                 }
-                const dayEl = document.createElement('div');
-                dayEl.classList.add("dd");
-                dayEl.textContent = String(day);
-                cCell.appendChild(dayEl);
+                if ( cal.weekStartsMonday && (daysAdded == 5 || daysAdded == 6)
+                 || !cal.weekStartsMonday && (daysAdded == 7 || daysAdded == 6)) {
+                    cCell.classList.add("weekend");
+                }
+                const dayNumber = document.createElement('span');
+                dayNumber.classList.add("dayNumber");
+                dayNumber.textContent = String(day);
+                const dayLine = document.createElement('div');
+                dayLine.classList.add("dayInfoLine");
+                dayLine.appendChild(dayNumber)
+                cCell.appendChild(dayLine);
 
-                //retrieve events for this day
                 var eventsDay = cal.getEvents(cal.selYear, cal.selMonth, day);
-                if (eventsDay.length !== 0) {
-                    for (let j = 0; j < eventsDay.length; j++) {
+
+                for (let j = 0; j < eventsDay.length; j++) {
+                    if (j >= maxEventLines-1 && eventsDay.length != maxEventLines) {
                         var evt = document.createElement("div");
-                        evt.classList.add("evt");
-                        evt.textContent = eventsDay[j].data;
-                        evt.style.backgroundColor = eventsDay[j].color;
+                        evt.classList.add("evtMore");
+                        evt.textContent = '+' + (eventsDay.length-j) + ' events';
                         cCell.appendChild(evt);
+                        break;
                     }
+                    var evt = document.createElement("div");
+                    evt.classList.add("evtSmall");
+                    evt.textContent = eventsDay[j].data;
+                    evt.style.backgroundColor = eventsDay[j].color;
+                    cCell.appendChild(evt);
                 }
                 cCell.onclick = () => {
-                    let day = Number.parseInt(cCell.getElementsByClassName("dd")[0].textContent);
+                    let day = Number.parseInt(cCell.getElementsByClassName("dayNumber")[0].textContent);
                     cal.renderAndSelectDay(cal.selYear, cal.selMonth, day);
                 };
             }
-            cal.daysGrid.appendChild(cCell);
+            if (daysAdded === 7) {
+                weekTr = document.createElement("tr");
+                weekTr.setAttribute("height", rowHeightPercent + '%');
+                cal.daysGrid.appendChild(weekTr);
+                daysAdded = 0;
+            }
+            weekTr.appendChild(cCell);
+            daysAdded++;
         }
-        cal.monthScreen.classList.remove("hidden");
     },
 
     renderAndSelectDay: (year, month, day) => {
@@ -398,7 +432,6 @@ var cal = {
             }
         }
 
-        cal.daysGrid.classList.add("hidden");
         cal.dayScreen.classList.remove("hidden");
 
         // // (D2) UPDATE EVENT FORM
@@ -428,7 +461,6 @@ var cal = {
 
     closeDayScreen: () => {
         cal.dayScreen.classList.add("hidden");
-        cal.daysGrid.classList.remove("hidden");
         cal.cancelAddEvent();
     },
 
@@ -551,7 +583,6 @@ var cal = {
     },
 
     showDateSel: () => {
-        cal.daysGrid.classList.add("hidden");
         cal.monthSelScreen.classList.remove("hidden");
     },
 
@@ -561,7 +592,6 @@ var cal = {
     },
 
     closeDateSel: () => {
-        cal.daysGrid.classList.remove("hidden");
         cal.monthSelScreen.classList.add("hidden");
     },
 
@@ -569,14 +599,12 @@ var cal = {
         cal.importScreen.classList.remove("hidden");
         removeAllChildren(cal.exportDiv.firstChild);
         cal.exportDiv.classList.add("hidden");
-        cal.daysGrid.classList.add("hidden");
         cal.importDiv.classList.remove("hidden");
     },
 
     closeImport: () => {
         cal.importTextarea.value = "";
         cal.importScreen.classList.add("hidden");
-        cal.daysGrid.classList.remove("hidden");
     },
 
     exporter: (id = undefined) => {
