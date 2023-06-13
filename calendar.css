@@ -280,14 +280,6 @@ textarea {
     box-shadow: rgba(0,0,0,0.8) 0 0 10px;
 }
 
-#exportDiv {
-    background-color: #90ADC6;
-    border-radius: 10px;
-    width: 90vw;
-    position: relative;
-    padding: 10px;
-}
-
 .eventBtn {
     cursor: pointer;
     width: 42.5vw;

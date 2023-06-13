@@ -43,9 +43,6 @@ var cal = {
     addEventOkButton: document.getElementById("addEventOkButton"),
 
     importScreen: document.getElementById("importScreen"),
-    importTextarea: document.getElementById("importTextarea"),
-    importDiv: document.getElementById("importDiv"),
-    exportDiv: document.getElementById("exportDiv"),
 
     init: () => {
         const now = new Date();
@@ -69,15 +66,9 @@ var cal = {
         document.getElementById("dayScreenCloseButton").onclick = cal.closeDayScreen;
         cal.addEventOkButton.onclick = cal.doAddEvent;
         cal.color = "#FAD02C";
-        document.getElementById("importFromTextareaButton").onclick = () => {
-            const events = parseIcsToJSON(cal.importTextarea.value)
-            console.log("import" + events);
-            parseJSONToWebxdcUpdate(events);
-            cal.closeImport();
-        };
         document.getElementById("importFromFileButton").onclick = cal.importFromFile;
-        document.getElementById("exportButton").onclick = () => {
-            cal.exporter();
+        document.getElementById("exportToFileButton").onclick = () => {
+            cal.sendToChat();
         };
         document.getElementById("mainmenu").onclick = cal.openImport;
         document.getElementById("importCloseButton").onclick = cal.closeImport;
@@ -85,7 +76,6 @@ var cal = {
         document.getElementById("todayMonth").onclick = cal.gotoToday;
         document.getElementById("todayDayScreen").onclick = cal.gotoToday;
         document.getElementById("addEventCancelButton").onclick = cal.cancelAddEvent;
-        document.getElementById("exportToChatButton").onclick = cal.exportToChat;
         cal.multiDayCheckbox.onchange = (ev) => {
             //set the default date in form
             if (ev.target.checked) {
@@ -375,13 +365,12 @@ var cal = {
             var author = document.createElement("p");
             var lilHeader = document.createElement("div");
 
-            exportButton.innerHTML =
-                '<svg viewBox="0 0 32 32" width="18" height="18" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"><path d="M28 22 L28 30 4 30 4 22 M16 4 L16 24 M8 12 L16 4 24 12" /></svg>';
+            exportButton.innerText = 'Share';
             exportButton.setAttribute("data-id", dayEvents[i].id);
             exportButton.setAttribute("class", "event-export");
 
             exportButton.onclick = (ev) => {
-                cal.exporter(ev.currentTarget.getAttribute("data-id"));
+                cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
             };
             removeButton.innerHTML =
                 "<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
@@ -597,52 +586,33 @@ var cal = {
 
     openImport: () => {
         cal.importScreen.classList.remove("hidden");
-        removeAllChildren(cal.exportDiv.firstChild);
-        cal.exportDiv.classList.add("hidden");
-        cal.importDiv.classList.remove("hidden");
     },
 
     closeImport: () => {
-        cal.importTextarea.value = "";
         cal.importScreen.classList.add("hidden");
     },
 
-    exporter: (id = undefined) => {
-        cal.importDiv.classList.add("hidden");
-        //check if id is one or more events
+    sendToChat: (id = undefined) => {
+        var data = '';
+        var title = '';
         if (id === undefined) {
-            cal.exportDiv.classList.remove("hidden");
-            document.querySelector("#exportData").textContent = createIcsData(cal.events);
-            document.querySelector("#exportTitle").textContent = "";
+            data = createIcsData(cal.events);
         } else {
             let event = cal.events.filter((ev) => {
                 return Number.parseInt(ev.id) === Number.parseInt(id);
             });
-            let icsString = createIcsData(event);
-            cal.importScreen.classList.remove("hidden");
-            cal.dayScreen.classList.add("hidden");
-            cal.exportDiv.classList.remove("hidden");
-            document.querySelector("#exportData").textContent = icsString;
+            data = createIcsData(event);
             if (event.length === 1) {
-                document.querySelector("#exportTitle").textContent = event[0].data;
+                title = event[0].data;
             }
         }
-    },
 
-    exportToChat: async () => {
-        const data = document.getElementById("exportData").textContent;
-        const title = document.getElementById("exportTitle").textContent;
-        const file = new File([data], "event.ics", {
-            type: "text/calendar",
-        });
-        try {
-            await window.webxdc.sendToChat({
-                file: { name: file.name, blob: file },
-                text: title,
-            });
-        } catch (error) {
+        window.webxdc.sendToChat({
+            file: { name: "event.ics", plainText: data },
+            text: title,
+        }).catch((error) => {
             console.error("export failed", error);
-        }
+        });
     },
 
     importFromFile: async () => {
