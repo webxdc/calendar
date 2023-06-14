@@ -483,7 +483,7 @@ var cal = {
         }
         data = cal.addEventText.value;
         color = cal.color;
-        info = window.webxdc.selfName + " created \"" + cal.addEventText.value.replace(/\n/g, " ") +
+        info = window.webxdc.selfName + " created \"" + simplifyString(cal.addEventText.value) +
                "\" on " + cal.monthNames[dateSt.getMonth()] + " " + dateSt.getDate();
         id = Date.now();
 
@@ -515,7 +515,7 @@ var cal = {
 
         let confirmationText = document.createElement("p");
         confirmationText.textContent =
-            "Do you really want to delete '" + eventToDelete.data + "'?";
+            "Do you really want to delete '" + simplifyString(eventToDelete.data) + "'?";
         confirmationBox.appendChild(confirmationText);
 
         let btnYes = document.createElement("button");
@@ -525,10 +525,8 @@ var cal = {
             // send new updates
             var info =
                 window.webxdc.selfName +
-                " deleted \"" + eventToDelete.data + "\" from " +
-                cal.monthNames[cal.selMonth] +
-                " " +
-                cal.selDay;
+                " deleted \"" + simplifyString(eventToDelete.data) + "\" from " +
+                cal.monthNames[cal.selMonth] + " " + cal.selDay;
             window.webxdc.sendUpdate({
                     payload: { actions: [{
                         action: 'delete',

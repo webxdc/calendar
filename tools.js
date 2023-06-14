@@ -78,3 +78,12 @@ function getWeekFirstDay() {
 		return 1;
 	}
 }
+
+function simplifyString(str) {
+    const MAX_LEN = 32;
+    var ret = str.replace(/\n/g, " ");
+    if (ret.length > MAX_LEN) {
+        ret = ret.substring(0, MAX_LEN-1).trim() + "…";
+    }
+    return ret;
+}
