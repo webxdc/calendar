@@ -19,7 +19,6 @@ var cal = {
     weekStartsMonday: getWeekFirstDay() === 1,
     weekdayNames: null,
     color: null,
-    importEventObj: undefined,
     touchstartX: 0,
 
     // html elements
@@ -129,14 +128,16 @@ var cal = {
 
         // handle past and future state updates
         window.webxdc.setUpdateListener((update) => {
-            if (update.payload.addition) {
-                cal.events.push(update.payload);
-            } else {
-                let index = cal.events.findIndex((obj) => {
-                    return Number.parseInt(obj.id) === Number.parseInt(update.payload.id);
-                });
-                if (index != -1) cal.events.splice(index, 1);
-            }
+            update.payload.actions.forEach((action) => {
+                if (action.action == 'add') {
+                    cal.events.push(action);
+                } else {
+                    let index = cal.events.findIndex((obj) => {
+                        return Number.parseInt(obj.id) === Number.parseInt(action.id);
+                    });
+                    if (index != -1) cal.events.splice(index, 1);
+                }
+            });
             if (cal.initDone) {
                 cal.renderSelectedMonth();
             }
@@ -473,44 +474,29 @@ var cal = {
 
     doAddEvent: () => {
         let dateSt, dateEnd, color, data, info, id;
-
-        if (cal.importEventObj === undefined) {
-            if (cal.multiDayCheckbox.checked) {
-                dateSt = new Date(document.getElementById("start-day").value);
-                dateEnd = new Date(document.getElementById("end-day").value);
-            } else {
-                dateSt = new Date(cal.selYear, cal.selMonth, cal.selDay);
-                dateEnd = dateSt;
-            }
-            data = cal.addEventText.value;
-            color = cal.color;
-            info = window.webxdc.selfName + " created \"" + cal.addEventText.value.replace(/\n/g, " ") +
-                   "\" on " + cal.monthNames[dateSt.getMonth()] + " " + dateSt.getDate();
-            id = Date.now();
+        if (cal.multiDayCheckbox.checked) {
+            dateSt = new Date(document.getElementById("start-day").value);
+            dateEnd = new Date(document.getElementById("end-day").value);
         } else {
-            // imported event
-            dateSt = new Date(cal.importEventObj.startDate);
-            dateEnd = new Date(cal.importEventObj.endDate);
-            data = cal.importEventObj.summary;
-            color =  cal.importEventObj.color;
-            info = window.webxdc.selfName + " imported \"" + cal.addEventText.value.replace(/\n/g, " ") +
-                   "\" on " + cal.monthNames[dateSt.getMonth()] + " " + dateSt.getDate();
-            id = cal.importEventObj.uid;
+            dateSt = new Date(cal.selYear, cal.selMonth, cal.selDay);
+            dateEnd = dateSt;
         }
+        data = cal.addEventText.value;
+        color = cal.color;
+        info = window.webxdc.selfName + " created \"" + cal.addEventText.value.replace(/\n/g, " ") +
+               "\" on " + cal.monthNames[dateSt.getMonth()] + " " + dateSt.getDate();
+        id = Date.now();
 
-        // send new updates
-        window.webxdc.sendUpdate(
-            {
-                payload: {
+        window.webxdc.sendUpdate({
+                payload: { actions: [{
+                    action: 'add',
                     id: id,
                     startDate: dateSt.getTime(),
                     endDate: dateEnd.getTime(),
                     data: data,
                     color: color,
-                    addition: true,
                     creator: window.webxdc.selfName,
-                    //send timezone?
-                },
+                }]},
                 info: info,
                 summary: "" + (cal.events.length+1) + " events"
             },
@@ -543,13 +529,12 @@ var cal = {
                 cal.monthNames[cal.selMonth] +
                 " " +
                 cal.selDay;
-            window.webxdc.sendUpdate(
-                {
-                    payload: {
+            window.webxdc.sendUpdate({
+                    payload: { actions: [{
+                        action: 'delete',
                         id: id,
-                        addition: false,
                         deleter: window.webxdc.selfName,
-                    },
+                    }]},
                     info: info,
                     summary: "" + (cal.events.length-1) + " events"
                 },
@@ -619,7 +604,28 @@ var cal = {
         const [file] = await window.webxdc.importFiles({mimeTypes: ["text/calendar"], extensions: [".ics"]});
         const text = await file.text();
         const events = parseIcsToJSON(text);
-        parseJSONToWebxdcUpdate(events);
+
+        var actions = [];
+        for (const i in events) {
+            const eventObj = events[i];
+            actions.push({
+                action: 'add',
+                id: eventObj.uid,
+                startDate: new Date(eventObj.startDate).getTime(),
+                endDate: new Date(eventObj.endDate).getTime(),
+                data: eventObj.summary,
+                color: eventObj.color,
+                creator: window.webxdc.selfName,
+            });
+        }
+        const info = window.webxdc.selfName + ' imported ' + actions.length + ' events';
+        window.webxdc.sendUpdate({
+                payload: { actions: actions },
+                info: info,
+                summary: '' + (cal.events.length + actions.length) + ' events'
+            },
+            info
+        );
         cal.closeImport();
     }
 };

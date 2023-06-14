@@ -125,11 +125,3 @@ function parseIcsToJSON(icsData) {
 	}
 	return array
 }
-
-function parseJSONToWebxdcUpdate(events) {
-	for (const evt in events) {
-		cal.importEventObj = events[evt];
-		cal.doAddEvent();
-	}
-	cal.importEventObj = undefined;
-}
