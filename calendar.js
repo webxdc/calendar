@@ -128,16 +128,20 @@ var cal = {
 
         // handle past and future state updates
         window.webxdc.setUpdateListener((update) => {
-            update.payload.actions.forEach((action) => {
-                if (action.action == 'add') {
-                    cal.events.push(action);
-                } else {
-                    let index = cal.events.findIndex((obj) => {
-                        return Number.parseInt(obj.id) === Number.parseInt(action.id);
-                    });
-                    if (index != -1) cal.events.splice(index, 1);
-                }
-            });
+            try {
+                update.payload.actions.forEach((action) => {
+                    if (action.action == 'add') {
+                        cal.events.push(action);
+                    } else {
+                        let index = cal.events.findIndex((obj) => {
+                            return Number.parseInt(obj.id) === Number.parseInt(action.id);
+                        });
+                        if (index != -1) cal.events.splice(index, 1);
+                    }
+                });
+            } catch(e) {
+                console.error(e);
+            }
             if (cal.initDone) {
                 cal.renderSelectedMonth();
             }
