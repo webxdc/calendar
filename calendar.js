@@ -36,8 +36,6 @@ var cal = {
     eventBoxes: document.getElementById("eventBoxes"),
     addEventFloatingButton: document.getElementById("addEventFloatingButton"),
     addEventText: document.getElementById("addEventText"),
-    multiDayCheckbox: document.getElementById("multiDayCheckbox"),
-    multiDayForm: document.getElementsByClassName("multiDayForm"), // watch out is an Array!
     addEventDetailsDiv: document.getElementById("addEventDetailsDiv"),
     addEventOkButton: document.getElementById("addEventOkButton"),
 
@@ -75,18 +73,6 @@ var cal = {
         document.getElementById("todayMonth").onclick = cal.gotoToday;
         document.getElementById("todayDayScreen").onclick = cal.gotoToday;
         document.getElementById("addEventCancelButton").onclick = cal.cancelAddEvent;
-        cal.multiDayCheckbox.onchange = (ev) => {
-            //set the default date in form
-            if (ev.target.checked) {
-                for (let i = 0; i < cal.multiDayForm.length; i++) {
-                    cal.multiDayForm[i].style.display = "block";
-                }
-            } else {
-                for (let i = 0; i < cal.multiDayForm.length; i++) {
-                    cal.multiDayForm[i].style.display = "none";
-                }
-            }
-        };
 
         // swipe listeners for mobile
         cal.daysGrid.addEventListener("touchstart", (event) => {
@@ -437,10 +423,6 @@ var cal = {
         cal.eventBoxes.classList.add("hidden");
         cal.addEventDetailsDiv.classList.remove("hidden");
         cal.addEventFloatingButton.classList.add("hidden");
-        cal.multiDayCheckbox.checked = false;
-        for (let i = 0; i < cal.multiDayForm.length; i++) {
-            cal.multiDayForm[i].style.display = "none";
-        }
         document.getElementById("start-day").value = `${cal.selYear}-${cal.selMonth + 1 < 10 ? "0" + (cal.selMonth + 1) : cal.selMonth + 1
             }-${cal.selDay < 10 ? "0" + cal.selDay : cal.selDay}`;
         document.getElementById("end-day").value = `${cal.selYear}-${cal.selMonth + 1 < 10 ? "0" + (cal.selMonth + 1) : cal.selMonth + 1
@@ -477,20 +459,13 @@ var cal = {
     },
 
     doAddEvent: () => {
-        let dateSt, dateEnd, color, data, info, id;
-        if (cal.multiDayCheckbox.checked) {
-            dateSt = new Date(document.getElementById("start-day").value);
-            dateEnd = new Date(document.getElementById("end-day").value);
-        } else {
-            dateSt = new Date(cal.selYear, cal.selMonth, cal.selDay);
-            dateEnd = dateSt;
-        }
-        data = cal.addEventText.value;
-        color = cal.color;
-        info = window.webxdc.selfName + " created \"" + simplifyString(cal.addEventText.value) +
+        const dateSt = new Date(cal.selYear, cal.selMonth, cal.selDay);
+        const dateEnd = dateSt;
+        const data = cal.addEventText.value;
+        const color = cal.color;
+        const info = window.webxdc.selfName + " created \"" + simplifyString(cal.addEventText.value) +
                "\" on " + cal.monthNames[dateSt.getMonth()] + " " + dateSt.getDate();
-        id = Date.now();
-
+        const id = Date.now();
         window.webxdc.sendUpdate({
                 payload: { actions: [{
                     action: 'add',

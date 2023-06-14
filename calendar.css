@@ -253,11 +253,6 @@ select {
     margin-bottom: 80px;
 }
 
-#multi {
-    width: 90vw;
-    text-align: left;
-}
-
 textarea {
     font-size: 1.3em;
     margin-top: 2.5vw;
@@ -318,10 +313,6 @@ textarea {
 #confirmation {
     display: none;
     padding-top: 200px;
-}
-
-.multiDayForm {
-    display: none;
 }
 
 /* MOBILE SCREENS */
