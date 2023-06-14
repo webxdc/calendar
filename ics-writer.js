@@ -24,7 +24,6 @@ function createIcsData(events) {
 	for (const event of events) {
 		//if is the same ID is a multi-day event, so skip iteration
 		if (Number.parseInt(event.id) === Number.parseInt(lastID)) continue;
-		//compound the event in ics format
 			lastID = event.id;
 			let dateStart = new Date(event.startDate);
 			let dateEnd = new Date(event.endDate);
@@ -33,13 +32,13 @@ function createIcsData(events) {
 				SEPARATOR +
 				`UID:${lastID}` +
 				SEPARATOR +
-				`DTSTAMP:${toDateTime(new Date())}` +
+				`DTSTAMP:${dateToIcsDate(new Date())}` +
 				SEPARATOR +
-				`CREATED:${toDateTime(new Date())}` +
+				`CREATED:${dateToIcsDate(new Date())}` +
 				SEPARATOR +
-				`DTSTART:${toDateTime(dateStart)}` +
+				`DTSTART:${dateToIcsDate(dateStart)}` +
 				SEPARATOR +
-				`DTEND:${toDateTime(dateEnd)}` +
+				`DTEND:${dateToIcsDate(dateEnd)}` +
 				SEPARATOR +
 				`SUMMARY:${event.data}` +
 				SEPARATOR +
@@ -57,8 +56,7 @@ function createIcsData(events) {
 	return icsString;
 }
 
-// JS Date Format -> ICS Date Format
-function toDateTime(date) {
+function dateToIcsDate(date) {
 	const isoString = date.toISOString();
 	const formattedString = isoString.replace(/[-:.]/g, "");
 	return formattedString.substring(0, formattedString.length - 4) + "Z";
