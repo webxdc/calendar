@@ -26,7 +26,6 @@ var cal = {
     monthTitle: document.getElementById("monthTitle"),
     daysGrid: document.getElementById("daysGrid"),
 
-    monthSelScreen: document.getElementById("monthSelScreen"),
     monthSelMonth: document.getElementById("monthSelMonth"),
     monthSelYear: document.getElementById("monthSelYear"),
     possibleLines: -1,
@@ -34,12 +33,12 @@ var cal = {
     dayScreen: document.getElementById("dayScreen"),
     dayTitle: document.getElementById("dayTitle"),
     eventBoxes: document.getElementById("eventBoxes"),
-    addEventFloatingButton: document.getElementById("addEventFloatingButton"),
+    eventBoxesButtonBar: document.getElementById("eventBoxesButtonBar"),
     addEventText: document.getElementById("addEventText"),
     addEventDetailsDiv: document.getElementById("addEventDetailsDiv"),
     addEventOkButton: document.getElementById("addEventOkButton"),
 
-    importScreen: document.getElementById("importScreen"),
+    drawer: document.getElementById("drawer"),
 
     init: () => {
         const now = new Date();
@@ -50,13 +49,11 @@ var cal = {
         cal.events = [];
         cal.weekdayNames = cal.weekStartsMonday ? getShortWeekdayNamesStartingFromMon() : getShortWeekdayNamesStartingFromSun();
 
-        cal.monthTitle.onclick = cal.showDateSel;
         document.getElementById("nextDay").onclick = cal.nextDay;
         document.getElementById("prevDay").onclick = cal.prevDay;
         document.getElementById("nextMonth").onclick = cal.nextMonth;
         document.getElementById("prevMonth").onclick = cal.prevMonth;
 
-        document.getElementById("monthSelCancelButton").onclick = cal.closeDateSel;
         document.getElementById("monthSelOkButton").onclick = cal.doMonthSel;
 
         cal.addEventOkButton.classList.add("disabled");
@@ -67,11 +64,10 @@ var cal = {
         document.getElementById("exportToFileButton").onclick = () => {
             cal.sendToChat();
         };
-        document.getElementById("mainmenu").onclick = cal.openImport;
-        document.getElementById("importCloseButton").onclick = cal.closeImport;
-        cal.addEventFloatingButton.onclick = cal.showAddEvent;
+        document.getElementById("mainmenu").onclick = cal.openDrawer;
+        document.getElementById("drawerCloseButton").onclick = cal.closeDrawer;
+        document.getElementById("addEventButton").onclick = cal.showAddEvent;
         document.getElementById("todayMonth").onclick = cal.gotoToday;
-        document.getElementById("todayDayScreen").onclick = cal.gotoToday;
         document.getElementById("addEventCancelButton").onclick = cal.cancelAddEvent;
 
         // swipe listeners for mobile
@@ -137,39 +133,35 @@ var cal = {
       });
     },
 
+    daysInSelMonth: () => {
+        return new Date(cal.selYear, cal.selMonth + 1, 0).getDate();
+    },
+
     prevDay: () => {
-        let daysInMonth = () => {
-            return new Date(cal.selYear, cal.selMonth + 1, 0).getDate();
-        };
         if (cal.selDay - 1 > 0) {
             cal.renderAndSelectDay(cal.selYear, cal.selMonth, cal.selDay - 1);
         } else {
             if (cal.selMonth - 1 >= 0) {
                 cal.selMonth--;
-                cal.renderAndSelectDay(cal.selYear, cal.selMonth, daysInMonth());
             } else {
                 cal.selMonth = 11;
                 cal.selYear--;
-                cal.renderAndSelectDay(cal.selYear, cal.selMonth, daysInMonth());
             }
+            cal.renderAndSelectDay(cal.selYear, cal.selMonth, cal.daysInSelMonth());
         }
     },
 
     nextDay: () => {
-        let daysInMonth = () => {
-            return new Date(cal.selYear, cal.selMonth + 1, 0).getDate();
-        };
-        if (cal.selDay + 1 <= daysInMonth()) {
+        if (cal.selDay + 1 <= cal.daysInSelMonth()) {
             cal.renderAndSelectDay(cal.selYear, cal.selMonth, cal.selDay + 1);
         } else {
             if (cal.selMonth + 1 > 11) {
                 cal.selMonth = 0;
                 cal.selYear++;
-                cal.renderAndSelectDay(cal.selYear, cal.selMonth, 1);
             } else {
                 cal.selMonth++;
-                cal.renderAndSelectDay(cal.selYear, cal.selMonth, 1);
             }
+            cal.renderAndSelectDay(cal.selYear, cal.selMonth, 1);
         }
     },
 
@@ -212,44 +204,40 @@ var cal = {
     },
 
     renderSelectedMonth: () => {
-        // (C1) BASIC CALCULATIONS - DAYS IN MONTH, START + END DAY
-        // Note - Jan is 0 & Dec is 11
-        // Note - Sun is 0 & Sat is 6
-        cal.selMonth = parseInt(cal.monthSelMonth.value); // selected month
-        cal.selYear = parseInt(cal.monthSelYear.value); // selected year
-        let daysInMth = new Date(cal.selYear, cal.selMonth + 1, 0).getDate(), // number of days in selected month
-            startDay = new Date(cal.selYear, cal.selMonth, 1).getDay(), // first day of the month
-            endDay = new Date(cal.selYear, cal.selMonth, daysInMth).getDay(); // last day of the month
+        cal.selMonth = parseInt(cal.monthSelMonth.value); // 0=jan, 11=dec
+        cal.selYear = parseInt(cal.monthSelYear.value);
+        const daysInMonth = cal.daysInSelMonth();
+        const startWeekday = new Date(cal.selYear, cal.selMonth, 1).getDay(); // 0=sun, 6=sat
+        const endWeekday = new Date(cal.selYear, cal.selMonth, daysInMonth).getDay(); // 0=sun, 6=sat
 
-        // (C3) DRAWING CALCULATIONS
-        // Blank squares before start of month
+        // blank squares before start of month
         let squares = [];
-        if (cal.weekStartsMonday && startDay != 1) {
-            let blanks = startDay == 0 ? 7 : startDay;
+        if (cal.weekStartsMonday && startWeekday != 1) {
+            let blanks = startWeekday == 0 ? 7 : startWeekday;
             for (let i = 1; i < blanks; i++) {
                 squares.push("b");
             }
         }
-        if (!cal.weekStartsMonday && startDay != 0) {
-            for (let i = 0; i < startDay; i++) {
+        if (!cal.weekStartsMonday && startWeekday != 0) {
+            for (let i = 0; i < startWeekday; i++) {
                 squares.push("b");
             }
         }
 
-        // Days of the month
-        for (let i = 1; i <= daysInMth; i++) {
+        // squares for each day of the month
+        for (let i = 1; i <= daysInMonth; i++) {
             squares.push(i);
         }
 
-        // Blank squares after end of month
-        if (cal.weekStartsMonday && endDay != 0) {
-            let blanks = endDay == 6 ? 1 : 7 - endDay;
+        // blank squares after end of month
+        if (cal.weekStartsMonday && endWeekday != 0) {
+            let blanks = endWeekday == 6 ? 1 : 7 - endWeekday;
             for (let i = 0; i < blanks; i++) {
                 squares.push("b");
             }
         }
-        if (!cal.weekStartsMonday && endDay != 6) {
-            let blanks = endDay == 0 ? 6 : 6 - endDay;
+        if (!cal.weekStartsMonday && endWeekday != 6) {
+            let blanks = endWeekday == 0 ? 6 : 6 - endWeekday;
             for (let i = 0; i < blanks; i++) {
                 squares.push("b");
             }
@@ -271,7 +259,7 @@ var cal = {
 
         // subsequent rows are a week with dayNumber and events each
         let weekTr = null;
-        var daysAdded = 7; // 7 == out of range, start new row
+        var daysAdded = 7; // 7 = out of range, start new row
         const rowsCount = Math.ceil(squares.length / 7);
         const rowHeightPercent = parseInt(87/rowsCount); // this "87" works for firefox/chrome/safari
 
@@ -299,7 +287,7 @@ var cal = {
                 dayLine.appendChild(dayNumber)
                 cCell.appendChild(dayLine);
 
-                var eventsDay = cal.getEvents(cal.selYear, cal.selMonth, day);
+                var eventsDay = cal.getEventsForDay(cal.selYear, cal.selMonth, day);
 
                 for (let j = 0; j < eventsDay.length; j++) {
                     if (j >= maxEventLines-1 && eventsDay.length != maxEventLines) {
@@ -332,11 +320,59 @@ var cal = {
     },
 
     renderAndSelectDay: (year, month, day) => {
-        // (D1) FETCH EXISTING DATA
         cal.selDay = day;
-        let dayEvents = cal.getEvents(year, month, day);
+        let dayEvents = cal.getEventsForDay(year, month, day);
 
-        //ADD EVENT BOXES
+        removeAllChildren(cal.eventBoxes);
+        if (dayEvents.length > 0) {
+            for (const i in dayEvents) {
+                var eventBox = document.createElement("div");
+                var removeButton = document.createElement("span");
+                var exportButton = document.createElement("span");
+                var data = document.createElement("div");
+                var author = document.createElement("div");
+                var lilHeader = document.createElement("div");
+                lilHeader.classList.add("eventMeta");
+
+                exportButton.innerText = 'Share';
+                exportButton.setAttribute("class", "eventShare");
+                exportButton.setAttribute("data-id", dayEvents[i].id);
+                exportButton.onclick = (ev) => {
+                    cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
+                };
+
+                removeButton.innerHTML =
+                    "<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
+                removeButton.setAttribute("class", "eventDelete");
+                removeButton.setAttribute("data-id", dayEvents[i].id);
+
+                removeButton.onclick = (ev) => {
+                    cal.deleteEvent(ev.currentTarget.getAttribute("data-id"));
+                };
+                author.textContent = dayEvents[i].creator;
+                lilHeader.appendChild(removeButton);
+                lilHeader.appendChild(exportButton);
+                lilHeader.appendChild(author);
+
+                eventBox.appendChild(lilHeader);
+                data.textContent = dayEvents[i].data;
+                eventBox.style.backgroundColor = dayEvents[i].color;
+                eventBox.appendChild(data);
+                cal.eventBoxes.appendChild(eventBox);
+            }
+        } else {
+            var p = document.createElement("p");
+            p.setAttribute("class", "noEvents");
+            p.innerText = 'Tap "New Event" to add events.';
+            cal.eventBoxes.appendChild(p);
+        }
+
+        const date = new Date(year, month, day);
+        cal.dayTitle.textContent = `${cal.weekdayNames[date.getDay()]} ${day} ${cal.monthNames[month]} ${year}`;
+        cal.dayScreen.classList.remove("hidden");
+    },
+
+    showAddEvent: () => {
         cal.addEventText.value = "";
         cal.addEventOkButton.classList.add("disabled");
         cal.addEventText.addEventListener("input", () => {
@@ -347,57 +383,15 @@ var cal = {
             }
         });
 
-        removeAllChildren(cal.eventBoxes);
-        for (const i in dayEvents) {
-            var eventBox = document.createElement("div");
-            var removeButton = document.createElement("span");
-            var exportButton = document.createElement("span");
-            var data = document.createElement("p");
-            var author = document.createElement("p");
-            var lilHeader = document.createElement("div");
-
-            exportButton.innerText = 'Share';
-            exportButton.setAttribute("data-id", dayEvents[i].id);
-            exportButton.setAttribute("class", "event-export");
-
-            exportButton.onclick = (ev) => {
-                cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
-            };
-            removeButton.innerHTML =
-                "<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
-            removeButton.setAttribute("data-id", dayEvents[i].id);
-
-            removeButton.onclick = (ev) => {
-                cal.deleteEvent(ev.currentTarget.getAttribute("data-id"));
-            };
-            author.textContent = dayEvents[i].creator;
-            author.classList.add("evt-view-name");
-            lilHeader.appendChild(author);
-            lilHeader.appendChild(removeButton);
-            lilHeader.appendChild(exportButton);
-            eventBox.appendChild(lilHeader);
-            data.textContent = dayEvents[i].data;
-            data.classList.add("evt-data");
-            eventBox.style.backgroundColor = dayEvents[i].color;
-            eventBox.appendChild(data);
-            eventBox.classList.add("evt-view");
-            eventBox.classList.add("block");
-            cal.eventBoxes.appendChild(eventBox);
-        }
-
-        //color buttons
         var yellow = document.getElementById("yellow"),
             red = document.getElementById("red"),
             blue = document.getElementById("blue"),
             green = document.getElementById("green");
-
         selectColor(yellow);
-
         yellow.onclick = (ev) => selectColor(ev.target);
         red.onclick = (ev) => selectColor(ev.target);
         blue.onclick = (ev) => selectColor(ev.target);
         green.onclick = (ev) => selectColor(ev.target);
-
         function selectColor(el) {
             cal.color = el.getAttribute("data-color");
             var buttons = document.getElementsByClassName("colorBtns");
@@ -412,27 +406,15 @@ var cal = {
             }
         }
 
-        cal.dayScreen.classList.remove("hidden");
-
-        // // (D2) UPDATE EVENT FORM
-        let fullDate = new Date(year, month, day);
-        cal.dayTitle.textContent = `${cal.weekdayNames[fullDate.getDay()]} ${day} ${cal.monthNames[month]} ${year}`;
-    },
-
-    showAddEvent: () => {
         cal.eventBoxes.classList.add("hidden");
+        cal.eventBoxesButtonBar.classList.add("hidden");
         cal.addEventDetailsDiv.classList.remove("hidden");
-        cal.addEventFloatingButton.classList.add("hidden");
-        document.getElementById("start-day").value = `${cal.selYear}-${cal.selMonth + 1 < 10 ? "0" + (cal.selMonth + 1) : cal.selMonth + 1
-            }-${cal.selDay < 10 ? "0" + cal.selDay : cal.selDay}`;
-        document.getElementById("end-day").value = `${cal.selYear}-${cal.selMonth + 1 < 10 ? "0" + (cal.selMonth + 1) : cal.selMonth + 1
-            }-${cal.selDay < 10 ? "0" + cal.selDay : cal.selDay}`;
     },
 
     cancelAddEvent: () => {
         cal.eventBoxes.classList.remove("hidden");
         cal.addEventDetailsDiv.classList.add("hidden");
-        cal.addEventFloatingButton.classList.remove("hidden");
+        cal.eventBoxesButtonBar.classList.remove("hidden");
     },
 
     closeDayScreen: () => {
@@ -440,22 +422,14 @@ var cal = {
         cal.cancelAddEvent();
     },
 
-    // GET ALL EVENTS FROM A DAY
-    /**
-     *
-     * @param {number} year
-     * @param {number} month
-     * @param {number} day
-     * @returns {CalEvent[]}
-     */
-    getEvents: (year, month, day) => {
+    getEventsForDay: (year, month, day) => {
         var events = cal.events.filter((event) => {
             let startDate = new Date(event.startDate);
             let endDate = new Date(event.endDate);
             return startDate.getFullYear() <= year && startDate.getMonth() <= month && startDate.getDate() <= day
                 && endDate.getFullYear() >= year && endDate.getMonth() >= month && endDate.getDate() >= day;
         });
-        return events;
+        return events; // CalEvent[]
     },
 
     doAddEvent: () => {
@@ -486,26 +460,13 @@ var cal = {
     },
 
     deleteEvent: (id) => {
-        let eventToDelete = cal.events.find((evnt) => evnt.id == id);
-
-        let confirmationBox = document.querySelector("#confirmation");
-        removeAllChildren(confirmationBox);
-        confirmationBox.style.display = "block";
-
-        let confirmationText = document.createElement("p");
-        confirmationText.textContent =
-            "Do you really want to delete '" + simplifyString(eventToDelete.data) + "'?";
-        confirmationBox.appendChild(confirmationText);
-
-        let btnYes = document.createElement("button");
-        btnYes.classList.add("eventBtn");
-        btnYes.textContent = "Yes";
-        btnYes.onclick = () => {
-            // send new updates
-            var info =
-                window.webxdc.selfName +
-                " deleted \"" + simplifyString(eventToDelete.data) + "\" from " +
-                cal.monthNames[cal.selMonth] + " " + cal.selDay;
+        const eventToDelete = cal.events.find((evnt) => evnt.id == id);
+        const confirmationBox = document.getElementById("confirmation");
+        confirmationBox.classList.remove("hidden");
+        document.getElementById("confirmationText").textContent = "Delete '" + simplifyString(eventToDelete.data) + "'?";
+        document.getElementById("confirmationOk").onclick = () => {
+            const info = window.webxdc.selfName + " deleted \"" + simplifyString(eventToDelete.data)
+                + "\" from " + cal.monthNames[cal.selMonth] + " " + cal.selDay;
             window.webxdc.sendUpdate({
                     payload: { actions: [{
                         action: 'delete',
@@ -517,41 +478,25 @@ var cal = {
                 },
                 info
             );
-            document
-                .querySelector('[data-id="' + id + '"]')
-                .parentElement.parentElement.remove();
-            confirmationBox.style.display = "none";
+            document.querySelector('[data-id="' + id + '"]').parentElement.parentElement.remove();
+            confirmationBox.classList.add("hidden");
         };
-        confirmationBox.appendChild(btnYes);
-
-        let btnNo = document.createElement("button");
-        btnNo.classList.add("eventBtn");
-        btnNo.textContent = "No";
-        btnNo.onclick = () => {
-            confirmationBox.style.display = "none";
+        document.getElementById("confirmationCancel").onclick = () => {
+            confirmationBox.classList.add("hidden");
         };
-        confirmationBox.appendChild(btnNo);
-    },
-
-    showDateSel: () => {
-        cal.monthSelScreen.classList.remove("hidden");
     },
 
     doMonthSel: () => {
         cal.renderSelectedMonth();
-        cal.closeDateSel();
+        cal.closeDrawer();
     },
 
-    closeDateSel: () => {
-        cal.monthSelScreen.classList.add("hidden");
+    openDrawer: () => {
+        cal.drawer.classList.remove("hidden");
     },
 
-    openImport: () => {
-        cal.importScreen.classList.remove("hidden");
-    },
-
-    closeImport: () => {
-        cal.importScreen.classList.add("hidden");
+    closeDrawer: () => {
+        cal.drawer.classList.add("hidden");
     },
 
     sendToChat: (id = undefined) => {
@@ -603,7 +548,7 @@ var cal = {
             },
             info
         );
-        cal.closeImport();
+        cal.closeDrawer();
     }
 };
 

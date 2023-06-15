@@ -16,77 +16,69 @@
 
 	<table id="monthScreen">
 		<thead><tr><td colspan="7" nowrap class="overflow: hidden;">
-			<span id="mainmenu">☰</span>
-			<span id="monthTitle"></span>
+			<span id="mainmenu"><span style="padding: 0 13px 0 5px;">≡</span><span id="monthTitle" class="title"></span></span>
 			<div style="float: right;">
-				<button id="prevMonth">&#10094;</button>
+				<button id="prevMonth">&lt;</button>
 				<button id="todayMonth">Today</button>
-				<button id="nextMonth">&#10095;</button>
+				<button id="nextMonth">&gt;</button>
 			</div>
 		</td></tr></thead>
 		<tbody id="daysGrid"></tbody>
 	</table>
 
-	<div id="monthSelScreen" class="hidden">
-		<div class="header">
-			<span id="monthSelCancelButton">&#x2715</span>
-		</div>
-		<div class="block centerY">
-			<select id="monthSelMonth"></select>
-			<select id="monthSelYear"></select>
-		</div>
-		<button class="eventBtn" id="monthSelOkButton">Go</button>
-	</div>
-
-	<div id="dayScreen" class="hidden">
-		<div class="header">
-			<button id="todayDayScreen"><svg id="i-calendar" viewBox="0 0 32 32" width="22" height="22"
-					fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round"
-					stroke-width="3.5">
-					<path d="M2 6 L2 30 30 30 30 6 Z M2 15 L30 15 M7 3 L7 9 M13 3 L13 9 M19 3 L19 9 M25 3 L25 9" />
-			</svg></button>
-			<span id="dayScreenCloseButton"><svg id='i-close' viewBox='0 0 32 32' width='20' height='20' fill='none'
+	<div id="dayScreen" class="dialog hidden"><div>
+		<span id="dayTitle" class="title"></span>
+		<div style="float: right;">
+			<span id="dayScreenCloseButton" style="margin-left: 1.5em;"><svg id='i-close' viewBox='0 0 32 32' width='20' height='20' fill='none'
 					stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='4'>
 					<path d='M2 30 L30 2 M30 30 L2 2' />
 			</svg></span>
 		</div>
-		<div class="flex-between block">
-			<button id="prevDay" class="arrows">&#10094;</button>
-			<h1 id="dayTitle" class="block"></h1>
-			<button id="nextDay" class="arrows">&#10095;</button>
+		<div id="eventBoxes" style="clear: both;"></div>
+		<div id="eventBoxesButtonBar" class="buttonbar">
+			<button id="prevDay">&lt;</button>
+			<button id="nextDay" style="margin-right: 0.5em;">&gt;</button>
+			<button id="addEventButton" class="primary">New Event</button>
 		</div>
-		<div id="eventBoxes"></div>
-		<button id="addEventFloatingButton"><svg id="i-plus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32"
-												 height="32" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-			<path d="M16 2 L16 30 M2 16 L30 16" />
-		</svg></button>
 		<div id="addEventDetailsDiv" class="hidden">
-			<textarea id="addEventText" class="block bottomMargin" placeholder="Add a new event..."></textarea>
-			<div class="block bottomMargin" id="colorBtns">
+			<textarea id="addEventText" class="block bottomMargin" placeholder="Enter event description"></textarea>
+			<div>
 				<button class="colorBtns" id="yellow" data-color="#FAD02C">Yellow</button>
 				<button class="colorBtns" id="red" data-color="#c74646">Red</button>
 				<button class="colorBtns" id="blue" data-color="#333652">Blue</button>
 				<button class="colorBtns" id="green" data-color="#00cc00">Green</button>
 			</div>
-			<button class="eventBtn" id="addEventOkButton">Add event</button>
-			<button class="eventBtn" id="addEventCancelButton">Cancel</button>
+			<div class="buttonbar">
+				<button id="addEventCancelButton">Cancel</button>
+				<button id="addEventOkButton" class="primary">Add Event</button>
+			</div>
 		</div>
-		<div id="confirmation"></div>
-	</div>
+	</div></div>
 
-	<div id="importScreen" class="hidden">
-		<div class="header">
-			<span id="importCloseButton"><svg viewBox='0 0 32 32' width='20' height='20' fill='none' stroke='currentcolor'
-					stroke-linecap='round' stroke-linejoin='round' stroke-width='4'>
-					<path d='M2 30 L30 2 M30 30 L2 2' />
-				</svg></span>
-		</div>
-		<h1>Import/export data</h1>
+	<div id="drawer" class="dialog hidden"><div>
 		<div>
-			<button class="eventBtn" id="importFromFileButton">Import from ICS File</button>
-			<button class="eventBtn" id="exportToFileButton">Export to ICS File</button>
+			<span id="drawerCloseButton"><svg viewBox='0 0 32 32' width='20' height='20' fill='none' stroke='currentcolor'
+				stroke-linecap='round' stroke-linejoin='round' stroke-width='4'>
+				<path d='M2 30 L30 2 M30 30 L2 2' />
+			</svg></span>
 		</div>
-	</div>
+		<div align="center" style="margin-top: 32px;">
+			<p><select id="monthSelMonth" style="width: 45%"></select> &nbsp; <select id="monthSelYear" style="width: 45%"></select></p>
+			<p><button id="monthSelOkButton" class="primary">Show Month</button></p>
+		</div>
+		<div style="position: absolute; bottom: 32px;">
+			<p><button id="importFromFileButton">Import ICS File</button></p>
+			<p><button id="exportToFileButton">Export ICS File</button></p>
+		</div>
+	</div></div>
+
+	<div id="confirmation" class="dialog hidden"><div>
+		<p id="confirmationText"></p>
+		<div class="buttonbar">
+			<button id="confirmationCancel">Cancel</button>
+			<button id="confirmationOk" class="primary">Delete</button>
+		</div>
+	</div></div>
 
 </body>
 <script src="calendar.js"></script>
