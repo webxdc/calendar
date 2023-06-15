@@ -300,7 +300,7 @@ var cal = {
                     var evt = document.createElement("div");
                     evt.classList.add("evtSmall");
                     evt.textContent = eventsDay[j].data;
-                    evt.style.backgroundColor = eventsDay[j].color;
+                    evt.style.backgroundColor = validateColor(eventsDay[j].color);
                     cCell.appendChild(evt);
                 }
                 cCell.onclick = () => {
@@ -356,7 +356,7 @@ var cal = {
 
                 eventBox.appendChild(lilHeader);
                 data.textContent = dayEvents[i].data;
-                eventBox.style.backgroundColor = dayEvents[i].color;
+                eventBox.style.backgroundColor = validateColor(dayEvents[i].color);
                 eventBox.appendChild(data);
                 cal.eventBoxes.appendChild(eventBox);
             }
@@ -459,12 +459,34 @@ var cal = {
         return false;
     },
 
+    showAlert: (msg, primaryLabel, cancelLabel = undefined, primaryCallback = undefined) => {
+        const dlg = document.getElementById("alert");
+        const cancel = document.getElementById("alertCancel");
+        const primary = document.getElementById("alertPrimary");
+
+        primary.textContent = primaryLabel;
+        primary.onclick = () => {
+            dlg.classList.add("hidden");
+            if (primaryCallback !== undefined) {
+                primaryCallback();
+            }
+        };
+        if (cancelLabel === undefined) {
+            cancel.classList.add("hidden");
+        } else {
+            cancel.classList.remove("hidden");
+            cancel.textContent = cancelLabel;
+            cancel.onclick = () => {
+                dlg.classList.add("hidden");
+            };
+        }
+        document.getElementById("alertText").textContent = msg;
+        dlg.classList.remove("hidden");
+    },
+
     deleteEvent: (id) => {
         const eventToDelete = cal.events.find((evnt) => evnt.id == id);
-        const confirmationBox = document.getElementById("confirmation");
-        confirmationBox.classList.remove("hidden");
-        document.getElementById("confirmationText").textContent = "Delete '" + simplifyString(eventToDelete.data) + "'?";
-        document.getElementById("confirmationOk").onclick = () => {
+        cal.showAlert("Delete '" + simplifyString(eventToDelete.data) + "'?", "Delete", "Cancel", () => {
             const info = window.webxdc.selfName + " deleted \"" + simplifyString(eventToDelete.data)
                 + "\" from " + cal.monthNames[cal.selMonth] + " " + cal.selDay;
             window.webxdc.sendUpdate({
@@ -479,11 +501,7 @@ var cal = {
                 info
             );
             document.querySelector('[data-id="' + id + '"]').parentElement.parentElement.remove();
-            confirmationBox.classList.add("hidden");
-        };
-        document.getElementById("confirmationCancel").onclick = () => {
-            confirmationBox.classList.add("hidden");
-        };
+        });
     },
 
     doMonthSel: () => {
@@ -527,6 +545,12 @@ var cal = {
         const text = await file.text();
         const events = parseIcsToJSON(text);
 
+        if (events.length == 0) {
+            cal.showAlert('"' + file.name + '" cannot be read. No events were added to your calendar.', 'OK');
+            cal.closeDrawer();
+            return;
+        }
+
         var actions = [];
         for (const i in events) {
             const eventObj = events[i];
@@ -548,6 +572,7 @@ var cal = {
             },
             info
         );
+        cal.showAlert('' + events.length + ' event(s) imported from "' + file.name + '".', 'OK');
         cal.closeDrawer();
     }
 };

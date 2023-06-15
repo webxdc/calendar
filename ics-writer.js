@@ -1,6 +1,3 @@
-const SEPARATOR = "\r\n";
-// const SEPARATOR = "\\n"; //to import in Outlook calendar
-
 
 /**
  * Output ICS as a string
@@ -8,56 +5,42 @@ const SEPARATOR = "\r\n";
  * @returns {String} String representation of the ICS events
  */
 function createIcsData(events) {
-	let icsString = "BEGIN:VCALENDAR" + SEPARATOR;
-	console.log(events);
+    const LINEEND = "\r\n";
 
-	icsString +=
-		"VERSION:2.0" +
-		SEPARATOR +
-		"PRODID:-//calendar/webxdc//EN" +
-		SEPARATOR +
-		"X-WR-CALNAME:" +
-		window.webxdc.selfName +
-		" calendar" +
-		SEPARATOR;
-		let lastID = 0;
-	for (const event of events) {
-		//if is the same ID is a multi-day event, so skip iteration
-		if (Number.parseInt(event.id) === Number.parseInt(lastID)) continue;
-			lastID = event.id;
-			let dateStart = new Date(event.startDate);
-			let dateEnd = new Date(event.endDate);
-			icsString +=
-				"BEGIN:VEVENT" +
-				SEPARATOR +
-				`UID:${lastID}` +
-				SEPARATOR +
-				`DTSTAMP:${dateToIcsDate(new Date())}` +
-				SEPARATOR +
-				`CREATED:${dateToIcsDate(new Date())}` +
-				SEPARATOR +
-				`DTSTART:${dateToIcsDate(dateStart)}` +
-				SEPARATOR +
-				`DTEND:${dateToIcsDate(dateEnd)}` +
-				SEPARATOR +
-				`SUMMARY:${event.data}` +
-				SEPARATOR +
-				`DESCRIPTION:${event.data}` +
-				SEPARATOR +
-				`LOCATION:${event[location] ? event.location : ""}` +
-				SEPARATOR +
-				`X-CALENDAR-XDC-COLOR:${escape(event.color)}` +
-				SEPARATOR +
-				"END:VEVENT" +
-				SEPARATOR;
-		
-	}
-	icsString += "END:VCALENDAR";
-	return icsString;
+    let icsString =
+          "BEGIN:VCALENDAR" + LINEEND
+        + "VERSION:2.0" + LINEEND
+        + "PRODID:-//calendar/webxdc//EN" + LINEEND
+        + "X-WR-CALNAME:" + window.webxdc.selfName + " calendar" + LINEEND;
+        let lastID = 0;
+    for (const event of events) {
+        // if is the same ID is a multi-day event, so skip iteration
+        if (Number.parseInt(event.id) === Number.parseInt(lastID)) {
+            continue;
+        }
+        lastID = event.id;
+        let dateStart = new Date(event.startDate);
+        let dateEnd = new Date(event.endDate);
+        icsString +=
+              "BEGIN:VEVENT" + LINEEND
+            + `UID:${lastID}` + LINEEND
+            + `DTSTAMP:${dateToIcsDate(new Date())}` + LINEEND
+            + `CREATED:${dateToIcsDate(new Date())}` + LINEEND
+            + `DTSTART:${dateToIcsDate(dateStart)}` + LINEEND
+            + `DTEND:${dateToIcsDate(dateEnd)}` + LINEEND
+            + `SUMMARY:${event.data}` + LINEEND
+            + `DESCRIPTION:${event.data}` + LINEEND
+            + `LOCATION:${event[location] ? event.location : ""}` + LINEEND
+            + `X-CALENDAR-XDC-COLOR:${escape(event.color)}` + LINEEND
+            + "END:VEVENT" + LINEEND;
+
+    }
+    icsString += "END:VCALENDAR" + LINEEND;
+    return icsString;
 }
 
 function dateToIcsDate(date) {
-	const isoString = date.toISOString();
-	const formattedString = isoString.replace(/[-:.]/g, "");
-	return formattedString.substring(0, formattedString.length - 4) + "Z";
+    const isoString = date.toISOString();
+    const formattedString = isoString.replace(/[-:.]/g, "");
+    return formattedString.substring(0, formattedString.length - 4) + "Z";
 }

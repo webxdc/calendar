@@ -87,3 +87,11 @@ function simplifyString(str) {
     }
     return ret;
 }
+
+function validateColor(color) {
+    if (typeof color === 'string' && color[0] === '#') {
+        return color;
+    } else {
+        return '#FAD02C';
+    }
+}

@@ -24,58 +24,40 @@ function icsDateToUnixTimestamp(icalStr, timezone) {
 	return oDate.getTime();
 }
 
-//parse ics file into JSON
 function parseIcsToJSON(icsData) {
 	const NEW_LINE = /\r\n|\n|\r/;
-	const EVENT = "VEVENT";
-	const EVENT_START = "BEGIN";
-	const EVENT_END = "END";
-	const START_DATE = "DTSTART";
-	const END_DATE = "DTEND";
-	const DESCRIPTION = "DESCRIPTION";
-	const SUMMARY = "SUMMARY";
-	const LOCATION = "LOCATION";
-	const ALARM = "VALARM";
-	const UID = "UID";
-	const TZID = "TZID";
-	const X_COLOR = "X-CALENDAR-XDC-COLOR"
-
 	const keyMap = {
-		[UID]: "uid",
-		[START_DATE]: "startDate",
-		[END_DATE]: "endDate",
-		[DESCRIPTION]: "description",
-		[SUMMARY]: "summary",
-		[LOCATION]: "location",
-		[TZID]: "timeZone",
-		[X_COLOR]: "color"
+		['UID']: "uid",
+		['DTSTART']: "startDate",
+		['DTEND']: "endDate",
+		['DESCRIPTION']: "description",
+		['SUMMARY']: "summary",
+		['LOCATION']: "location",
+		['TZID']: "timeZone",
+		['X-CALENDAR-XDC-COLOR']: "color"
 	};
-
 	const clean = (string) => unescape(string).trim();
-
-	// const icsToJson = icsData => {
-	const array = [];
 	let currentObj = {};
 	let lastKey = "";
+	var ret = [];
 
 	const lines = icsData.split(NEW_LINE);
 
 	let isAlarm = false;
-	for (let i = 0, iLen = lines.length; i < iLen; ++i) {
+	for (let i = 0; i < lines.length; i++) {
+		// split ical lines as KEY;PARAM:VALUE
 		const line = lines[i];
 		const lineData = line.split(":");
-
 		let key = lineData[0];
 		let keyParam = "";
 		const value = lineData[1];
-
 		if (key.indexOf(";") !== -1) {
 			const keyParts = key.split(";");
 			key = keyParts[0];
-			// Maybe do something with that second part later
 			keyParam = keyParts[1];
 		}
 
+		// lines starting with a space continue last VALUE
 		if (lineData.length < 2) {
 			if (key.startsWith(" ") && lastKey !== undefined && lastKey.length) {
 				currentObj[lastKey] += clean(line.substr(1));
@@ -86,42 +68,45 @@ function parseIcsToJSON(icsData) {
 		}
 
 		switch (key) {
-			case EVENT_START:
-				if (value === EVENT) {
+			case 'BEGIN':
+				if (value === 'VEVENT') {
 					currentObj = {};
-				} else if (value === ALARM) {
-					isAlarm = true;
+				} else if (value === 'VALARM') {
+					isAlarm = true; // VEVENT may include VALARM: ignore DESCRIPTION of VALARM
 				}
 				break;
-			case EVENT_END:
+			case 'END':
 				isAlarm = false;
-				if (value === EVENT) array.push(currentObj);
+				if (value === 'VEVENT') {
+				    ret.push(currentObj);
+				}
 				break;
-			case UID:
-				currentObj[keyMap[UID]] = clean(Math.floor(Math.random() * 10000 + 1)); //calendar webxdc is not able to delete events if their id isn't a number
+			case 'UID':
+				currentObj[keyMap['UID']] = clean(Math.floor(Math.random() * 10000 + 1)); //calendar webxdc is not able to delete events if their id isn't a number
 				break;
-			case START_DATE:
+			case 'DTSTART':
 				// parse TZID=<TIMEZONE>
 				keyParam = keyParam.split("=");
-				currentObj[keyMap[TZID]] = keyParam[1];
-				currentObj[keyMap[START_DATE]] = icsDateToUnixTimestamp(value, keyParam[1]);
+				currentObj[keyMap['TZID']] = keyParam[1];
+				currentObj[keyMap['DTSTART']] = icsDateToUnixTimestamp(value, keyParam[1]);
 				break;
-			case END_DATE:
-				currentObj[keyMap[END_DATE]] = icsDateToUnixTimestamp(value);
+			case 'DTEND':
+				currentObj[keyMap['DTEND']] = icsDateToUnixTimestamp(value);
 				break;
-			case DESCRIPTION:
-				if (!isAlarm) currentObj[keyMap[DESCRIPTION]] = clean(value);
+			case 'DESCRIPTION':
+				if (!isAlarm) currentObj[keyMap['DESCRIPTION']] = clean(value);
 				break;
-			case SUMMARY:
-				currentObj[keyMap[SUMMARY]] = clean(value);
+			case 'SUMMARY':
+				currentObj[keyMap['SUMMARY']] = clean(value);
 				break;
-			case LOCATION:
-				currentObj[keyMap[LOCATION]] = clean(value);
-			case X_COLOR:
-				currentObj[keyMap[X_COLOR]] = clean(value);
+			case 'LOCATION':
+				currentObj[keyMap['LOCATION']] = clean(value);
+			case 'X-CALENDAR-XDC-COLOR':
+				currentObj[keyMap['X-CALENDAR-XDC-COLOR']] = clean(value);
 			default:
 				continue;
 		}
 	}
-	return array
+
+	return ret;
 }
