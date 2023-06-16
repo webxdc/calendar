@@ -184,6 +184,7 @@ select {
     padding: 8px;
     color: #fff;
     margin-bottom: 8px;
+    white-space: pre-line;
 }
 
 #eventBoxes .eventMeta {

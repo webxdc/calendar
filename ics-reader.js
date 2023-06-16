@@ -1,31 +1,5 @@
 
-// transform ics dates to Date timestamps;
-// ics dates are expected as YYYYMMDDTHHmmSS format in UTC (what else appears in the wild?)
-function icsDateToUnixTimestamp(icalStr, timezone) {
-    const year = icalStr.substr(0, 4);
-    const month = icalStr.substr(4, 2);
-    const day = icalStr.substr(6, 2);
-    const hour = icalStr.substr(9, 2);
-    const min = icalStr.substr(11, 2);
-    const sec = icalStr.substr(13, 2);
-    const isoStr = year + '-' + month + '-' + day + 'T' + hour + ':' + min + ':' + sec + '.000Z';
-    var oDate = new Date(isoStr);
-
-    //convert to local time if timezone is not undefined
-    // if (timezone != undefined) {
-    // // 	const dateString = oDate.toISOString(); //example "2019-05-05T10:30:00Z"
-    // // 	const userOffset = new Date().getTimezoneOffset() * 60 * 1000;
-    // // 	const localDate = new Date(dateString);
-    // // 	const utcDate = new Date(localDate.getTime() + userOffset);
-    // 	const timezones = JSON.parse("./timezones.json");
-
-    // }
-
-    return oDate.getTime();
-}
-
-function parseIcsToJSON(icsData) {
-    const NEW_LINE = /\r\n|\n|\r/;
+function icsStringToEventArray(icsString) {
     const keyMap = {
         ['UID']: "uid",
         ['DTSTART']: "startDate",
@@ -33,40 +7,40 @@ function parseIcsToJSON(icsData) {
         ['DESCRIPTION']: "description",
         ['SUMMARY']: "summary",
         ['LOCATION']: "location",
-        ['TZID']: "timeZone",
         ['X-CALENDAR-XDC-COLOR']: "color"
     };
-    const clean = (string) => unescape(string).trim();
     let currentObj = {};
     let lastKey = "";
-    var ret = [];
-
-    const lines = icsData.split(NEW_LINE);
-
     let isAlarm = false;
-    for (let i = 0; i < lines.length; i++) {
-        // split ical lines as KEY;PARAM:VALUE
-        const line = lines[i];
-        const lineData = line.split(":");
-        let key = lineData[0];
-        let keyParam = "";
-        const value = lineData[1];
+    var ret = [];
+    const lines = icsString.split(/\r\n|\n|\r/);
+
+    for (const line of lines) {
+        // unfold lines
+        if (line.startsWith(" ")) {
+            if (lastKey != "") {
+                currentObj[lastKey] += unescapeIcsValue(line.substr(1));
+            }
+            continue;
+        }
+
+        // very basic splitting of lines as `KEY;PARAMNAME=PARAM:VALUE`
+        // (following spec, PARAM may be quoted and contain `:` ... we'll see how that non-tokenizing implementation does in the wild :)
+        const colonPos = line.indexOf(":");
+        if (colonPos == -1) {
+            continue;
+        }
+        let key = line.substring(0, colonPos);
+        let param = {};
+        const value = line.substring(colonPos + 1);
         if (key.indexOf(";") !== -1) {
             const keyParts = key.split(";");
             key = keyParts[0];
-            keyParam = keyParts[1];
+            const p = keyParts[1].split("=");
+            param[p[0]] = p[1];
         }
 
-        // lines starting with a space continue last VALUE
-        if (lineData.length < 2) {
-            if (key.startsWith(" ") && lastKey !== undefined && lastKey.length) {
-                currentObj[lastKey] += clean(line.substr(1));
-            }
-            continue;
-        } else {
-            lastKey = keyMap[key];
-        }
-
+        lastKey = keyMap[key];
         switch (key) {
             case 'BEGIN':
                 if (value === 'VEVENT') {
@@ -82,31 +56,64 @@ function parseIcsToJSON(icsData) {
                 }
                 break;
             case 'UID':
-                currentObj[keyMap['UID']] = clean(Math.floor(Math.random() * 10000 + 1)); //calendar webxdc is not able to delete events if their id isn't a number
+                currentObj[keyMap['UID']] = unescapeIcsValue(Math.floor(Math.random() * 10000 + 1)); //calendar webxdc is not able to delete events if their id isn't a number
                 break;
             case 'DTSTART':
-                // parse TZID=<TIMEZONE>
-                keyParam = keyParam.split("=");
-                currentObj[keyMap['TZID']] = keyParam[1];
-                currentObj[keyMap['DTSTART']] = icsDateToUnixTimestamp(value, keyParam[1]);
+                currentObj[keyMap['DTSTART']] = icsDateStringToUnixTimestamp(value, param);
                 break;
             case 'DTEND':
-                currentObj[keyMap['DTEND']] = icsDateToUnixTimestamp(value);
+                currentObj[keyMap['DTEND']] = icsDateStringToUnixTimestamp(value, param);
                 break;
             case 'DESCRIPTION':
-                if (!isAlarm) currentObj[keyMap['DESCRIPTION']] = clean(value);
+                if (!isAlarm) currentObj[keyMap['DESCRIPTION']] = unescapeIcsValue(value);
                 break;
             case 'SUMMARY':
-                currentObj[keyMap['SUMMARY']] = clean(value);
+                currentObj[keyMap['SUMMARY']] = unescapeIcsValue(value);
                 break;
             case 'LOCATION':
-                currentObj[keyMap['LOCATION']] = clean(value);
+                currentObj[keyMap['LOCATION']] = unescapeIcsValue(value);
             case 'X-CALENDAR-XDC-COLOR':
-                currentObj[keyMap['X-CALENDAR-XDC-COLOR']] = clean(value);
+                currentObj[keyMap['X-CALENDAR-XDC-COLOR']] = unescapeIcsValue(value);
             default:
                 continue;
         }
     }
 
     return ret;
+}
+
+function unescapeIcsValue(str) {
+    if (typeof str === "string") {
+        return str.replaceAll("\\n", "\n")
+                  .replaceAll("\\N", "\n") // yes, uppercase linebreak allowed in the spec
+                  .replaceAll("\\,", ",")
+                  .replaceAll("\\;", ";")
+                  .replaceAll("\\\\", "\\");
+    } else {
+        return "" + str;
+    }
+}
+
+function icsDateStringToUnixTimestamp(icsDateString, param) {
+    // ics date strings are `YYYYMMDDTHHmmSSZ` for UTC, otherwise the last `Z` is omitted
+    const year   = icsDateString.substr(0,  4);
+    const month  = icsDateString.substr(4,  2);
+    const day    = icsDateString.substr(6,  2);
+    const hour   = icsDateString.substr(9,  2);
+    const min    = icsDateString.substr(11, 2);
+    const sec    = icsDateString.substr(13, 2);
+    const isoStr = year + '-' + month + '-' + day + 'T' + hour + ':' + min + ':' + sec + '.000Z';
+    var oDate = new Date(isoStr);
+
+    //convert to local time if timezone is not undefined
+    // if (timezone != undefined) {
+    // // 	const dateString = oDate.toISOString(); //example "2019-05-05T10:30:00Z"
+    // // 	const userOffset = new Date().getTimezoneOffset() * 60 * 1000;
+    // // 	const localDate = new Date(dateString);
+    // // 	const utcDate = new Date(localDate.getTime() + userOffset);
+    // 	const timezones = JSON.parse("./timezones.json");
+
+    // }
+
+    return oDate.getTime();
 }

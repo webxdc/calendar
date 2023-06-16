@@ -521,12 +521,12 @@ var cal = {
         var data = '';
         var title = '';
         if (id === undefined) {
-            data = createIcsData(cal.events);
+            data = eventArrayToIcsString(cal.events);
         } else {
             let event = cal.events.filter((ev) => {
                 return Number.parseInt(ev.id) === Number.parseInt(id);
             });
-            data = createIcsData(event);
+            data = eventArrayToIcsString(event);
             if (event.length === 1) {
                 title = event[0].data;
             }
@@ -543,7 +543,7 @@ var cal = {
     importFromFile: async () => {
         const [file] = await window.webxdc.importFiles({mimeTypes: ["text/calendar"], extensions: [".ics"]});
         const text = await file.text();
-        const events = parseIcsToJSON(text);
+        const events = icsStringToEventArray(text);
 
         if (events.length == 0) {
             cal.showAlert('"' + file.name + '" cannot be read. No events were added to your calendar.', 'OK');

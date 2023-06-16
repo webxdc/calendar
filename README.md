@@ -21,6 +21,11 @@ To create a `.xdc` file that can be attached to a Delta Chat group, execute:
 
 Then just add the `.xdc` file to a group or a chat and you are ready to go!
 
+Import, export and share are using ICS format as described in
+[RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545) and used in practise.
+ICS compatibility been tested with Simple Calendar, Etar, Thunderbird, Google and Apple Calendar -
+please let us know, if there is something to add.
+
 To make the code base of this small project useful and accessible for many developers,
 we tried not to dive into tool and framework discussions
 (which are very opinionated anyways)
