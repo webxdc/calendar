@@ -3,7 +3,7 @@
 This is a simple calendar app for webxdc.
 You can create and delete events to share with other people.
 
-![image](https://user-images.githubusercontent.com/50194845/177145963-62df6494-61f6-47a1-9e75-fed0a51c935b.jpg)
+![Screenshot](https://github.com/webxdc/calendar/assets/9800740/db3693b7-0bd4-4efc-912a-d5fe075a8f79)
 
 [Download .xdc from Release Assets](https://github.com/webxdc/calendar/releases),
 attach to a Delta Chat group and share events!
