@@ -1,6 +1,15 @@
-//@ts-check
-/** @typedef {import('./webxdc').Webxdc} Webxdc */
-/** @typedef {import('./types').CalEvent} CalEvent */
+
+class CalEvent {
+    uid            = '';
+    startTimestamp = 0;
+    endTimestamp   = 0;
+    summary        = '';
+    color          = '';
+    creator        = '';
+
+    constructor() {
+    }
+}
 
 var cal = {
     // current date
@@ -15,6 +24,7 @@ var cal = {
 
     /** @type {CalEvent[]} */
     events: null,
+
     monthNames: getShortMonthNames(),
     weekStartsMonday: getWeekFirstDay() === 1,
     weekdayNames: null,
@@ -113,10 +123,14 @@ var cal = {
             try {
                 update.payload.actions.forEach((action) => {
                     if (action.action == 'add') {
-                        cal.events.push(action);
-                    } else {
+                        if (cal.events.find((e) => e.uid === action.event.uid) === undefined) {
+                            cal.events.push(action.event);
+                        } else {
+                            console.log('event already exists: ' + simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
+                        }
+                    } else if (action.action == 'delete') {
                         let index = cal.events.findIndex((obj) => {
-                            return Number.parseInt(obj.id) === Number.parseInt(action.id);
+                            return obj.uid === action.uid;
                         });
                         if (index != -1) cal.events.splice(index, 1);
                     }
@@ -299,7 +313,7 @@ var cal = {
                     }
                     var evt = document.createElement("div");
                     evt.classList.add("evtSmall");
-                    evt.textContent = eventsDay[j].data;
+                    evt.textContent = eventsDay[j].summary;
                     evt.style.backgroundColor = validateColor(eventsDay[j].color);
                     cCell.appendChild(evt);
                 }
@@ -336,7 +350,7 @@ var cal = {
 
                 exportButton.innerText = 'Share';
                 exportButton.setAttribute("class", "eventShare");
-                exportButton.setAttribute("data-id", dayEvents[i].id);
+                exportButton.setAttribute("data-id", dayEvents[i].uid);
                 exportButton.onclick = (ev) => {
                     cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
                 };
@@ -344,7 +358,7 @@ var cal = {
                 removeButton.innerHTML =
                     "<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
                 removeButton.setAttribute("class", "eventDelete");
-                removeButton.setAttribute("data-id", dayEvents[i].id);
+                removeButton.setAttribute("data-id", dayEvents[i].uid);
 
                 removeButton.onclick = (ev) => {
                     cal.deleteEvent(ev.currentTarget.getAttribute("data-id"));
@@ -355,7 +369,7 @@ var cal = {
                 lilHeader.appendChild(author);
 
                 eventBox.appendChild(lilHeader);
-                data.textContent = dayEvents[i].data;
+                data.textContent = dayEvents[i].summary;
                 eventBox.style.backgroundColor = validateColor(dayEvents[i].color);
                 eventBox.appendChild(data);
                 cal.eventBoxes.appendChild(eventBox);
@@ -424,32 +438,27 @@ var cal = {
 
     getEventsForDay: (year, month, day) => {
         var events = cal.events.filter((event) => {
-            let startDate = new Date(event.startDate);
-            let endDate = new Date(event.endDate);
-            return startDate.getFullYear() <= year && startDate.getMonth() <= month && startDate.getDate() <= day
-                && endDate.getFullYear() >= year && endDate.getMonth() >= month && endDate.getDate() >= day;
+            let startTimestamp = new Date(event.startTimestamp);
+            let endTimestamp = new Date(event.endTimestamp);
+            return startTimestamp.getFullYear() <= year && startTimestamp.getMonth() <= month && startTimestamp.getDate() <= day
+                && endTimestamp.getFullYear() >= year && endTimestamp.getMonth() >= month && endTimestamp.getDate() >= day;
         });
         return events; // CalEvent[]
     },
 
     doAddEvent: () => {
         const dateSt = new Date(cal.selYear, cal.selMonth, cal.selDay);
-        const dateEnd = dateSt;
-        const data = cal.addEventText.value;
-        const color = cal.color;
+        var event = new CalEvent();
+        event.startTimestamp = dateSt.getTime();
+        event.endTimestamp   = event.startTimestamp;
+        event.summary        = cal.addEventText.value;
+        event.color          = cal.color;
+        event.uid            = generateUid();
+        event.creator        = window.webxdc.selfName;
         const info = window.webxdc.selfName + " created \"" + simplifyString(cal.addEventText.value) +
                "\" on " + cal.monthNames[dateSt.getMonth()] + " " + dateSt.getDate();
-        const id = Date.now();
         window.webxdc.sendUpdate({
-                payload: { actions: [{
-                    action: 'add',
-                    id: id,
-                    startDate: dateSt.getTime(),
-                    endDate: dateEnd.getTime(),
-                    data: data,
-                    color: color,
-                    creator: window.webxdc.selfName,
-                }]},
+                payload: { actions: [{ action: 'add', event }]},
                 info: info,
                 summary: "" + (cal.events.length+1) + " events"
             },
@@ -484,23 +493,19 @@ var cal = {
         dlg.classList.remove("hidden");
     },
 
-    deleteEvent: (id) => {
-        const eventToDelete = cal.events.find((evnt) => evnt.id == id);
-        cal.showAlert("Delete '" + simplifyString(eventToDelete.data) + "'?", "Delete", "Cancel", () => {
-            const info = window.webxdc.selfName + " deleted \"" + simplifyString(eventToDelete.data)
+    deleteEvent: (uid) => {
+        const eventToDelete = cal.events.find((event) => event.uid === uid);
+        cal.showAlert("Delete '" + simplifyString(eventToDelete.summary) + "'?", "Delete", "Cancel", () => {
+            const info = window.webxdc.selfName + " deleted \"" + simplifyString(eventToDelete.summary)
                 + "\" from " + cal.monthNames[cal.selMonth] + " " + cal.selDay;
             window.webxdc.sendUpdate({
-                    payload: { actions: [{
-                        action: 'delete',
-                        id: id,
-                        deleter: window.webxdc.selfName,
-                    }]},
+                    payload: { actions: [{ action: 'delete', uid: uid }]},
                     info: info,
                     summary: "" + (cal.events.length-1) + " events"
                 },
                 info
             );
-            document.querySelector('[data-id="' + id + '"]').parentElement.parentElement.remove();
+            document.querySelector('[data-id="' + uid + '"]').parentElement.parentElement.remove();
         });
     },
 
@@ -517,18 +522,18 @@ var cal = {
         cal.drawer.classList.add("hidden");
     },
 
-    sendToChat: (id = undefined) => {
+    sendToChat: (uid = undefined) => {
         var data = '';
         var title = '';
-        if (id === undefined) {
+        if (uid === undefined) {
             data = eventArrayToIcsString(cal.events);
         } else {
-            let event = cal.events.filter((ev) => {
-                return Number.parseInt(ev.id) === Number.parseInt(id);
+            let event = cal.events.filter((event) => {
+                return event.uid === uid;
             });
             data = eventArrayToIcsString(event);
             if (event.length === 1) {
-                title = event[0].data;
+                title = event[0].summary;
             }
         }
 
@@ -552,17 +557,8 @@ var cal = {
         }
 
         var actions = [];
-        for (const i in events) {
-            const eventObj = events[i];
-            actions.push({
-                action: 'add',
-                id: eventObj.uid,
-                startDate: new Date(eventObj.startDate).getTime(),
-                endDate: new Date(eventObj.endDate).getTime(),
-                data: eventObj.summary,
-                color: eventObj.color,
-                creator: window.webxdc.selfName,
-            });
+        for (const event of events) {
+            actions.push({ action: 'add', event});
         }
         const info = window.webxdc.selfName + ' imported ' + actions.length + ' events';
         window.webxdc.sendUpdate({

@@ -11,6 +11,6 @@ DTEND:20230605T220000Z
 SUMMARY:semicolon \; newline\ncolon : newline\ncomma \,
 DESCRIPTION:semicolon \; newline\ncolon : newline\ncomma \,
 LOCATION:
-X-CALENDAR-XDC-COLOR:#FAD02C
+X-XDC-COLOR:#FAD02C
 END:VEVENT
 END:VCALENDAR

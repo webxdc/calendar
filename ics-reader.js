@@ -2,14 +2,15 @@
 function icsStringToEventArray(icsString) {
     const keyMap = {
         ['UID']: "uid",
-        ['DTSTART']: "startDate",
-        ['DTEND']: "endDate",
-        ['DESCRIPTION']: "description",
+        ['DTSTART']: "startTimestamp",
+        ['DTEND']: "endTimestamp",
         ['SUMMARY']: "summary",
-        ['LOCATION']: "location",
-        ['X-CALENDAR-XDC-COLOR']: "color"
+        ['X-XDC-COLOR']: "color",
+        ['X-XDC-CREATOR']: "creator",
+        ['DESCRIPTION']: "description", // will be added to summary
+        ['LOCATION']: "location",       // will be added to summary
     };
-    let currentObj = {};
+    let currentObj = new CalEvent();
     let lastKey = "";
     let isAlarm = false;
     var ret = [];
@@ -44,7 +45,7 @@ function icsStringToEventArray(icsString) {
         switch (key) {
             case 'BEGIN':
                 if (value === 'VEVENT') {
-                    currentObj = {};
+                    currentObj = new CalEvent();
                 } else if (value === 'VALARM') {
                     isAlarm = true; // VEVENT may include VALARM: ignore DESCRIPTION of VALARM
                 }
@@ -52,11 +53,22 @@ function icsStringToEventArray(icsString) {
             case 'END':
                 isAlarm = false;
                 if (value === 'VEVENT') {
+                    if (currentObj.uid == '') {
+                        currentObj.uid = generateUid();
+                    }
+                    if (currentObj.description !== undefined) {
+                        currentObj.summary += "\n\n" + currentObj.description;
+                        currentObj.description = undefined;
+                    }
+                    if (currentObj.location !== undefined) {
+                        currentObj.summary += "\n\n" + currentObj.location;
+                        currentObj.location = undefined;
+                    }
                     ret.push(currentObj);
                 }
                 break;
             case 'UID':
-                currentObj[keyMap['UID']] = unescapeIcsValue(Math.floor(Math.random() * 10000 + 1)); //calendar webxdc is not able to delete events if their id isn't a number
+                currentObj[keyMap['UID']] = unescapeIcsValue(value);
                 break;
             case 'DTSTART':
                 currentObj[keyMap['DTSTART']] = icsDateStringToUnixTimestamp(value, param);
@@ -72,8 +84,10 @@ function icsStringToEventArray(icsString) {
                 break;
             case 'LOCATION':
                 currentObj[keyMap['LOCATION']] = unescapeIcsValue(value);
-            case 'X-CALENDAR-XDC-COLOR':
-                currentObj[keyMap['X-CALENDAR-XDC-COLOR']] = unescapeIcsValue(value);
+            case 'X-XDC-CREATOR':
+                currentObj[keyMap['X-XDC-CREATOR']] = unescapeIcsValue(value);
+            case 'X-XDC-COLOR':
+                currentObj[keyMap['X-XDC-COLOR']] = unescapeIcsValue(value);
             default:
                 continue;
         }

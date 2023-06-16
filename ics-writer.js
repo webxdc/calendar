@@ -7,26 +7,22 @@ function eventArrayToIcsString(events) {
         + "VERSION:2.0" + LINEEND
         + "PRODID:-//calendar/webxdc//EN" + LINEEND
         + "X-WR-CALNAME:" + window.webxdc.selfName + " calendar" + LINEEND;
-    let lastID = 0;
+    let lastUid = '';
     for (const event of events) {
-        // if is the same ID is a multi-day event, so skip iteration
-        if (Number.parseInt(event.id) === Number.parseInt(lastID)) {
+        if (event.uid === lastUid) { // multi-day events have the same UID
             continue;
         }
-        lastID = event.id;
-        let dateStart = new Date(event.startDate);
-        let dateEnd = new Date(event.endDate);
+        lastUid = event.uid;
         icsString +=
               "BEGIN:VEVENT" + LINEEND
-            + "UID:"         + lastID + LINEEND
+            + "UID:"         + lastUid + LINEEND
             + "DTSTAMP:"     + dateToIcsDateString(new Date()) + LINEEND
             + "CREATED:"     + dateToIcsDateString(new Date()) + LINEEND
-            + "DTSTART:"     + dateToIcsDateString(dateStart) + LINEEND
-            + "DTEND:"       + dateToIcsDateString(dateEnd) + LINEEND
-            + "SUMMARY:"     + escapeIcsValue(event.data) + LINEEND
-            + "DESCRIPTION:" + escapeIcsValue(event.data) + LINEEND
-            + "LOCATION:"    + escapeIcsValue(event[location] ? event.location : "") + LINEEND
-            + "X-CALENDAR-XDC-COLOR:" + escapeIcsValue(event.color) + LINEEND
+            + "DTSTART:"     + dateToIcsDateString(new Date(event.startTimestamp)) + LINEEND
+            + "DTEND:"       + dateToIcsDateString(new Date(event.endTimestamp)) + LINEEND
+            + "SUMMARY:"     + escapeIcsValue(event.summary) + LINEEND
+            + "X-XDC-CREATOR:" + escapeIcsValue(event.creator) + LINEEND
+            + "X-XDC-COLOR:" + escapeIcsValue(event.color) + LINEEND
             + "END:VEVENT" + LINEEND;
 
     }

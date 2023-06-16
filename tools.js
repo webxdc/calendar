@@ -95,6 +95,14 @@ function getTimezoneOffsetMilliseconds(timeZoneStr) {
     return minutesOffset * 60 * 1000;
 }
 
+function generateUid() {
+    try {
+        return crypto.randomUUID();
+    } catch(e) {
+        return Date.now() + '-' + Math.floor(Math.random() * 2000000000);
+    }
+}
+
 function simplifyString(str) {
     const MAX_LEN = 32;
     var ret = str.replace(/\n/g, " ");
