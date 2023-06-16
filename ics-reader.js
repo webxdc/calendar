@@ -103,17 +103,10 @@ function icsDateStringToUnixTimestamp(icsDateString, param) {
     const min    = icsDateString.substr(11, 2);
     const sec    = icsDateString.substr(13, 2);
     const isoStr = year + '-' + month + '-' + day + 'T' + hour + ':' + min + ':' + sec + '.000Z';
-    var oDate = new Date(isoStr);
-
-    //convert to local time if timezone is not undefined
-    // if (timezone != undefined) {
-    // // 	const dateString = oDate.toISOString(); //example "2019-05-05T10:30:00Z"
-    // // 	const userOffset = new Date().getTimezoneOffset() * 60 * 1000;
-    // // 	const localDate = new Date(dateString);
-    // // 	const utcDate = new Date(localDate.getTime() + userOffset);
-    // 	const timezones = JSON.parse("./timezones.json");
-
-    // }
-
-    return oDate.getTime();
+    const dateObj = new Date(isoStr);
+    var unixTimestamp = dateObj.getTime();
+    if (icsDateString.substr(15, 1) != 'Z' && typeof param.TZID == 'string') {
+        unixTimestamp -= getTimezoneOffsetMilliseconds(param.TZID);
+    }
+    return unixTimestamp;
 }

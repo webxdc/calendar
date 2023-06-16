@@ -79,6 +79,22 @@ function getWeekFirstDay() {
 	}
 }
 
+function getTimezoneOffsetMilliseconds(timeZoneStr) {
+    var minutesOffset = 0;
+    try {
+        // get timezone specific date for "now" as `MM/DD/YYYY, GMT+HH:mm`
+        const dateStr = Intl.DateTimeFormat('en-US', {timeZone: timeZoneStr, timeZoneName: "longOffset"}).format(new Date());
+        const gmtStr = dateStr.split(" ")[1].slice(3) || '+0'; // `+0` is needed when the timezone is missing the number part. Ex. Africa/Bamako -> GMT
+        minutesOffset = parseInt(gmtStr.split(':')[0])*60;
+        if (gmtStr.includes(":")) {
+           minutesOffset = minutesOffset + parseInt(gmtStr.split(':')[1]);
+        }
+    } catch(e) {
+        console.error(e);
+    }
+    return minutesOffset * 60 * 1000;
+}
+
 function simplifyString(str) {
     const MAX_LEN = 32;
     var ret = str.replace(/\n/g, " ");
