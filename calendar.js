@@ -1,11 +1,11 @@
 
 class CalEvent {
-    uid            = '';
-    startTimestamp = 0;
-    endTimestamp   = 0;
-    summary        = '';
-    color          = '';
-    creator        = '';
+    uid              = '';
+    startTimestamp   = 0;
+    endTimestamp     = 0;
+    summary          = '';
+    color            = '';
+    creator          = '';
 
     constructor() {
     }

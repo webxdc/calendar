@@ -14,16 +14,16 @@ function eventArrayToIcsString(events) {
         }
         lastUid = event.uid;
         icsString +=
-              "BEGIN:VEVENT" + LINEEND
-            + "UID:"         + lastUid + LINEEND
-            + "DTSTAMP:"     + dateToIcsDateString(new Date()) + LINEEND
-            + "CREATED:"     + dateToIcsDateString(new Date()) + LINEEND
-            + "DTSTART:"     + dateToIcsDateString(new Date(event.startTimestamp)) + LINEEND
-            + "DTEND:"       + dateToIcsDateString(new Date(event.endTimestamp)) + LINEEND
-            + "SUMMARY:"     + escapeIcsValue(event.summary) + LINEEND
+              "BEGIN:VEVENT"   + LINEEND
+            + "UID:"           + lastUid + LINEEND
+            + "DTSTAMP:"       + dateToIcsDateString(new Date()) + LINEEND
+            + "CREATED:"       + dateToIcsDateString(new Date()) + LINEEND
+            + "DTSTART:"       + dateToIcsDateString(new Date(event.startTimestamp)) + LINEEND
+            + "DTEND:"         + dateToIcsDateString(new Date(event.endTimestamp)) + LINEEND
+            + "SUMMARY:"       + escapeIcsValue(event.summary) + LINEEND
             + "X-XDC-CREATOR:" + escapeIcsValue(event.creator) + LINEEND
-            + "X-XDC-COLOR:" + escapeIcsValue(event.color) + LINEEND
-            + "END:VEVENT" + LINEEND;
+            + "X-XDC-COLOR:"   + escapeIcsValue(event.color) + LINEEND
+            + "END:VEVENT"     + LINEEND;
 
     }
     icsString += "END:VCALENDAR" + LINEEND;
