@@ -17,7 +17,6 @@ function eventArrayToIcsString(events) {
               "BEGIN:VEVENT"   + LINEEND
             + "UID:"           + lastUid + LINEEND
             + "DTSTAMP:"       + dateToIcsDateString(new Date()) + LINEEND
-            + "CREATED:"       + dateToIcsDateString(new Date()) + LINEEND
             + "DTSTART:"       + dateToIcsDateString(new Date(event.startTimestamp)) + LINEEND
             + "DTEND:"         + dateToIcsDateString(new Date(event.endTimestamp)) + LINEEND
             + "SUMMARY:"       + escapeIcsValue(event.summary) + LINEEND
