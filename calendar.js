@@ -80,6 +80,11 @@ var cal = {
         };
         document.getElementById("mainmenu").onclick = cal.openDrawer;
         document.getElementById("drawerCloseButton").onclick = cal.closeDrawer;
+        cal.drawer.onclick = (e) => {
+            if (e.target == cal.drawer) {
+                cal.closeDrawer();
+            }
+        };
         document.getElementById("addEventButton").onclick = cal.showAddEvent;
         document.getElementById("todayMonth").onclick = cal.gotoToday;
         document.getElementById("addEventCancelButton").onclick = cal.cancelAddEvent;
