@@ -74,7 +74,6 @@ var cal = {
         cal.addEventOkButton.classList.add("disabled");
         document.getElementById("dayScreenCloseButton").onclick = cal.closeDayScreen;
         cal.addEventOkButton.onclick = cal.doAddEvent;
-        cal.color = "#FAD02C";
         document.getElementById("importFromFileButton").onclick = cal.importFromFile;
         document.getElementById("exportToFileButton").onclick = () => {
             cal.sendToChat();
@@ -404,12 +403,12 @@ var cal = {
 
         var yellow = document.getElementById("yellow"),
             red = document.getElementById("red"),
-            blue = document.getElementById("blue"),
+            purple = document.getElementById("purple"),
             green = document.getElementById("green");
         selectColor(yellow);
         yellow.onclick = (ev) => selectColor(ev.target);
         red.onclick = (ev) => selectColor(ev.target);
-        blue.onclick = (ev) => selectColor(ev.target);
+        purple.onclick = (ev) => selectColor(ev.target);
         green.onclick = (ev) => selectColor(ev.target);
         function selectColor(el) {
             cal.color = el.getAttribute("data-color");
