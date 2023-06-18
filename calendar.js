@@ -528,6 +528,11 @@ var cal = {
     },
 
     sendToChat: (uid = undefined) => {
+        if (!window.webxdc.sendToChat) {
+            cal.showAlert("Please update to Delta Chat 1.38 or compatible to use this function.", "OK");
+            return;
+        }
+
         var data = '';
         var title = '';
         if (uid === undefined) {
@@ -551,6 +556,11 @@ var cal = {
     },
 
     importFromFile: async () => {
+        if (!window.webxdc.importFiles) {
+            cal.showAlert("Please update to Delta Chat 1.38 or compatible to use this function.", "OK");
+            return;
+        }
+
         const [file] = await window.webxdc.importFiles({mimeTypes: ["text/calendar"], extensions: [".ics"]});
         const text = await file.text();
         const events = icsStringToEventArray(text);
