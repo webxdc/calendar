@@ -1,8 +1,13 @@
 
 class CalEvent {
     uid              = '';
-    startTimestamp   = 0;
-    endTimestamp     = 0;
+
+    /** unified to `yyyymmdd` for whole day events or `yyyymmddThhmmssZ` for UTC times */
+    dtStart          = '';
+
+    /** whole day or UTC time after the event (does not belong to the event), empty when unset */
+    dtEnd            = '';
+
     summary          = '';
     color            = '';
     creator          = '';
@@ -437,26 +442,26 @@ var cal = {
     },
 
     getEventsForDay: (year, month, day) => {
+        const dayStart = new Date(year, month, day).getTime();
+        const dayEnd = new Date(year, month, day + 1).getTime(); // Date() takes care of overflows
         var events = cal.events.filter((event) => {
-            let startTimestamp = new Date(event.startTimestamp);
-            let endTimestamp = new Date(event.endTimestamp);
-            return startTimestamp.getFullYear() <= year && startTimestamp.getMonth() <= month && startTimestamp.getDate() <= day
-                && endTimestamp.getFullYear() >= year && endTimestamp.getMonth() >= month && endTimestamp.getDate() >= day;
+            const eventStart = unifiedIcsDateStringToDateObj(event.dtStart).getTime();
+            return eventStart >= dayStart && eventStart < dayEnd;
         });
         return events; // CalEvent[]
     },
 
     doAddEvent: () => {
-        const dateSt = new Date(cal.selYear, cal.selMonth, cal.selDay);
         var event = new CalEvent();
-        event.startTimestamp = dateSt.getTime();
-        event.endTimestamp   = event.startTimestamp;
+        var end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
+        event.dtStart        = ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
+        event.dtEnd          = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
         event.summary        = cal.addEventText.value;
         event.color          = cal.color;
         event.uid            = generateUid();
         event.creator        = window.webxdc.selfName;
         const info = window.webxdc.selfName + " created \"" + simplifyString(cal.addEventText.value) +
-               "\" on " + cal.monthNames[dateSt.getMonth()] + " " + dateSt.getDate();
+               "\" on " + cal.monthNames[cal.selMonth] + " " + cal.selDay;
         window.webxdc.sendUpdate({
                 payload: { actions: [{ action: 'add', event }]},
                 info: info,

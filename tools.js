@@ -119,3 +119,61 @@ function validateColor(color) {
         return '#FAD02C';
     }
 }
+
+function addLeadingZeros(num, size) {
+    var s = "000000000" + num;
+    return s.substring(s.length - size);
+}
+
+function icsDateStringToIsoString(icsDateString) {
+    const year   = icsDateString.substr(0,  4);
+    const month  = icsDateString.substr(4,  2);
+    const day    = icsDateString.substr(6,  2);
+    const hour   = icsDateString.substr(9,  2);
+    const min    = icsDateString.substr(11, 2);
+    const sec    = icsDateString.substr(13, 2);
+    return year + '-' + month + '-' + day + 'T' + hour + ':' + min + ':' + sec + '.000Z';
+}
+
+function ymdToIcsDateString(year, monthIndex, day) {
+    return addLeadingZeros(year, 4) + addLeadingZeros(monthIndex + 1, 2) + addLeadingZeros(day, 2);
+}
+
+function unifyIcsDateString(icsDateString, param = {}) {
+    try {
+        icsDateString = icsDateString.trim();
+        if (icsDateString.length >= 15) {
+            var dateObj = new Date(icsDateStringToIsoString(icsDateString));
+            if (icsDateString.substr(15, 1) != 'Z' && typeof param.TZID == 'string') {
+                var unixTimestamp = dateObj.getTime();
+                unixTimestamp -= getTimezoneOffsetMilliseconds(param.TZID);
+                dateObj = new Date(unixTimestamp);
+            }
+            return dateToIcsDateString(dateObj);
+        } else {
+            return icsDateString.substring(0, 8);
+        }
+    } catch (e) {
+        console.error(e);
+        return dateToIcsDateString(new Date())
+    }
+}
+
+function ununifyIcsDateString(unifiedIcsStr) {
+    if (unifiedIcsStr.length == 8) {
+        return ';VALUE=DATE:' + unifiedIcsStr;
+    } else {
+        return ':' + unifiedIcsStr;
+    }
+}
+
+function unifiedIcsDateStringToDateObj(icsDateString) {
+    if (icsDateString.length >= 15) {
+        return new Date(icsDateStringToIsoString(icsDateString));
+    } else {
+        const year       = parseInt(icsDateString.substr(0,  4), 10);
+        const monthIndex = parseInt(icsDateString.substr(4,  2) - 1, 10);
+        const day        = parseInt(icsDateString.substr(6,  2), 10);
+        return new Date(year, monthIndex, day);
+    }
+}

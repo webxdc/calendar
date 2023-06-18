@@ -2,8 +2,8 @@
 function icsStringToEventArray(icsString) {
     const keyMap = {
         ['UID']: "uid",
-        ['DTSTART']: "startTimestamp",
-        ['DTEND']: "endTimestamp",
+        ['DTSTART']: "dtStart",
+        ['DTEND']: "dtEnd",
         ['SUMMARY']: "summary",
         ['X-XDC-COLOR']: "color",
         ['X-XDC-CREATOR']: "creator",
@@ -71,10 +71,10 @@ function icsStringToEventArray(icsString) {
                 currentObj[keyMap['UID']] = unescapeIcsValue(value);
                 break;
             case 'DTSTART':
-                currentObj[keyMap['DTSTART']] = icsDateStringToUnixTimestamp(value, param);
+                currentObj[keyMap['DTSTART']] = unifyIcsDateString(value, param);
                 break;
             case 'DTEND':
-                currentObj[keyMap['DTEND']] = icsDateStringToUnixTimestamp(value, param);
+                currentObj[keyMap['DTEND']] = unifyIcsDateString(value, param);
                 break;
             case 'DESCRIPTION':
                 if (!isAlarm) currentObj[keyMap['DESCRIPTION']] = unescapeIcsValue(value);
@@ -106,21 +106,4 @@ function unescapeIcsValue(str) {
     } else {
         return "" + str;
     }
-}
-
-function icsDateStringToUnixTimestamp(icsDateString, param) {
-    // ics date strings are `YYYYMMDDTHHmmSSZ` for UTC, otherwise the last `Z` is omitted
-    const year   = icsDateString.substr(0,  4);
-    const month  = icsDateString.substr(4,  2);
-    const day    = icsDateString.substr(6,  2);
-    const hour   = icsDateString.substr(9,  2);
-    const min    = icsDateString.substr(11, 2);
-    const sec    = icsDateString.substr(13, 2);
-    const isoStr = year + '-' + month + '-' + day + 'T' + hour + ':' + min + ':' + sec + '.000Z';
-    const dateObj = new Date(isoStr);
-    var unixTimestamp = dateObj.getTime();
-    if (icsDateString.substr(15, 1) != 'Z' && typeof param.TZID == 'string') {
-        unixTimestamp -= getTimezoneOffsetMilliseconds(param.TZID);
-    }
-    return unixTimestamp;
 }

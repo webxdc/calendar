@@ -13,16 +13,17 @@ function eventArrayToIcsString(events) {
             continue;
         }
         lastUid = event.uid;
-        icsString +=
-              "BEGIN:VEVENT"   + LINEEND
-            + "UID:"           + lastUid + LINEEND
-            + "DTSTAMP:"       + dateToIcsDateString(new Date()) + LINEEND
-            + "DTSTART:"       + dateToIcsDateString(new Date(event.startTimestamp)) + LINEEND
-            + "DTEND:"         + dateToIcsDateString(new Date(event.endTimestamp)) + LINEEND
-            + "SUMMARY:"       + escapeIcsValue(event.summary) + LINEEND
-            + "X-XDC-CREATOR:" + escapeIcsValue(event.creator) + LINEEND
-            + "X-XDC-COLOR:"   + escapeIcsValue(event.color) + LINEEND
-            + "END:VEVENT"     + LINEEND;
+        icsString     += "BEGIN:VEVENT"   + LINEEND
+                       + "UID:"           + lastUid + LINEEND
+                       + "DTSTAMP:"       + dateToIcsDateString(new Date()) + LINEEND
+                       + "DTSTART"        + ununifyIcsDateString(event.dtStart) + LINEEND // colon added by ununify
+                       + "SUMMARY:"       + escapeIcsValue(event.summary) + LINEEND
+                       + "X-XDC-CREATOR:" + escapeIcsValue(event.creator) + LINEEND
+                       + "X-XDC-COLOR:"   + escapeIcsValue(event.color) + LINEEND;
+        if (event.dtEnd != '') {
+            icsString += "DTEND"          + ununifyIcsDateString(event.dtEnd) + LINEEND // colon added by ununify
+        }
+        icsString     += "END:VEVENT"     + LINEEND;
 
     }
     icsString += "END:VCALENDAR" + LINEEND;
