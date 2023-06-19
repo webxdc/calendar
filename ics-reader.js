@@ -84,10 +84,13 @@ function icsStringToEventArray(icsString) {
                 break;
             case 'LOCATION':
                 currentObj[keyMap['LOCATION']] = unescapeIcsValue(value);
+                break;
             case 'X-XDC-CREATOR':
                 currentObj[keyMap['X-XDC-CREATOR']] = unescapeIcsValue(value);
+                break;
             case 'X-XDC-COLOR':
                 currentObj[keyMap['X-XDC-COLOR']] = unescapeIcsValue(value);
+                break;
             default:
                 continue;
         }
