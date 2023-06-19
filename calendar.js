@@ -445,7 +445,7 @@ var cal = {
         cal.editEventText.value = "";
         selectColor(document.getElementById("defaultColor"));
         if (editUid) {
-            const event = cal.events.find((event) => event.uid === editUid);
+            const event = cal.events.find((e) => e.uid === editUid);
             cal.editEventText.value = event.summary;
             for (button of colorButtons) {
                 if (button.getAttribute("data-color") == event.color) {
@@ -479,13 +479,25 @@ var cal = {
     /** adds (editUid undefined) or edits an event (editUid defined) */
     doEditEvent: (editUid) => {
         var event = new CalEvent();
+        event.uid       = editUid ? editUid : generateUid();
+        event.summary   = cal.editEventText.value;
+        event.dtStart   = ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
         var end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
-        event.dtStart        = ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
-        event.dtEnd          = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
-        event.summary        = cal.editEventText.value;
-        event.color          = cal.color;
-        event.uid            = editUid ? editUid : generateUid();
-        event.creator        = window.webxdc.selfName;
+        event.dtEnd     = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
+        event.color     = cal.color;
+        event.creator   = window.webxdc.selfName;
+
+        if (editUid) {
+            const old = cal.events.find((e) => e.uid === editUid);
+            if (event.summary   === old.summary
+             && event.dtStart   === old.dtStart
+             && event.dtEnd     === old.dtEnd
+             && event.color     === old.color) {
+                console.log("no changes");
+                return;
+            }
+        }
+
         const info = window.webxdc.selfName + (editUid ? " edited \"" : " created \"") + simplifyString(cal.editEventText.value) +
                "\" on " + cal.monthNames[cal.selMonth] + " " + cal.selDay;
         window.webxdc.sendUpdate({
@@ -495,7 +507,6 @@ var cal = {
             },
             info
         );
-        return false;
     },
 
     deleteEvent: (uid) => {
