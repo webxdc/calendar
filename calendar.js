@@ -232,6 +232,16 @@ var cal = {
         return parseInt(allHeight / lineHeight);
     },
 
+    getEventsForDay: (year, month, day) => {
+        const dayStart = new Date(year, month, day).getTime();
+        const dayEnd = new Date(year, month, day + 1).getTime(); // Date() takes care of overflows
+        var events = cal.events.filter((event) => {
+            const eventStart = unifiedIcsDateStringToDateObj(event.dtStart).getTime();
+            return eventStart >= dayStart && eventStart < dayEnd;
+        });
+        return events; // CalEvent[]
+    },
+
     renderSelectedMonth: () => {
         cal.selMonth = parseInt(cal.monthSelMonth.value); // 0=jan, 11=dec
         cal.selYear = parseInt(cal.monthSelYear.value);
@@ -348,6 +358,9 @@ var cal = {
         }
     },
 
+
+    // day view
+
     renderAndSelectDay: (year, month, day) => {
         cal.selDay = day;
         let dayEvents = cal.getEventsForDay(year, month, day);
@@ -397,6 +410,14 @@ var cal = {
         cal.dayTitle.textContent = `${cal.weekdayNames[date.getDay()]} ${day} ${cal.monthNames[month]} ${year}`;
         cal.dayScreen.classList.remove("hidden");
     },
+
+    closeDayScreen: () => {
+        cal.dayScreen.classList.add("hidden");
+        cal.closeEditEvent();
+    },
+
+
+    // event editor
 
     /** show dialog to add (editUid undefined) or edit an event (editUid defined) */
     showEditEvent: (editUid = undefined) => {
@@ -455,27 +476,6 @@ var cal = {
         cal.editEventDetailsDiv.classList.remove("hidden");
     },
 
-    closeEditEvent: () => {
-        cal.eventBoxes.classList.remove("hidden");
-        cal.editEventDetailsDiv.classList.add("hidden");
-        cal.eventBoxesButtonBar.classList.remove("hidden");
-    },
-
-    closeDayScreen: () => {
-        cal.dayScreen.classList.add("hidden");
-        cal.closeEditEvent();
-    },
-
-    getEventsForDay: (year, month, day) => {
-        const dayStart = new Date(year, month, day).getTime();
-        const dayEnd = new Date(year, month, day + 1).getTime(); // Date() takes care of overflows
-        var events = cal.events.filter((event) => {
-            const eventStart = unifiedIcsDateStringToDateObj(event.dtStart).getTime();
-            return eventStart >= dayStart && eventStart < dayEnd;
-        });
-        return events; // CalEvent[]
-    },
-
     /** adds (editUid undefined) or edits an event (editUid defined) */
     doEditEvent: (editUid) => {
         var event = new CalEvent();
@@ -498,31 +498,6 @@ var cal = {
         return false;
     },
 
-    showAlert: (msg, primaryLabel, cancelLabel = undefined, primaryCallback = undefined) => {
-        const dlg = document.getElementById("alert");
-        const cancel = document.getElementById("alertCancel");
-        const primary = document.getElementById("alertPrimary");
-
-        primary.textContent = primaryLabel;
-        primary.onclick = () => {
-            dlg.classList.add("hidden");
-            if (primaryCallback !== undefined) {
-                primaryCallback();
-            }
-        };
-        if (cancelLabel === undefined) {
-            cancel.classList.add("hidden");
-        } else {
-            cancel.classList.remove("hidden");
-            cancel.textContent = cancelLabel;
-            cancel.onclick = () => {
-                dlg.classList.add("hidden");
-            };
-        }
-        document.getElementById("alertText").textContent = msg;
-        dlg.classList.remove("hidden");
-    },
-
     deleteEvent: (uid) => {
         const eventToDelete = cal.events.find((event) => event.uid === uid);
         cal.showAlert("Delete '" + simplifyString(eventToDelete.summary) + "'?", "Delete", "Cancel", () => {
@@ -539,17 +514,22 @@ var cal = {
         });
     },
 
-    doMonthSel: () => {
-        cal.renderSelectedMonth();
-        cal.closeDrawer();
+    closeEditEvent: () => {
+        cal.eventBoxes.classList.remove("hidden");
+        cal.editEventDetailsDiv.classList.add("hidden");
+        cal.eventBoxesButtonBar.classList.remove("hidden");
     },
+
+
+    // drawer
 
     openDrawer: () => {
         cal.drawer.classList.remove("hidden");
     },
 
-    closeDrawer: () => {
-        cal.drawer.classList.add("hidden");
+    doMonthSel: () => {
+        cal.renderSelectedMonth();
+        cal.closeDrawer();
     },
 
     sendToChat: (uid = undefined) => {
@@ -611,6 +591,38 @@ var cal = {
         cal.showAlert('' + events.length + ' event(s) imported from "' + file.name + '".', 'OK');
         cal.closeDrawer();
     }
+
+    closeDrawer: () => {
+        cal.drawer.classList.add("hidden");
+    },
+
+
+    // tools
+
+    showAlert: (msg, primaryLabel, cancelLabel = undefined, primaryCallback = undefined) => {
+        const dlg = document.getElementById("alert");
+        const cancel = document.getElementById("alertCancel");
+        const primary = document.getElementById("alertPrimary");
+
+        primary.textContent = primaryLabel;
+        primary.onclick = () => {
+            dlg.classList.add("hidden");
+            if (primaryCallback !== undefined) {
+                primaryCallback();
+            }
+        };
+        if (cancelLabel === undefined) {
+            cancel.classList.add("hidden");
+        } else {
+            cancel.classList.remove("hidden");
+            cancel.textContent = cancelLabel;
+            cancel.onclick = () => {
+                dlg.classList.add("hidden");
+            };
+        }
+        document.getElementById("alertText").textContent = msg;
+        dlg.classList.remove("hidden");
+    },
 };
 
 window.addEventListener("load", cal.init);
