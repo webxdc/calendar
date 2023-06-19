@@ -7,6 +7,7 @@ body {
     color: #000;
     height: 100vh;
     margin: 0;
+    cursor: default;
 }
 
 body, textarea {
@@ -83,6 +84,7 @@ button.primary {
     border-bottom: 1px solid #999 !important;
     color: #333;
     padding-right: 8px;
+    cursor: default !important;
 }
 
 #daysGrid td {
@@ -90,10 +92,12 @@ button.primary {
     border: 1px solid #ddd;
     vertical-align: top;
     overflow: hidden;
+    cursor: pointer;
 }
 
 #daysGrid td.blank {
     border: 0;
+    cursor: default !important;
 }
 
 #daysGrid td.weekend {
@@ -129,6 +133,7 @@ button.primary {
 
 .evtMore {
     padding-left: 3px;
+    font-weight: bold;
 }
 
 
@@ -159,6 +164,10 @@ button.primary {
 
 #drawer button {
     width: 268px;
+}
+
+#drawerCloseButton, #dayScreenCloseButton {
+    cursor: pointer;
 }
 
 select {
@@ -193,6 +202,7 @@ select {
 }
 
 #eventBoxes .eventAction {
+    cursor: pointer;
     float: right;
     margin: 0 6px;
 }

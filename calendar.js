@@ -301,7 +301,7 @@ var cal = {
 
         cal.possibleLines = cal.calcPossibleLines();
         const linesPerRow = parseInt(cal.possibleLines / rowsCount);
-        const maxEventLines = Math.max(1, linesPerRow - 1);
+        const maxEventLines = Math.max(2, linesPerRow - 1);
         for (let i = 0; i < squares.length; i++) {
             var day = squares[i];
             let cCell = document.createElement("td");
@@ -329,7 +329,7 @@ var cal = {
                     if (j >= maxEventLines-1 && eventsDay.length != maxEventLines) {
                         var evt = document.createElement("div");
                         evt.classList.add("evtMore");
-                        evt.textContent = '+' + (eventsDay.length-j) + ' events';
+                        evt.textContent = '+' + (eventsDay.length-j);
                         cCell.appendChild(evt);
                         break;
                     }
