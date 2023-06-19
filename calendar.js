@@ -364,34 +364,36 @@ var cal = {
 
         removeAllChildren(cal.eventBoxes);
         if (dayEvents.length > 0) {
-            for (const i in dayEvents) {
+            for (event of dayEvents) {
                 var eventBox = document.createElement("div");
-                var editButton = document.createElement("span");
-                var exportButton = document.createElement("span");
-                var data = document.createElement("div");
-                var author = document.createElement("div");
-                var lilHeader = document.createElement("div");
-                lilHeader.classList.add("eventMeta");
+                eventBox.style.backgroundColor = validateColor(event.color);
 
+                var eventMeta = document.createElement("div");
+                eventMeta.classList.add("eventMeta");
+
+                var author = document.createElement("div");
+                author.textContent = event.creator;
+
+                var exportButton = document.createElement("span");
                 exportButton.innerText = 'Share';
                 exportButton.setAttribute("class", "eventAction");
-                exportButton.setAttribute("data-id", dayEvents[i].uid);
+                exportButton.setAttribute("data-id", event.uid);
                 exportButton.onclick = (ev) => cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
 
+                var editButton = document.createElement("span");
                 editButton.innerText = 'Edit';
                 editButton.setAttribute("class", "eventAction");
-                editButton.setAttribute("data-id", dayEvents[i].uid);
+                editButton.setAttribute("data-id", event.uid);
                 editButton.onclick = (ev) => cal.showEditEvent(ev.currentTarget.getAttribute("data-id"));
 
-                author.textContent = dayEvents[i].creator;
-                lilHeader.appendChild(editButton);
-                lilHeader.appendChild(exportButton);
-                lilHeader.appendChild(author);
+                var summary = document.createElement("div");
+                summary.textContent = event.summary;
 
-                eventBox.appendChild(lilHeader);
-                data.textContent = dayEvents[i].summary;
-                eventBox.style.backgroundColor = validateColor(dayEvents[i].color);
-                eventBox.appendChild(data);
+                eventMeta.appendChild(editButton);
+                eventMeta.appendChild(exportButton);
+                eventMeta.appendChild(author);
+                eventBox.appendChild(eventMeta);
+                eventBox.appendChild(summary);
                 cal.eventBoxes.appendChild(eventBox);
             }
         } else {
