@@ -371,8 +371,16 @@ var cal = {
                 var eventMeta = document.createElement("div");
                 eventMeta.classList.add("eventMeta");
 
-                var author = document.createElement("div");
-                author.textContent = event.creator;
+                var info = document.createElement("div");
+                var str = getLocalIcsTimeString(event.dtStart);
+                var end = getLocalIcsTimeString(event.dtEnd);
+                if (str != '' && end != '') {
+                    str += ' - ' + end;
+                }
+                if (event.creator != '') {
+                    str += (str == '' ? '' : ', ') + event.creator;
+                }
+                info.textContent = str;
 
                 var exportButton = document.createElement("span");
                 exportButton.innerText = 'Share';
@@ -391,7 +399,7 @@ var cal = {
 
                 eventMeta.appendChild(editButton);
                 eventMeta.appendChild(exportButton);
-                eventMeta.appendChild(author);
+                eventMeta.appendChild(info);
                 eventBox.appendChild(eventMeta);
                 eventBox.appendChild(summary);
                 cal.eventBoxes.appendChild(eventBox);
@@ -477,21 +485,22 @@ var cal = {
         var event = new CalEvent();
         event.uid       = editUid ? editUid : generateUid();
         event.summary   = cal.editEventText.value;
-        event.dtStart   = ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
-        var end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
-        event.dtEnd     = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
         event.color     = cal.color;
         event.creator   = window.webxdc.selfName;
 
         if (editUid) {
             const old = cal.events.find((e) => e.uid === editUid);
             if (event.summary   === old.summary
-             && event.dtStart   === old.dtStart
-             && event.dtEnd     === old.dtEnd
              && event.color     === old.color) {
                 console.log("no changes");
                 return;
             }
+            event.dtStart = old.dtStart;
+            event.dtEnd   = old.dtEnd;
+        } else {
+            var end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
+            event.dtStart = ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
+            event.dtEnd   = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
         }
 
         const info = window.webxdc.selfName + (editUid ? " edited \"" : " created \"") + simplifyString(cal.editEventText.value) +

@@ -80,15 +80,11 @@ function getWeekFirstDay() {
 }
 
 function getDateString(year, monthIndex, day, options = {}) {
-    try {
-        const date = new Date(year, monthIndex, day);
-        if (year == new Date().getFullYear()) {
-            return date.toLocaleDateString(undefined, { ...options, ...{month: "short", day: "numeric"} });
-        } else {
-            return date.toLocaleDateString(undefined, { ...options, ...{year: "numeric", month: "short", day: "numeric"} });
-        }
-    } catch(e) {
-        return '' + year + '-' + (monthIndex+1) + '-' + day;
+    const date = new Date(year, monthIndex, day);
+    if (year == new Date().getFullYear()) {
+        return date.toLocaleDateString(undefined, { ...options, ...{month: "short", day: "numeric"} });
+    } else {
+        return date.toLocaleDateString(undefined, { ...options, ...{year: "numeric", month: "short", day: "numeric"} });
     }
 }
 
@@ -189,4 +185,12 @@ function unifiedIcsDateStringToDateObj(icsDateString) {
         const day        = parseInt(icsDateString.substr(6,  2), 10);
         return new Date(year, monthIndex, day);
     }
+}
+
+function getLocalIcsTimeString(icsDateString) {
+    if (icsDateString.length != 16) {
+        return '';
+    }
+    const date = unifiedIcsDateStringToDateObj(icsDateString);
+    return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' });
 }
