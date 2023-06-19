@@ -590,7 +590,7 @@ var cal = {
         );
         cal.showAlert('' + events.length + ' event(s) imported from "' + file.name + '".', 'OK');
         cal.closeDrawer();
-    }
+    },
 
     closeDrawer: () => {
         cal.drawer.classList.add("hidden");
