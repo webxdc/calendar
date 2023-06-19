@@ -403,8 +403,7 @@ var cal = {
             cal.eventBoxes.appendChild(p);
         }
 
-        const date = new Date(year, month, day);
-        cal.dayTitle.textContent = `${cal.weekdayNames[date.getDay()]} ${day} ${cal.monthNames[month]} ${year}`;
+        cal.dayTitle.textContent = getDateString(year, month, day, {weekday: "short", year: "numeric"});
         cal.dayScreen.classList.remove("hidden");
     },
 
@@ -496,7 +495,7 @@ var cal = {
         }
 
         const info = window.webxdc.selfName + (editUid ? " edited \"" : " created \"") + simplifyString(cal.editEventText.value) +
-               "\" on " + cal.monthNames[cal.selMonth] + " " + cal.selDay;
+               "\" on " + getDateString(cal.selYear, cal.selMonth, cal.selDay);
         window.webxdc.sendUpdate({
                 payload: { actions: [{ action: editUid ? 'edit' : 'add', event }]},
                 info: editUid ? undefined : info,
@@ -510,7 +509,7 @@ var cal = {
         const eventToDelete = cal.events.find((e) => e.uid === uid);
         cal.showAlert("Delete '" + simplifyString(eventToDelete.summary) + "'?", "Delete", "Cancel", () => {
             const info = window.webxdc.selfName + " deleted \"" + simplifyString(eventToDelete.summary)
-                + "\" from " + cal.monthNames[cal.selMonth] + " " + cal.selDay;
+                + "\" from " + getDateString(cal.selYear, cal.selMonth, cal.selDay);
             window.webxdc.sendUpdate({
                     payload: { actions: [{ action: 'delete', uid: uid }]},
                     info: info,

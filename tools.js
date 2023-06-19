@@ -79,6 +79,19 @@ function getWeekFirstDay() {
 	}
 }
 
+function getDateString(year, monthIndex, day, options = {}) {
+    try {
+        const date = new Date(year, monthIndex, day);
+        if (year == new Date().getFullYear()) {
+            return date.toLocaleDateString(undefined, { ...options, ...{month: "short", day: "numeric"} });
+        } else {
+            return date.toLocaleDateString(undefined, { ...options, ...{year: "numeric", month: "short", day: "numeric"} });
+        }
+    } catch(e) {
+        return '' + year + '-' + (monthIndex+1) + '-' + day;
+    }
+}
+
 function getTimezoneOffsetMilliseconds(timeZoneStr) {
     var minutesOffset = 0;
     try {
