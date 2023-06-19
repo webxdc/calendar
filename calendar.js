@@ -72,9 +72,8 @@ var cal = {
 
         document.getElementById("dayScreenCloseButton").onclick = cal.closeDayScreen;
         document.getElementById("importFromFileButton").onclick = cal.importFromFile;
-        document.getElementById("exportToFileButton").onclick = () => {
-            cal.sendToChat();
-        };
+        document.getElementById("exportToFileButton").onclick = () => cal.sendToChat();
+
         document.getElementById("mainmenu").onclick = cal.openDrawer;
         document.getElementById("drawerCloseButton").onclick = cal.closeDrawer;
         cal.drawer.onclick = (e) => {
@@ -134,16 +133,14 @@ var cal = {
                             console.log('event already exists: ' + simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
                         }
                     } else if (action.action == 'edit') {
-                        let i = cal.events.findIndex((obj) => { return obj.uid === action.event.uid; });
+                        let i = cal.events.findIndex((e) => e.uid === action.event.uid);
                         if (i != -1) {
                             cal.events[i] = action.event;
                         } else {
                             console.log('event not found: ' + simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
                         }
                     } else if (action.action == 'delete') {
-                        let index = cal.events.findIndex((obj) => {
-                            return obj.uid === action.uid;
-                        });
+                        let index = cal.events.findIndex((e) => e.uid === action.uid);
                         if (index != -1) cal.events.splice(index, 1);
                     }
                 });
@@ -379,9 +376,7 @@ var cal = {
                 exportButton.innerText = 'Share';
                 exportButton.setAttribute("class", "eventAction");
                 exportButton.setAttribute("data-id", dayEvents[i].uid);
-                exportButton.onclick = (ev) => {
-                    cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
-                };
+                exportButton.onclick = (ev) => cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
 
                 editButton.innerText = 'Edit';
                 editButton.setAttribute("class", "eventAction");
@@ -510,7 +505,7 @@ var cal = {
     },
 
     deleteEvent: (uid) => {
-        const eventToDelete = cal.events.find((event) => event.uid === uid);
+        const eventToDelete = cal.events.find((e) => e.uid === uid);
         cal.showAlert("Delete '" + simplifyString(eventToDelete.summary) + "'?", "Delete", "Cancel", () => {
             const info = window.webxdc.selfName + " deleted \"" + simplifyString(eventToDelete.summary)
                 + "\" from " + cal.monthNames[cal.selMonth] + " " + cal.selDay;
@@ -554,9 +549,7 @@ var cal = {
         if (uid === undefined) {
             data = eventArrayToIcsString(cal.events);
         } else {
-            let event = cal.events.filter((event) => {
-                return event.uid === uid;
-            });
+            let event = cal.events.filter((e) => e.uid === uid);
             data = eventArrayToIcsString(event);
             if (event.length === 1) {
                 title = event[0].summary;
@@ -627,9 +620,7 @@ var cal = {
         } else {
             cancel.classList.remove("hidden");
             cancel.textContent = cancelLabel;
-            cancel.onclick = () => {
-                dlg.classList.add("hidden");
-            };
+            cancel.onclick = () => dlg.classList.add("hidden");
         }
         document.getElementById("alertText").textContent = msg;
         dlg.classList.remove("hidden");
