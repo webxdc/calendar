@@ -40,17 +40,18 @@
 			<button id="nextDay" style="margin-right: 0.5em;">&gt;</button>
 			<button id="addEventButton" class="primary">New Event</button>
 		</div>
-		<div id="addEventDetailsDiv" class="hidden">
-			<textarea id="addEventText" class="block bottomMargin" placeholder="Enter event description"></textarea>
+		<div id="editEventDetailsDiv" class="hidden">
+			<textarea id="editEventText" class="block bottomMargin" placeholder="Enter event description"></textarea>
 			<div>
-				<button class="colorBtns" id="yellow" data-color="#ffb800">Default</button>
-				<button class="colorBtns" id="red" data-color="#c74646">Red</button>
-				<button class="colorBtns" id="purple" data-color="#a85bff">Purple</button>
-				<button class="colorBtns" id="green" data-color="#00b58f">Green</button>
+				<button class="colorBtns" data-color="#ffb800" id="defaultColor">Default</button>
+				<button class="colorBtns" data-color="#c74646">Red</button>
+				<button class="colorBtns" data-color="#a85bff">Purple</button>
+				<button class="colorBtns" data-color="#00b58f">Green</button>
 			</div>
 			<div class="buttonbar">
-				<button id="addEventCancelButton">Cancel</button>
-				<button id="addEventOkButton" class="primary">Add Event</button>
+				<button id="editEventCancelButton">Cancel</button>
+				<button id="editEventDeleteButton">Delete</button>
+				<button id="editEventOkButton" class="primary">Add Event</button>
 			</div>
 		</div>
 	</div></div>

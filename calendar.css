@@ -192,9 +192,9 @@ select {
     margin-bottom: 8px;
 }
 
-#eventBoxes .eventShare, #eventBoxes .eventDelete {
+#eventBoxes .eventAction {
     float: right;
-    margin-left: 8px;
+    margin: 0 6px;
 }
 
 .noEvents {
@@ -202,7 +202,7 @@ select {
     color: #AAA;
 }
 
-#addEventDetailsDiv textarea {
+#editEventDetailsDiv textarea {
     margin-top: 1em;
     width: 95%;
     height: 30vh;
@@ -210,6 +210,10 @@ select {
 
 .colorBtns {
     font-size: 16px;
+}
+
+#editEventDeleteButton {
+    float: left;
 }
 
 #alert > div {

@@ -49,9 +49,8 @@ var cal = {
     dayTitle: document.getElementById("dayTitle"),
     eventBoxes: document.getElementById("eventBoxes"),
     eventBoxesButtonBar: document.getElementById("eventBoxesButtonBar"),
-    addEventText: document.getElementById("addEventText"),
-    addEventDetailsDiv: document.getElementById("addEventDetailsDiv"),
-    addEventOkButton: document.getElementById("addEventOkButton"),
+    editEventText: document.getElementById("editEventText"),
+    editEventDetailsDiv: document.getElementById("editEventDetailsDiv"),
 
     drawer: document.getElementById("drawer"),
 
@@ -71,9 +70,7 @@ var cal = {
 
         document.getElementById("monthSelOkButton").onclick = cal.doMonthSel;
 
-        cal.addEventOkButton.classList.add("disabled");
         document.getElementById("dayScreenCloseButton").onclick = cal.closeDayScreen;
-        cal.addEventOkButton.onclick = cal.doAddEvent;
         document.getElementById("importFromFileButton").onclick = cal.importFromFile;
         document.getElementById("exportToFileButton").onclick = () => {
             cal.sendToChat();
@@ -85,9 +82,8 @@ var cal = {
                 cal.closeDrawer();
             }
         };
-        document.getElementById("addEventButton").onclick = cal.showAddEvent;
+        document.getElementById("addEventButton").onclick = () => cal.showEditEvent();
         document.getElementById("todayMonth").onclick = cal.gotoToday;
-        document.getElementById("addEventCancelButton").onclick = cal.cancelAddEvent;
 
         // swipe listeners for mobile
         cal.daysGrid.addEventListener("touchstart", (event) => {
@@ -137,6 +133,13 @@ var cal = {
                         } else {
                             console.log('event already exists: ' + simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
                         }
+                    } else if (action.action == 'edit') {
+                        let i = cal.events.findIndex((obj) => { return obj.uid === action.event.uid; });
+                        if (i != -1) {
+                            cal.events[i] = action.event;
+                        } else {
+                            console.log('event not found: ' + simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
+                        }
                     } else if (action.action == 'delete') {
                         let index = cal.events.findIndex((obj) => {
                             return obj.uid === action.uid;
@@ -149,6 +152,9 @@ var cal = {
             }
             if (cal.initDone) {
                 cal.renderSelectedMonth();
+                if (!dayScreen.classList.contains("hidden")) {
+                    cal.renderAndSelectDay(cal.selYear, cal.selMonth, cal.selDay);
+                }
             }
         }).then(() => {
           cal.renderSelectedMonth();
@@ -350,7 +356,7 @@ var cal = {
         if (dayEvents.length > 0) {
             for (const i in dayEvents) {
                 var eventBox = document.createElement("div");
-                var removeButton = document.createElement("span");
+                var editButton = document.createElement("span");
                 var exportButton = document.createElement("span");
                 var data = document.createElement("div");
                 var author = document.createElement("div");
@@ -358,22 +364,19 @@ var cal = {
                 lilHeader.classList.add("eventMeta");
 
                 exportButton.innerText = 'Share';
-                exportButton.setAttribute("class", "eventShare");
+                exportButton.setAttribute("class", "eventAction");
                 exportButton.setAttribute("data-id", dayEvents[i].uid);
                 exportButton.onclick = (ev) => {
                     cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
                 };
 
-                removeButton.innerHTML =
-                    "<svg id='i-close' viewBox='0 0 32 32' width='15' height='15' fill='none' stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='3.5'><path d='M2 30 L30 2 M30 30 L2 2' /></svg>";
-                removeButton.setAttribute("class", "eventDelete");
-                removeButton.setAttribute("data-id", dayEvents[i].uid);
+                editButton.innerText = 'Edit';
+                editButton.setAttribute("class", "eventAction");
+                editButton.setAttribute("data-id", dayEvents[i].uid);
+                editButton.onclick = (ev) => cal.showEditEvent(ev.currentTarget.getAttribute("data-id"));
 
-                removeButton.onclick = (ev) => {
-                    cal.deleteEvent(ev.currentTarget.getAttribute("data-id"));
-                };
                 author.textContent = dayEvents[i].creator;
-                lilHeader.appendChild(removeButton);
+                lilHeader.appendChild(editButton);
                 lilHeader.appendChild(exportButton);
                 lilHeader.appendChild(author);
 
@@ -395,54 +398,72 @@ var cal = {
         cal.dayScreen.classList.remove("hidden");
     },
 
-    showAddEvent: () => {
-        cal.addEventText.value = "";
-        cal.addEventOkButton.classList.add("disabled");
-        cal.addEventText.addEventListener("input", () => {
-            if (cal.addEventText.value.trim() != "") {
-                cal.addEventOkButton.classList.remove("disabled");
-            } else {
-                cal.addEventOkButton.classList.add("disabled");
-            }
-        });
+    /** show dialog to add (editUid undefined) or edit an event (editUid defined) */
+    showEditEvent: (editUid = undefined) => {
+        const okButton = document.getElementById("editEventOkButton");
+        const deleteButton = document.getElementById('editEventDeleteButton');
+        const colorButtons = document.getElementsByClassName("colorBtns");
+        document.getElementById("editEventCancelButton").onclick = cal.closeEditEvent;
 
-        var yellow = document.getElementById("yellow"),
-            red = document.getElementById("red"),
-            purple = document.getElementById("purple"),
-            green = document.getElementById("green");
-        selectColor(yellow);
-        yellow.onclick = (ev) => selectColor(ev.target);
-        red.onclick = (ev) => selectColor(ev.target);
-        purple.onclick = (ev) => selectColor(ev.target);
-        green.onclick = (ev) => selectColor(ev.target);
+        for (button of colorButtons) {
+            button.onclick = (ev) => selectColor(ev.target);
+        }
         function selectColor(el) {
             cal.color = el.getAttribute("data-color");
-            var buttons = document.getElementsByClassName("colorBtns");
-            for (let i = 0; i < buttons.length; i++) {
-                if (buttons[i].getAttribute("data-color") == cal.color) {
-                    buttons[i].style.backgroundColor = cal.color;
-                    buttons[i].style.color = "white";
+            for (button of colorButtons) {
+                if (button.getAttribute("data-color") == cal.color) {
+                    button.style.backgroundColor = cal.color;
+                    button.style.color = "white";
                 } else {
-                    buttons[i].style.backgroundColor = "transparent";
-                    buttons[i].style.color = "#333652";
+                    button.style.backgroundColor = "transparent";
+                    button.style.color = "#333652";
                 }
             }
         }
 
+        cal.editEventText.value = "";
+        selectColor(document.getElementById("defaultColor"));
+        if (editUid) {
+            const event = cal.events.find((event) => event.uid === editUid);
+            cal.editEventText.value = event.summary;
+            for (button of colorButtons) {
+                if (button.getAttribute("data-color") == event.color) {
+                    selectColor(button);
+                }
+            }
+            deleteButton.classList.remove("hidden");
+            deleteButton.onclick = (ev) => cal.deleteEvent(editUid);
+            okButton.classList.remove("disabled");
+            okButton.onclick = () => { cal.doEditEvent(editUid); cal.closeEditEvent(); };
+            okButton.innerText = "Save";
+        } else {
+            cal.editEventText.addEventListener("input", () => {
+                if (cal.editEventText.value.trim() != "") {
+                    okButton.classList.remove("disabled");
+                } else {
+                    okButton.classList.add("disabled");
+                }
+            });
+            deleteButton.classList.add("hidden");
+            okButton.classList.add("disabled");
+            okButton.onclick = () => { cal.doEditEvent(editUid); cal.closeDayScreen(); };
+            okButton.innerText = "Add Event";
+        }
+
         cal.eventBoxes.classList.add("hidden");
         cal.eventBoxesButtonBar.classList.add("hidden");
-        cal.addEventDetailsDiv.classList.remove("hidden");
+        cal.editEventDetailsDiv.classList.remove("hidden");
     },
 
-    cancelAddEvent: () => {
+    closeEditEvent: () => {
         cal.eventBoxes.classList.remove("hidden");
-        cal.addEventDetailsDiv.classList.add("hidden");
+        cal.editEventDetailsDiv.classList.add("hidden");
         cal.eventBoxesButtonBar.classList.remove("hidden");
     },
 
     closeDayScreen: () => {
         cal.dayScreen.classList.add("hidden");
-        cal.cancelAddEvent();
+        cal.closeEditEvent();
     },
 
     getEventsForDay: (year, month, day) => {
@@ -455,25 +476,25 @@ var cal = {
         return events; // CalEvent[]
     },
 
-    doAddEvent: () => {
+    /** adds (editUid undefined) or edits an event (editUid defined) */
+    doEditEvent: (editUid) => {
         var event = new CalEvent();
         var end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
         event.dtStart        = ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
         event.dtEnd          = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
-        event.summary        = cal.addEventText.value;
+        event.summary        = cal.editEventText.value;
         event.color          = cal.color;
-        event.uid            = generateUid();
+        event.uid            = editUid ? editUid : generateUid();
         event.creator        = window.webxdc.selfName;
-        const info = window.webxdc.selfName + " created \"" + simplifyString(cal.addEventText.value) +
+        const info = window.webxdc.selfName + (editUid ? " edited \"" : " created \"") + simplifyString(cal.editEventText.value) +
                "\" on " + cal.monthNames[cal.selMonth] + " " + cal.selDay;
         window.webxdc.sendUpdate({
-                payload: { actions: [{ action: 'add', event }]},
-                info: info,
+                payload: { actions: [{ action: editUid ? 'edit' : 'add', event }]},
+                info: editUid ? undefined : info,
                 summary: "" + (cal.events.length+1) + " events"
             },
             info
         );
-        cal.closeDayScreen();
         return false;
     },
 
@@ -514,7 +535,7 @@ var cal = {
                 },
                 info
             );
-            document.querySelector('[data-id="' + uid + '"]').parentElement.parentElement.remove();
+            cal.closeEditEvent();
         });
     },
 
