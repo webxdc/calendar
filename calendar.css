@@ -4,7 +4,6 @@ html {
 }
 
 body {
-    color: #000;
     height: 100vh;
     margin: 0;
     cursor: default;
@@ -23,7 +22,6 @@ body, textarea {
 button {
     background: none;
     cursor: pointer;
-    color: #000;
     min-width: 20px;
     padding: 5px 12px;
     font-size: 20px;
@@ -156,7 +154,6 @@ button.primary {
 }
 
 #drawer > div {
-    border-right: 1px solid #ccc;
     margin: 0;
     width: 300px;
     height: 100vh;
@@ -173,11 +170,9 @@ button.primary {
 select {
     font-size: 1.5em;
     border: 0;
-    background-color: white;
 }
 
 #dayScreen > div {
-    border: 1px solid #ccc;
     margin: 5vh 5vw;
     width: 90vw;
 }
@@ -227,7 +222,42 @@ select {
 }
 
 #alert > div {
-    border: 1px solid #ccc;
     margin: 10vh 10vw;
     width: 80vw;
+}
+
+
+/* dark mode */
+
+:root {
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1f1d1e;
+        color: #eee;
+    }
+
+    button, textarea {
+        border: 1px solid #404040;
+    }
+
+    #daysGrid tr.weekdays td {
+        border: 0 !important;
+        border-bottom: 1px solid #404040 !important;
+        color: #ddd;
+    }
+
+    #daysGrid td {
+        border: 1px solid #404040;
+    }
+
+    #daysGrid td.weekend {
+        background-color: #282627;
+    }
+
+    .dialog > div {
+        background-color: #1f1d1e;
+    }
 }

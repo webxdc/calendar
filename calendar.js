@@ -441,7 +441,7 @@ var cal = {
                     button.style.color = "white";
                 } else {
                     button.style.backgroundColor = "transparent";
-                    button.style.color = "#333652";
+                    button.style.color = "inherit";
                 }
             }
         }
