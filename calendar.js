@@ -373,10 +373,6 @@ var cal = {
 
                 var info = document.createElement("div");
                 var str = getLocalIcsTimeString(event.dtStart);
-                var end = getLocalIcsTimeString(event.dtEnd);
-                if (str != '' && end != '') {
-                    str += ' - ' + end;
-                }
                 if (event.creator != '') {
                     str += (str == '' ? '' : ', ') + event.creator;
                 }
