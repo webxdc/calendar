@@ -268,7 +268,7 @@ export let cal = {
     getEventsForDay: (year, month, day) => {
         const dayStart = new Date(year, month, day).getTime();
         const dayEnd = new Date(year, month, day + 1).getTime(); // Date() takes care of overflows
-        var events = cal.events.filter((event) => {
+        const events = cal.events.filter((event) => {
             const eventStart = tools.unifiedIcsDateStringToDateObj(event.dtStart).getTime();
             return eventStart >= dayStart && eventStart < dayEnd;
         });
@@ -331,7 +331,7 @@ export let cal = {
 
         // subsequent rows are a week with dayNumber and events each
         let weekTr = null;
-        var daysAdded = 7; // 7 = out of range, start new row
+        let daysAdded = 7; // 7 = out of range, start new row
         const rowsCount = Math.ceil(squares.length / 7);
         const rowHeightPercent = parseInt(87/rowsCount); // this "87" works for firefox/chrome/safari
 
@@ -339,7 +339,7 @@ export let cal = {
         const linesPerRow = parseInt(cal.possibleLines / rowsCount);
         const maxEventLines = Math.max(2, linesPerRow - 1);
         for (let i = 0; i < squares.length; i++) {
-            var day = squares[i];
+            const day = squares[i];
             let cCell = document.createElement("td");
             if (day == "b") {
                 cCell.classList.add("blank");
@@ -359,17 +359,17 @@ export let cal = {
                 dayLine.appendChild(dayNumber)
                 cCell.appendChild(dayLine);
 
-                var eventsDay = cal.getEventsForDay(cal.selYear, cal.selMonth, day);
+                const eventsDay = cal.getEventsForDay(cal.selYear, cal.selMonth, day);
 
                 for (let j = 0; j < eventsDay.length; j++) {
                     if (j >= maxEventLines-1 && eventsDay.length != maxEventLines) {
-                        var evt = document.createElement("div");
+                        const evt = document.createElement("div");
                         evt.classList.add("evtMore");
                         evt.textContent = '+' + (eventsDay.length-j);
                         cCell.appendChild(evt);
                         break;
                     }
-                    var evt = document.createElement("div");
+                    const evt = document.createElement("div");
                     evt.classList.add("evtSmall");
                     evt.textContent = eventsDay[j].summary;
                     evt.style.backgroundColor = tools.validateColor(eventsDay[j].color);
@@ -400,33 +400,33 @@ export let cal = {
 
         tools.removeAllChildren(cal.eventBoxes);
         if (dayEvents.length > 0) {
-            for (event of dayEvents) {
-                var eventBox = document.createElement("div");
+            for (const event of dayEvents) {
+                const eventBox = document.createElement("div");
                 eventBox.style.backgroundColor = tools.validateColor(event.color);
 
-                var eventMeta = document.createElement("div");
+                const eventMeta = document.createElement("div");
                 eventMeta.classList.add("eventMeta");
 
-                var info = document.createElement("div");
-                var str = tools.icsDateStringToLocalTimeString(event.dtStart);
+                const info = document.createElement("div");
+                let str = tools.icsDateStringToLocalTimeString(event.dtStart);
                 if (event.creator != '') {
                     str += (str == '' ? '' : ', ') + event.creator;
                 }
                 info.textContent = str;
 
-                var exportButton = document.createElement("span");
+                const exportButton = document.createElement("span");
                 exportButton.innerText = 'Share';
                 exportButton.setAttribute("class", "eventAction");
                 exportButton.setAttribute("data-id", event.uid);
                 exportButton.onclick = (ev) => cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
 
-                var editButton = document.createElement("span");
+                const editButton = document.createElement("span");
                 editButton.innerText = 'Edit';
                 editButton.setAttribute("class", "eventAction");
                 editButton.setAttribute("data-id", event.uid);
                 editButton.onclick = (ev) => cal.showEditEvent(ev.currentTarget.getAttribute("data-id"));
 
-                var summary = document.createElement("div");
+                const summary = document.createElement("div");
                 summary.textContent = event.summary;
 
                 eventMeta.appendChild(editButton);
@@ -437,7 +437,7 @@ export let cal = {
                 cal.eventBoxes.appendChild(eventBox);
             }
         } else {
-            var p = document.createElement("p");
+            const p = document.createElement("p");
             p.setAttribute("class", "noEvents");
             p.innerText = 'Tap "New Event" to add events.';
             cal.eventBoxes.appendChild(p);
@@ -521,21 +521,21 @@ export let cal = {
 
     /** adds (editUid undefined) or edits an event (editUid defined) */
     doEditEvent: (editUid) => {
-        var event = new CalEvent();
+        const event     = new CalEvent();
         event.uid       = editUid ? editUid : tools.generateUid();
         event.summary   = cal.editEventText.value;
         event.color     = cal.color;
         event.creator   = window.webxdc.selfName;
 
-        var time   = cal.editEventStartTime.value.split(':');
-        var hour   = parseInt(time[0]);
-        var minute = parseInt(time[1]);
+        const time   = cal.editEventStartTime.value.split(':');
+        const hour   = parseInt(time[0]);
+        const minute = parseInt(time[1]);
         if (cal.editEventUseTime.checked && time.length == 2 && hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
             event.dtStart = tools.dateToIcsDateString(new Date(cal.selYear, cal.selMonth, cal.selDay, hour, minute, 0));
             event.dtEnd   = '';
         } else {
             event.dtStart = tools.ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
-            var end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
+            const end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
             event.dtEnd   = tools.ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
         }
 
@@ -608,12 +608,12 @@ export let cal = {
             return;
         }
 
-        var data = '';
-        var title = '';
+        let data = '';
+        let title = '';
         if (uid === undefined) {
             data = eventArrayToIcsString(cal.events);
         } else {
-            let event = cal.events.filter((e) => e.uid === uid);
+            const event = cal.events.filter((e) => e.uid === uid);
             data = eventArrayToIcsString(event);
             if (event.length === 1) {
                 title = event[0].summary;

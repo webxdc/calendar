@@ -14,7 +14,7 @@ export function icsStringToEventArray(icsString, newEvent) {
     let currentObj = newEvent();
     let lastKey = "";
     let isAlarm = false;
-    var ret = [];
+    const ret = [];
     const lines = icsString.split(/\r\n|\n|\r/);
 
     for (const line of lines) {
@@ -101,7 +101,7 @@ export function icsStringToEventArray(icsString, newEvent) {
 }
 
 function getTimezoneOffsetMilliseconds(timeZoneStr) {
-    var minutesOffset = 0;
+    let minutesOffset = 0;
     try {
         // get timezone specific date for "now" as `MM/DD/YYYY, GMT+HH:mm`
         const dateStr = Intl.DateTimeFormat('en-US', {timeZone: timeZoneStr, timeZoneName: "longOffset"}).format(new Date());
@@ -120,9 +120,9 @@ function unifyIcsDateString(icsDateString, param = {}) {
     try {
         icsDateString = icsDateString.trim();
         if (icsDateString.length >= 15) {
-            var dateObj = new Date(icsDateStringToIsoString(icsDateString));
+            let dateObj = new Date(icsDateStringToIsoString(icsDateString));
             if (icsDateString.substr(15, 1) != 'Z' && typeof param.TZID == 'string') {
-                var unixTimestamp = dateObj.getTime();
+                let unixTimestamp = dateObj.getTime();
                 unixTimestamp -= getTimezoneOffsetMilliseconds(param.TZID);
                 dateObj = new Date(unixTimestamp);
             }

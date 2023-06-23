@@ -98,7 +98,7 @@ export function generateUid() {
 
 export function simplifyString(str) {
     const MAX_LEN = 32;
-    var ret = str.replace(/\n/g, " ");
+    let ret = str.replace(/\n/g, " ");
     if (ret.length > MAX_LEN) {
         ret = ret.substring(0, MAX_LEN-1).trim() + "…";
     }
@@ -114,7 +114,7 @@ export function validateColor(color) {
 }
 
 export function addLeadingZeros(num, size) {
-    var s = "000000000" + num;
+    const s = "000000000" + num;
     return s.substring(s.length - size);
 }
 

@@ -138,4 +138,12 @@ describe("cal", () => {
     it("deleteEvent()", () => {
         cal.deleteEvent("a2");
     });
+
+    it("renderAndSelectDay()", () => {
+        expect(cal.getEventsForDay(2023, 6-1, 23).length).toBe(1);
+        cal.renderAndSelectDay(2023, 6-1, 23);
+
+        expect(cal.getEventsForDay(2000, 1, 1).length).toBe(0);
+        cal.renderAndSelectDay(2000, 1, 1);
+    });
 });
