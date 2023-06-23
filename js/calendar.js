@@ -23,7 +23,7 @@ export function newEvent() {
     return new CalEvent();
 }
 
-export let cal = {
+export const cal = {
     // current date
     nowDay: 0,
     nowMonth: 0,
@@ -323,7 +323,7 @@ export let cal = {
         let weekdaysTr = document.createElement("tr");
         weekdaysTr.classList.add("weekdays");
         for (const day of cal.weekdayNames) {
-            let cCell = document.createElement("td");
+            const cCell = document.createElement("td");
             cCell.textContent = day;
             weekdaysTr.appendChild(cCell);
         }
@@ -396,7 +396,7 @@ export let cal = {
 
     renderAndSelectDay: (year, month, day) => {
         cal.selDay = day;
-        let dayEvents = cal.getEventsForDay(year, month, day);
+        const dayEvents = cal.getEventsForDay(year, month, day);
 
         tools.removeAllChildren(cal.eventBoxes);
         if (dayEvents.length > 0) {
