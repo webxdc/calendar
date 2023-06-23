@@ -1,7 +1,6 @@
 {
   "private": true,
   "name": "calendar",
-  "version": "1.0.0",
   "scripts": {
     "build": "vite build",
     "dev-mini": "vite --port 3000",
