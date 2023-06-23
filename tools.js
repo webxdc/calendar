@@ -125,7 +125,7 @@ function validateColor(color) {
     if (typeof color === 'string' && color[0] === '#') {
         return color;
     } else {
-        return '#ffb800';
+        return '#ffb200';
     }
 }
 
