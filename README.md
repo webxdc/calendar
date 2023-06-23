@@ -7,8 +7,9 @@ You can create and delete events to share with other people.
 
 ## Get the app
 
-Download `calendar.xdc` file from [Release Assets](https://github.com/webxdc/calendar/releases),
-attach to a Delta Chat group and share events!
+Download [calendar.xdc](https://github.com/webxdc/calendar/releases/latest/download/calendar.xdc) file
+from [Release Assets](https://github.com/webxdc/calendar/releases), attach to a Delta Chat group
+and share events!
 
 [Online Demo](https://webxdc.github.io/calendar/)
 
