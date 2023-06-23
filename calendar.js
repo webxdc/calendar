@@ -104,6 +104,20 @@ var cal = {
             }
         });
 
+        addEventListener("keyup", (e) => {
+            if (e.key === "Escape") {
+                if (!document.getElementById("alert").classList.contains("hidden")) {
+                    document.getElementById("alert").classList.add("hidden");
+                } else if (!cal.editEventDetailsDiv.classList.contains("hidden")) {
+                    // do nothing to avoid loss of changed data
+                } else if (!cal.dayScreen.classList.contains("hidden")) {
+                    cal.closeDayScreen();
+                } else if (!cal.drawer.classList.contains("hidden")) {
+                    cal.closeDrawer();
+                }
+            }
+        });
+
         // init month and day selectors
         for (let i = 0; i < 12; i++) {
             let opt = document.createElement("option");
