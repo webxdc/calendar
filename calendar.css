@@ -9,7 +9,7 @@ body {
     cursor: default;
 }
 
-body, textarea {
+body, textarea, input {
     font-family: helvetica, arial, sans-serif;
     font-size: 16px;
 }
@@ -215,6 +215,11 @@ select {
 
 .colorBtns {
     font-size: 16px;
+}
+
+input[type=checkbox].uncheckHides:not(:checked) ~ .hideIfUnchecked {
+    opacity: 0.25;
+    pointer-events: none;
 }
 
 #editEventDeleteButton {

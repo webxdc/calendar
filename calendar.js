@@ -50,6 +50,8 @@ var cal = {
     eventBoxes: document.getElementById("eventBoxes"),
     eventBoxesButtonBar: document.getElementById("eventBoxesButtonBar"),
     editEventText: document.getElementById("editEventText"),
+    editEventUseTime: document.getElementById("editEventUseTime"),
+    editEventStartTime: document.getElementById("editEventStartTime"),
     editEventDetailsDiv: document.getElementById("editEventDetailsDiv"),
 
     drawer: document.getElementById("drawer"),
@@ -148,12 +150,14 @@ var cal = {
                 console.error(e);
             }
             if (cal.initDone) {
+                cal.sortEvents();
                 cal.renderSelectedMonth();
                 if (!dayScreen.classList.contains("hidden")) {
                     cal.renderAndSelectDay(cal.selYear, cal.selMonth, cal.selDay);
                 }
             }
         }).then(() => {
+          cal.sortEvents();
           cal.renderSelectedMonth();
           cal.initDone = true;
       });
@@ -227,6 +231,17 @@ var cal = {
         const allHeight = Math.max(1, cal.daysGrid.offsetHeight);
         const lineHeight = Math.max(1, parseInt(cal.monthTitle.offsetHeight*.9)); // use sth. that is already on screen
         return parseInt(allHeight / lineHeight);
+    },
+
+    sortEvents: () => {
+        cal.events.sort((a, b) => {
+            // sort whole days before concrete times by adding a prefix
+            const aa = (a.dtStart.length == 8 ? 'X' : 'Y') + a.dtStart;
+            const bb = (b.dtStart.length == 8 ? 'X' : 'Y') + b.dtStart;
+            if (aa < bb) { return -1; }
+            if (aa > bb) { return 1; }
+            return 0;
+        });
     },
 
     getEventsForDay: (year, month, day) => {
@@ -372,7 +387,7 @@ var cal = {
                 eventMeta.classList.add("eventMeta");
 
                 var info = document.createElement("div");
-                var str = getLocalIcsTimeString(event.dtStart);
+                var str = icsDateStringToLocalTimeString(event.dtStart);
                 if (event.creator != '') {
                     str += (str == '' ? '' : ', ') + event.creator;
                 }
@@ -443,6 +458,7 @@ var cal = {
         }
 
         cal.editEventText.value = "";
+        cal.editEventUseTime.checked = false;
         selectColor(document.getElementById("defaultColor"));
         if (editUid) {
             const event = cal.events.find((e) => e.uid === editUid);
@@ -452,6 +468,8 @@ var cal = {
                     selectColor(button);
                 }
             }
+            cal.editEventStartTime.value = icsDateStringToLocalTimeString(event.dtStart, { editable: true });
+            cal.editEventUseTime.checked = cal.editEventStartTime.value != '';
             deleteButton.classList.remove("hidden");
             deleteButton.onclick = (ev) => cal.deleteEvent(editUid);
             okButton.classList.remove("disabled");
@@ -471,6 +489,10 @@ var cal = {
             okButton.innerText = "Add Event";
         }
 
+        if (!cal.editEventUseTime.checked) {
+            cal.editEventStartTime.value = addLeadingZeros(new Date().getHours(), 2) + ':00';
+        }
+
         cal.eventBoxes.classList.add("hidden");
         cal.eventBoxesButtonBar.classList.add("hidden");
         cal.editEventDetailsDiv.classList.remove("hidden");
@@ -484,19 +506,27 @@ var cal = {
         event.color     = cal.color;
         event.creator   = window.webxdc.selfName;
 
+        var time   = cal.editEventStartTime.value.split(':');
+        var hour   = parseInt(time[0]);
+        var minute = parseInt(time[1]);
+        if (cal.editEventUseTime.checked && time.length == 2 && hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+            event.dtStart = dateToIcsDateString(new Date(cal.selYear, cal.selMonth, cal.selDay, hour, minute, 0));
+            event.dtEnd   = '';
+        } else {
+            event.dtStart = ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
+            var end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
+            event.dtEnd   = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
+        }
+
         if (editUid) {
             const old = cal.events.find((e) => e.uid === editUid);
             if (event.summary   === old.summary
+             && event.dtStart   === old.dtStart
+             && event.dtEnd     === old.dtEnd
              && event.color     === old.color) {
                 console.log("no changes");
                 return;
             }
-            event.dtStart = old.dtStart;
-            event.dtEnd   = old.dtEnd;
-        } else {
-            var end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
-            event.dtStart = ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
-            event.dtEnd   = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
         }
 
         const info = window.webxdc.selfName + (editUid ? " edited \"" : " created \"") + simplifyString(cal.editEventText.value) +

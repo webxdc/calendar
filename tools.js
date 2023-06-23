@@ -187,10 +187,14 @@ function unifiedIcsDateStringToDateObj(icsDateString) {
     }
 }
 
-function getLocalIcsTimeString(icsDateString) {
+function icsDateStringToLocalTimeString(icsDateString, options = { editable: false }) {
     if (icsDateString.length != 16) {
         return '';
     }
     const date = unifiedIcsDateStringToDateObj(icsDateString);
-    return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' });
+    if (options.editable) {
+        return addLeadingZeros(date.getHours(), 2) + ':' + addLeadingZeros(date.getMinutes(), 2);
+    } else {
+        return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' });
+    }
 }
