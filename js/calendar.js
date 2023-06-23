@@ -153,14 +153,14 @@ export const cal = {
                         if (cal.events.find((e) => e.uid === action.event.uid) === undefined) {
                             cal.events.push(action.event);
                         } else {
-                            console.log('event already exists: ' + tools.simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
+                            console.error('event already exists: ' + tools.simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
                         }
                     } else if (action.action == 'edit') {
                         let i = cal.events.findIndex((e) => e.uid === action.event.uid);
                         if (i != -1) {
                             cal.events[i] = action.event;
                         } else {
-                            console.log('event not found: ' + tools.simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
+                            console.error('event not found: ' + tools.simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
                         }
                     } else if (action.action == 'delete') {
                         let index = cal.events.findIndex((e) => e.uid === action.uid);
@@ -320,7 +320,7 @@ export const cal = {
         cal.monthTitle.textContent = cal.monthNames[cal.selMonth] + " " + cal.selYear;
 
         // first row are day names
-        let weekdaysTr = document.createElement("tr");
+        const weekdaysTr = document.createElement("tr");
         weekdaysTr.classList.add("weekdays");
         for (const day of cal.weekdayNames) {
             const cCell = document.createElement("td");
