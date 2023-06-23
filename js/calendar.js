@@ -127,7 +127,7 @@ export const cal = {
 
         // init month and day selectors
         for (let i = 0; i < 12; i++) {
-            let opt = document.createElement("option");
+            const opt = document.createElement("option");
             opt.value = String(i);
             opt.textContent = cal.monthNames[i];
             if (i == cal.nowMonth) {
@@ -136,7 +136,7 @@ export const cal = {
             cal.monthSelMonth.appendChild(opt);
         }
         for (let i = cal.nowYear - 30; i <= cal.nowYear + 30; i++) {
-            let opt = document.createElement("option");
+            const opt = document.createElement("option");
             opt.value = String(i);
             opt.textContent = String(i);
             if (i == cal.nowYear) {
@@ -156,14 +156,14 @@ export const cal = {
                             console.error('event already exists: ' + tools.simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
                         }
                     } else if (action.action == 'edit') {
-                        let i = cal.events.findIndex((e) => e.uid === action.event.uid);
+                        const i = cal.events.findIndex((e) => e.uid === action.event.uid);
                         if (i != -1) {
                             cal.events[i] = action.event;
                         } else {
                             console.error('event not found: ' + tools.simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
                         }
                     } else if (action.action == 'delete') {
-                        let index = cal.events.findIndex((e) => e.uid === action.uid);
+                        const index = cal.events.findIndex((e) => e.uid === action.uid);
                         if (index != -1) cal.events.splice(index, 1);
                     }
                 });
@@ -283,9 +283,9 @@ export const cal = {
         const endWeekday = new Date(cal.selYear, cal.selMonth, daysInMonth).getDay(); // 0=sun, 6=sat
 
         // blank squares before start of month
-        let squares = [];
+        const squares = [];
         if (cal.weekStartsMonday && startWeekday != 1) {
-            let blanks = startWeekday == 0 ? 7 : startWeekday;
+            const blanks = startWeekday == 0 ? 7 : startWeekday;
             for (let i = 1; i < blanks; i++) {
                 squares.push("b");
             }
@@ -303,13 +303,13 @@ export const cal = {
 
         // blank squares after end of month
         if (cal.weekStartsMonday && endWeekday != 0) {
-            let blanks = endWeekday == 6 ? 1 : 7 - endWeekday;
+            const blanks = endWeekday == 6 ? 1 : 7 - endWeekday;
             for (let i = 0; i < blanks; i++) {
                 squares.push("b");
             }
         }
         if (!cal.weekStartsMonday && endWeekday != 6) {
-            let blanks = endWeekday == 0 ? 6 : 6 - endWeekday;
+            const blanks = endWeekday == 0 ? 6 : 6 - endWeekday;
             for (let i = 0; i < blanks; i++) {
                 squares.push("b");
             }
@@ -340,7 +340,7 @@ export const cal = {
         const maxEventLines = Math.max(2, linesPerRow - 1);
         for (let i = 0; i < squares.length; i++) {
             const day = squares[i];
-            let cCell = document.createElement("td");
+            const cCell = document.createElement("td");
             if (day == "b") {
                 cCell.classList.add("blank");
             } else {
@@ -376,7 +376,7 @@ export const cal = {
                     cCell.appendChild(evt);
                 }
                 cCell.onclick = () => {
-                    let day = Number.parseInt(cCell.getElementsByClassName("dayNumber")[0].textContent);
+                    const day = Number.parseInt(cCell.getElementsByClassName("dayNumber")[0].textContent);
                     cal.renderAndSelectDay(cal.selYear, cal.selMonth, day);
                 };
             }
@@ -644,7 +644,7 @@ export const cal = {
             return;
         }
 
-        let actions = [];
+        const actions = [];
         let notDuplicateEvents = 0;
         for (const event of events) {
             if (cal.events.find((e) => e.uid === event.uid) === undefined) {

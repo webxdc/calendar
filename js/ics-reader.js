@@ -33,7 +33,7 @@ export function icsStringToEventArray(icsString, newEvent) {
             continue;
         }
         let key = line.substring(0, colonPos);
-        let param = {};
+        const param = {};
         const value = line.substring(colonPos + 1);
         if (key.indexOf(";") !== -1) {
             const keyParts = key.split(";");
