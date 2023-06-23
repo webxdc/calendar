@@ -532,6 +532,8 @@ var cal = {
             event.dtEnd   = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
         }
 
+        const info = window.webxdc.selfName + (editUid ? " edited \"" : " created \"") + simplifyString(cal.editEventText.value) +
+               "\" on " + getDateString(cal.selYear, cal.selMonth, cal.selDay);
         if (editUid) {
             const old = cal.events.find((e) => e.uid === editUid);
             if (event.summary   === old.summary
@@ -541,17 +543,22 @@ var cal = {
                 console.log("no changes");
                 return;
             }
+            window.webxdc.sendUpdate({
+                    payload: { actions: [{ action: 'edit', event }]},
+                    info: undefined,
+                    summary: "" + (cal.events.length) + " events"
+                },
+                info
+            );
+        } else {
+            window.webxdc.sendUpdate({
+                    payload: { actions: [{ action: 'add', event }]},
+                    info: info,
+                    summary: "" + (cal.events.length + 1) + " events"
+                },
+                info
+            );
         }
-
-        const info = window.webxdc.selfName + (editUid ? " edited \"" : " created \"") + simplifyString(cal.editEventText.value) +
-               "\" on " + getDateString(cal.selYear, cal.selMonth, cal.selDay);
-        window.webxdc.sendUpdate({
-                payload: { actions: [{ action: editUid ? 'edit' : 'add', event }]},
-                info: editUid ? undefined : info,
-                summary: "" + (cal.events.length+1) + " events"
-            },
-            info
-        );
     },
 
     deleteEvent: (uid) => {
@@ -631,18 +638,25 @@ var cal = {
         }
 
         var actions = [];
+        var notDuplicateEvents = 0;
         for (const event of events) {
+            if (cal.events.find((e) => e.uid === event.uid) === undefined) {
+                notDuplicateEvents++;
+            }
+            // also send send duplicates: this may have some sync advantages (receiver checks for duplicates as well)
             actions.push({ action: 'add', event});
         }
         const info = window.webxdc.selfName + ' imported ' + actions.length + ' events';
         window.webxdc.sendUpdate({
                 payload: { actions: actions },
                 info: info,
-                summary: '' + (cal.events.length + actions.length) + ' events'
+                summary: '' + (cal.events.length + notDuplicateEvents) + ' events'
             },
             info
         );
-        cal.showAlert('' + events.length + ' event(s) imported from "' + file.name + '".', 'OK');
+        cal.showAlert('' + notDuplicateEvents + ' new event(s) '
+                    + 'and ' + (events.length - notDuplicateEvents) + ' duplicate(s) '
+                    + 'imported from "' + file.name + '".', 'OK');
         cal.closeDrawer();
     },
 
