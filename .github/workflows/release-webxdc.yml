@@ -9,11 +9,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
 
-      - name: Build
-        run: |
-          ./create-xdc.sh ${{ github.event.repository.name }}
+      - run: npm install
+      - run: npm run build
+
+      - run: npm ci
+      - run: npm test
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -23,4 +28,4 @@ jobs:
             Auto-generated release
           prerelease: ${{ contains(github.event.ref, '-beta') }}
           fail_on_unmatched_files: true
-          files: ./*.xdc
+          files: ./dist-xdc/*.xdc

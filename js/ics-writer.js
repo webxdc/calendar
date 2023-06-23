@@ -1,5 +1,6 @@
+import { dateToIcsDateString } from "./tools";
 
-function eventArrayToIcsString(events) {
+export function eventArrayToIcsString(events) {
     const LINEEND = "\r\n";
 
     let icsString =
@@ -38,8 +39,10 @@ function escapeIcsValue(str) {
               .replaceAll("\r", "");
 }
 
-function dateToIcsDateString(date) {
-    const isoString = date.toISOString();
-    const formattedString = isoString.replace(/[-:.]/g, "");
-    return formattedString.substring(0, formattedString.length - 4) + "Z";
+function ununifyIcsDateString(unifiedIcsStr) {
+    if (unifiedIcsStr.length == 8) {
+        return ';VALUE=DATE:' + unifiedIcsStr;
+    } else {
+        return ':' + unifiedIcsStr;
+    }
 }

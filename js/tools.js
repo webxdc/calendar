@@ -1,11 +1,11 @@
 
-function removeAllChildren(el) {
+export function removeAllChildren(el) {
 	while (el.lastChild) {
 		el.removeChild(el.lastChild);
 	}
 }
 
-function getShortMonthNames() {
+export function getShortMonthNames() {
 	try {
 		const format = new Intl.DateTimeFormat(undefined, {
 			month: "short",
@@ -39,7 +39,7 @@ function getShortMonthNames() {
 	}
 }
 
-function getShortWeekdayNamesStartingFromSun() {
+export function getShortWeekdayNamesStartingFromSun() {
 	try {
 		const format = new Intl.DateTimeFormat(undefined, {
 			weekday: "short",
@@ -61,7 +61,7 @@ function getShortWeekdayNamesStartingFromSun() {
 	}
 }
 
-function getShortWeekdayNamesStartingFromMon() {
+export function getShortWeekdayNamesStartingFromMon() {
 	const arr = getShortWeekdayNamesStartingFromSun();
 	const sun = arr.shift();
 	arr.push(sun);
@@ -70,7 +70,7 @@ function getShortWeekdayNamesStartingFromMon() {
 
 // 1 is Monday, 7 is Sunday, like in
 // https://tc39.es/proposal-intl-locale-info/#sec-week-info-of-locale
-function getWeekFirstDay() {
+export function getWeekFirstDay() {
 	try {
 		const currLocale = (new Intl.DateTimeFormat()).resolvedOptions().locale;
 		return (new Intl.Locale(currLocale)).weekInfo.firstDay;
@@ -79,7 +79,7 @@ function getWeekFirstDay() {
 	}
 }
 
-function getDateString(year, monthIndex, day, options = {}) {
+export function getDateString(year, monthIndex, day, options = {}) {
     const date = new Date(year, monthIndex, day);
     if (year == new Date().getFullYear()) {
         return date.toLocaleDateString(undefined, { ...options, ...{month: "short", day: "numeric"} });
@@ -88,23 +88,7 @@ function getDateString(year, monthIndex, day, options = {}) {
     }
 }
 
-function getTimezoneOffsetMilliseconds(timeZoneStr) {
-    var minutesOffset = 0;
-    try {
-        // get timezone specific date for "now" as `MM/DD/YYYY, GMT+HH:mm`
-        const dateStr = Intl.DateTimeFormat('en-US', {timeZone: timeZoneStr, timeZoneName: "longOffset"}).format(new Date());
-        const gmtStr = dateStr.split(" ")[1].slice(3) || '+0'; // `+0` is needed when the timezone is missing the number part. Ex. Africa/Bamako -> GMT
-        minutesOffset = parseInt(gmtStr.split(':')[0])*60;
-        if (gmtStr.includes(":")) {
-           minutesOffset = minutesOffset + parseInt(gmtStr.split(':')[1]);
-        }
-    } catch(e) {
-        console.error(e);
-    }
-    return minutesOffset * 60 * 1000;
-}
-
-function generateUid() {
+export function generateUid() {
     try {
         return crypto.randomUUID();
     } catch(e) {
@@ -112,7 +96,7 @@ function generateUid() {
     }
 }
 
-function simplifyString(str) {
+export function simplifyString(str) {
     const MAX_LEN = 32;
     var ret = str.replace(/\n/g, " ");
     if (ret.length > MAX_LEN) {
@@ -121,7 +105,7 @@ function simplifyString(str) {
     return ret;
 }
 
-function validateColor(color) {
+export function validateColor(color) {
     if (typeof color === 'string' && color[0] === '#') {
         return color;
     } else {
@@ -129,12 +113,12 @@ function validateColor(color) {
     }
 }
 
-function addLeadingZeros(num, size) {
+export function addLeadingZeros(num, size) {
     var s = "000000000" + num;
     return s.substring(s.length - size);
 }
 
-function icsDateStringToIsoString(icsDateString) {
+export function icsDateStringToIsoString(icsDateString) {
     const year   = icsDateString.substr(0,  4);
     const month  = icsDateString.substr(4,  2);
     const day    = icsDateString.substr(6,  2);
@@ -144,39 +128,11 @@ function icsDateStringToIsoString(icsDateString) {
     return year + '-' + month + '-' + day + 'T' + hour + ':' + min + ':' + sec + '.000Z';
 }
 
-function ymdToIcsDateString(year, monthIndex, day) {
+export function ymdToIcsDateString(year, monthIndex, day) {
     return addLeadingZeros(year, 4) + addLeadingZeros(monthIndex + 1, 2) + addLeadingZeros(day, 2);
 }
 
-function unifyIcsDateString(icsDateString, param = {}) {
-    try {
-        icsDateString = icsDateString.trim();
-        if (icsDateString.length >= 15) {
-            var dateObj = new Date(icsDateStringToIsoString(icsDateString));
-            if (icsDateString.substr(15, 1) != 'Z' && typeof param.TZID == 'string') {
-                var unixTimestamp = dateObj.getTime();
-                unixTimestamp -= getTimezoneOffsetMilliseconds(param.TZID);
-                dateObj = new Date(unixTimestamp);
-            }
-            return dateToIcsDateString(dateObj);
-        } else {
-            return icsDateString.substring(0, 8);
-        }
-    } catch (e) {
-        console.error(e);
-        return dateToIcsDateString(new Date())
-    }
-}
-
-function ununifyIcsDateString(unifiedIcsStr) {
-    if (unifiedIcsStr.length == 8) {
-        return ';VALUE=DATE:' + unifiedIcsStr;
-    } else {
-        return ':' + unifiedIcsStr;
-    }
-}
-
-function unifiedIcsDateStringToDateObj(icsDateString) {
+export function unifiedIcsDateStringToDateObj(icsDateString) {
     if (icsDateString.length >= 15) {
         return new Date(icsDateStringToIsoString(icsDateString));
     } else {
@@ -187,7 +143,13 @@ function unifiedIcsDateStringToDateObj(icsDateString) {
     }
 }
 
-function icsDateStringToLocalTimeString(icsDateString, options = { editable: false }) {
+export function dateToIcsDateString(date) {
+    const isoString = date.toISOString();
+    const formattedString = isoString.replace(/[-:.]/g, "");
+    return formattedString.substring(0, formattedString.length - 4) + "Z";
+}
+
+export function icsDateStringToLocalTimeString(icsDateString, options = { editable: false }) {
     if (icsDateString.length != 16) {
         return '';
     }
