@@ -1,4 +1,4 @@
-# Calendar app
+# Calendar app [![CI](https://github.com/webxdc/calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/webxdc/calendar/actions/workflows/ci.yml)
 
 This is a simple calendar app for WebXDC.
 You can create and delete events to share with other people.
