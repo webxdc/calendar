@@ -29,7 +29,7 @@ and new features arising :)
 
 ### Install development dependencies
 
-> **NOTE:** you need to have installed [nodeJS and npm][https://docs.npmjs.com/downloading-and-installing-node-js-and-npm]
+> **NOTE:** you need to have installed [nodeJS and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 
 ```sh
 npm install
