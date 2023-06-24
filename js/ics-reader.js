@@ -2,7 +2,7 @@ import {
   generateUid,
   icsDateStringToIsoString,
   dateToIcsDateString,
-} from "./tools";
+} from "./tools.js";
 
 export function icsStringToEventArray(icsString, newEvent) {
   const keyMap = {

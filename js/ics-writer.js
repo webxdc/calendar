@@ -1,4 +1,4 @@
-import { dateToIcsDateString } from "./tools";
+import { dateToIcsDateString } from "./tools.js";
 
 export function eventArrayToIcsString(events) {
   const LINEEND = "\r\n";

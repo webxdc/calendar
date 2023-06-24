@@ -1,6 +1,6 @@
-import { eventArrayToIcsString } from "./ics-writer";
-import { icsStringToEventArray } from "./ics-reader";
-import * as tools from "./tools";
+import { eventArrayToIcsString } from "./ics-writer.js";
+import { icsStringToEventArray } from "./ics-reader.js";
+import * as tools from "./tools.js";
 
 class CalEvent {
   uid = "";
