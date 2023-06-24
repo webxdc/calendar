@@ -1,4 +1,4 @@
-# Calendar app [![CI](https://github.com/webxdc/calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/webxdc/calendar/actions/workflows/ci.yml)
+# Calendar app [![CI](https://github.com/webxdc/calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/webxdc/calendar/actions/workflows/ci.yml) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 This is a simple calendar app for WebXDC.
 You can create and delete events to share with other people.
@@ -49,6 +49,14 @@ To test the app in your browser (with hot reloading!) while you do modifications
 npm run dev-mini
 # Alternatively to test in a more advanced WebXDC emulator:
 npm run dev
+```
+
+### Code formatting
+
+We use [Prettier](https://github.com/prettier/prettier) to format code, after you modify the code, run:
+
+```sh
+npm run format
 ```
 
 ### Packaging

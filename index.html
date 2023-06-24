@@ -1,85 +1,135 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+    />
+    <script src="webxdc.js"></script>
+    <link href="./calendar.css" rel="stylesheet" />
+  </head>
 
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
-	<script src="webxdc.js"></script>
-	<link href="./calendar.css" rel="stylesheet" />
-</head>
+  <body>
+    <table id="monthScreen">
+      <thead>
+        <tr>
+          <td colspan="7" nowrap class="overflow: hidden;">
+            <span id="mainmenu"
+              ><span style="padding: 0 13px 0 5px">≡</span
+              ><span id="monthTitle" class="title"></span
+            ></span>
+            <div style="float: right">
+              <button id="prevMonth">&lt;</button>
+              <button id="todayMonth">Today</button>
+              <button id="nextMonth">&gt;</button>
+            </div>
+          </td>
+        </tr>
+      </thead>
+      <tbody id="daysGrid"></tbody>
+    </table>
 
-<body>
+    <div id="dayScreen" class="dialog hidden">
+      <div>
+        <span id="dayTitle" class="title"></span>
+        <div style="float: right">
+          <span id="dayScreenCloseButton" style="margin-left: 1.5em"
+            ><svg
+              id="i-close"
+              viewBox="0 0 32 32"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentcolor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="4"
+            >
+              <path d="M2 30 L30 2 M30 30 L2 2" /></svg
+          ></span>
+        </div>
+        <div id="eventBoxes" style="clear: both"></div>
+        <div id="eventBoxesButtonBar" class="buttonbar">
+          <button id="prevDay">&lt;</button>
+          <button id="nextDay" style="margin-right: 0.5em">&gt;</button>
+          <button id="addEventButton" class="primary">New Event</button>
+        </div>
+        <div id="editEventDetailsDiv" class="hidden">
+          <textarea
+            id="editEventText"
+            class="block bottomMargin"
+            placeholder="Enter event description"
+          ></textarea>
+          <div>
+            <button class="colorBtns" data-color="#ffb200" id="defaultColor">
+              Default
+            </button>
+            <button class="colorBtns" data-color="#c74646">Red</button>
+            <button class="colorBtns" data-color="#a85bff">Purple</button>
+            <button class="colorBtns" data-color="#00b58f">Green</button>
+          </div>
+          <p>
+            <input type="checkbox" id="editEventUseTime" class="uncheckHides" />
+            <label for="editEventUseTime">Starts at</label>
+            <input
+              type="time"
+              id="editEventStartTime"
+              class="hideIfUnchecked"
+            />
+          </p>
+          <div class="buttonbar">
+            <button id="editEventCancelButton">Cancel</button>
+            <button id="editEventDeleteButton">Delete</button>
+            <button id="editEventOkButton" class="primary">Add Event</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-	<table id="monthScreen">
-		<thead><tr><td colspan="7" nowrap class="overflow: hidden;">
-			<span id="mainmenu"><span style="padding: 0 13px 0 5px;">≡</span><span id="monthTitle" class="title"></span></span>
-			<div style="float: right;">
-				<button id="prevMonth">&lt;</button>
-				<button id="todayMonth">Today</button>
-				<button id="nextMonth">&gt;</button>
-			</div>
-		</td></tr></thead>
-		<tbody id="daysGrid"></tbody>
-	</table>
+    <div id="drawer" class="dialog hidden">
+      <div>
+        <div>
+          <span id="drawerCloseButton"
+            ><svg
+              viewBox="0 0 32 32"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentcolor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="4"
+            >
+              <path d="M2 30 L30 2 M30 30 L2 2" /></svg
+          ></span>
+        </div>
+        <div align="center" style="margin-top: 32px">
+          <p>
+            <select id="monthSelMonth" style="width: 45%"></select>
+            &nbsp;
+            <select id="monthSelYear" style="width: 45%"></select>
+          </p>
+          <p>
+            <button id="monthSelOkButton" class="primary">Show Month</button>
+          </p>
+        </div>
+        <div style="position: absolute; bottom: 32px">
+          <p><button id="importFromFileButton">Import ICS File</button></p>
+          <p><button id="exportToFileButton">Export ICS File</button></p>
+        </div>
+      </div>
+    </div>
 
-	<div id="dayScreen" class="dialog hidden"><div>
-		<span id="dayTitle" class="title"></span>
-		<div style="float: right;">
-			<span id="dayScreenCloseButton" style="margin-left: 1.5em;"><svg id='i-close' viewBox='0 0 32 32' width='20' height='20' fill='none'
-					stroke='currentcolor' stroke-linecap='round' stroke-linejoin='round' stroke-width='4'>
-					<path d='M2 30 L30 2 M30 30 L2 2' />
-			</svg></span>
-		</div>
-		<div id="eventBoxes" style="clear: both;"></div>
-		<div id="eventBoxesButtonBar" class="buttonbar">
-			<button id="prevDay">&lt;</button>
-			<button id="nextDay" style="margin-right: 0.5em;">&gt;</button>
-			<button id="addEventButton" class="primary">New Event</button>
-		</div>
-		<div id="editEventDetailsDiv" class="hidden">
-			<textarea id="editEventText" class="block bottomMargin" placeholder="Enter event description"></textarea>
-			<div>
-				<button class="colorBtns" data-color="#ffb200" id="defaultColor">Default</button>
-				<button class="colorBtns" data-color="#c74646">Red</button>
-				<button class="colorBtns" data-color="#a85bff">Purple</button>
-				<button class="colorBtns" data-color="#00b58f">Green</button>
-			</div>
-			<p>
-				<input type="checkbox" id="editEventUseTime" class="uncheckHides" /> <label for="editEventUseTime">Starts at</label>
-				<input type="time" id="editEventStartTime" class="hideIfUnchecked">
-			</p>
-			<div class="buttonbar">
-				<button id="editEventCancelButton">Cancel</button>
-				<button id="editEventDeleteButton">Delete</button>
-				<button id="editEventOkButton" class="primary">Add Event</button>
-			</div>
-		</div>
-	</div></div>
-
-	<div id="drawer" class="dialog hidden"><div>
-		<div>
-			<span id="drawerCloseButton"><svg viewBox='0 0 32 32' width='20' height='20' fill='none' stroke='currentcolor'
-				stroke-linecap='round' stroke-linejoin='round' stroke-width='4'>
-				<path d='M2 30 L30 2 M30 30 L2 2' />
-			</svg></span>
-		</div>
-		<div align="center" style="margin-top: 32px;">
-			<p><select id="monthSelMonth" style="width: 45%"></select> &nbsp; <select id="monthSelYear" style="width: 45%"></select></p>
-			<p><button id="monthSelOkButton" class="primary">Show Month</button></p>
-		</div>
-		<div style="position: absolute; bottom: 32px;">
-			<p><button id="importFromFileButton">Import ICS File</button></p>
-			<p><button id="exportToFileButton">Export ICS File</button></p>
-		</div>
-	</div></div>
-
-	<div id="alert" class="dialog hidden"><div>
-		<p id="alertText"></p>
-		<div class="buttonbar">
-			<button id="alertCancel"></button>
-			<button id="alertPrimary" class="primary"></button>
-		</div>
-	</div></div>
+    <div id="alert" class="dialog hidden">
+      <div>
+        <p id="alertText"></p>
+        <div class="buttonbar">
+          <button id="alertCancel"></button>
+          <button id="alertPrimary" class="primary"></button>
+        </div>
+      </div>
+    </div>
 
     <script src="./js/calendar.js" type="module"></script>
     <!-- Uncomment to include developer tools in your webxdc to debug it inside Delta Chat -->
@@ -89,5 +139,5 @@
          init.init();
          </script>
     -->
-</body>
+  </body>
 </html>
