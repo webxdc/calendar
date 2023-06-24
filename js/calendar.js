@@ -1,3 +1,6 @@
+import { eventArrayToIcsString } from "./ics-writer";
+import { icsStringToEventArray } from "./ics-reader";
+import * as tools from "./tools";
 
 class CalEvent {
     uid              = '';
@@ -16,7 +19,11 @@ class CalEvent {
     }
 }
 
-var cal = {
+export function newEvent() {
+    return new CalEvent();
+}
+
+export const cal = {
     // current date
     nowDay: 0,
     nowMonth: 0,
@@ -30,8 +37,8 @@ var cal = {
     /** @type {CalEvent[]} */
     events: null,
 
-    monthNames: getShortMonthNames(),
-    weekStartsMonday: getWeekFirstDay() === 1,
+    monthNames: tools.getShortMonthNames(),
+    weekStartsMonday: tools.getWeekFirstDay() === 1,
     weekdayNames: null,
     color: null,
     touchstartX: 0,
@@ -63,7 +70,7 @@ var cal = {
         cal.nowDay = now.getDate();
 
         cal.events = [];
-        cal.weekdayNames = cal.weekStartsMonday ? getShortWeekdayNamesStartingFromMon() : getShortWeekdayNamesStartingFromSun();
+        cal.weekdayNames = cal.weekStartsMonday ? tools.getShortWeekdayNamesStartingFromMon() : tools.getShortWeekdayNamesStartingFromSun();
 
         document.getElementById("nextDay").onclick = cal.nextDay;
         document.getElementById("prevDay").onclick = cal.prevDay;
@@ -120,7 +127,7 @@ var cal = {
 
         // init month and day selectors
         for (let i = 0; i < 12; i++) {
-            let opt = document.createElement("option");
+            const opt = document.createElement("option");
             opt.value = String(i);
             opt.textContent = cal.monthNames[i];
             if (i == cal.nowMonth) {
@@ -129,7 +136,7 @@ var cal = {
             cal.monthSelMonth.appendChild(opt);
         }
         for (let i = cal.nowYear - 30; i <= cal.nowYear + 30; i++) {
-            let opt = document.createElement("option");
+            const opt = document.createElement("option");
             opt.value = String(i);
             opt.textContent = String(i);
             if (i == cal.nowYear) {
@@ -146,17 +153,17 @@ var cal = {
                         if (cal.events.find((e) => e.uid === action.event.uid) === undefined) {
                             cal.events.push(action.event);
                         } else {
-                            console.log('event already exists: ' + simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
+                            console.error('event already exists: ' + tools.simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
                         }
                     } else if (action.action == 'edit') {
-                        let i = cal.events.findIndex((e) => e.uid === action.event.uid);
+                        const i = cal.events.findIndex((e) => e.uid === action.event.uid);
                         if (i != -1) {
                             cal.events[i] = action.event;
                         } else {
-                            console.log('event not found: ' + simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
+                            console.error('event not found: ' + tools.simplifyString(action.event.summary) + ' (' + action.event.uid + ')');
                         }
                     } else if (action.action == 'delete') {
-                        let index = cal.events.findIndex((e) => e.uid === action.uid);
+                        const index = cal.events.findIndex((e) => e.uid === action.uid);
                         if (index != -1) cal.events.splice(index, 1);
                     }
                 });
@@ -166,7 +173,7 @@ var cal = {
             if (cal.initDone) {
                 cal.sortEvents();
                 cal.renderSelectedMonth();
-                if (!dayScreen.classList.contains("hidden")) {
+                if (!cal.dayScreen.classList.contains("hidden")) {
                     cal.renderAndSelectDay(cal.selYear, cal.selMonth, cal.selDay);
                 }
             }
@@ -236,7 +243,7 @@ var cal = {
         cal.monthSelMonth.value = cal.nowMonth;
         cal.monthSelYear.value = cal.nowYear;
         cal.renderSelectedMonth();
-        if (!dayScreen.classList.contains("hidden")) {
+        if (!cal.dayScreen.classList.contains("hidden")) {
             cal.renderAndSelectDay(cal.nowYear, cal.nowMonth, cal.nowDay);
         }
     },
@@ -261,8 +268,8 @@ var cal = {
     getEventsForDay: (year, month, day) => {
         const dayStart = new Date(year, month, day).getTime();
         const dayEnd = new Date(year, month, day + 1).getTime(); // Date() takes care of overflows
-        var events = cal.events.filter((event) => {
-            const eventStart = unifiedIcsDateStringToDateObj(event.dtStart).getTime();
+        const events = cal.events.filter((event) => {
+            const eventStart = tools.unifiedIcsDateStringToDateObj(event.dtStart).getTime();
             return eventStart >= dayStart && eventStart < dayEnd;
         });
         return events; // CalEvent[]
@@ -276,9 +283,9 @@ var cal = {
         const endWeekday = new Date(cal.selYear, cal.selMonth, daysInMonth).getDay(); // 0=sun, 6=sat
 
         // blank squares before start of month
-        let squares = [];
+        const squares = [];
         if (cal.weekStartsMonday && startWeekday != 1) {
-            let blanks = startWeekday == 0 ? 7 : startWeekday;
+            const blanks = startWeekday == 0 ? 7 : startWeekday;
             for (let i = 1; i < blanks; i++) {
                 squares.push("b");
             }
@@ -296,35 +303,35 @@ var cal = {
 
         // blank squares after end of month
         if (cal.weekStartsMonday && endWeekday != 0) {
-            let blanks = endWeekday == 6 ? 1 : 7 - endWeekday;
+            const blanks = endWeekday == 6 ? 1 : 7 - endWeekday;
             for (let i = 0; i < blanks; i++) {
                 squares.push("b");
             }
         }
         if (!cal.weekStartsMonday && endWeekday != 6) {
-            let blanks = endWeekday == 0 ? 6 : 6 - endWeekday;
+            const blanks = endWeekday == 0 ? 6 : 6 - endWeekday;
             for (let i = 0; i < blanks; i++) {
                 squares.push("b");
             }
         }
 
         // draw month overview
-        removeAllChildren(cal.daysGrid);
+        tools.removeAllChildren(cal.daysGrid);
         cal.monthTitle.textContent = cal.monthNames[cal.selMonth] + " " + cal.selYear;
 
         // first row are day names
-        let weekdaysTr = document.createElement("tr");
+        const weekdaysTr = document.createElement("tr");
         weekdaysTr.classList.add("weekdays");
-        for (let d of cal.weekdayNames) {
-            let cCell = document.createElement("td");
-            cCell.textContent = d;
+        for (const day of cal.weekdayNames) {
+            const cCell = document.createElement("td");
+            cCell.textContent = day;
             weekdaysTr.appendChild(cCell);
         }
         cal.daysGrid.appendChild(weekdaysTr);
 
         // subsequent rows are a week with dayNumber and events each
         let weekTr = null;
-        var daysAdded = 7; // 7 = out of range, start new row
+        let daysAdded = 7; // 7 = out of range, start new row
         const rowsCount = Math.ceil(squares.length / 7);
         const rowHeightPercent = parseInt(87/rowsCount); // this "87" works for firefox/chrome/safari
 
@@ -332,8 +339,8 @@ var cal = {
         const linesPerRow = parseInt(cal.possibleLines / rowsCount);
         const maxEventLines = Math.max(2, linesPerRow - 1);
         for (let i = 0; i < squares.length; i++) {
-            var day = squares[i];
-            let cCell = document.createElement("td");
+            const day = squares[i];
+            const cCell = document.createElement("td");
             if (day == "b") {
                 cCell.classList.add("blank");
             } else {
@@ -352,24 +359,24 @@ var cal = {
                 dayLine.appendChild(dayNumber)
                 cCell.appendChild(dayLine);
 
-                var eventsDay = cal.getEventsForDay(cal.selYear, cal.selMonth, day);
+                const eventsDay = cal.getEventsForDay(cal.selYear, cal.selMonth, day);
 
                 for (let j = 0; j < eventsDay.length; j++) {
                     if (j >= maxEventLines-1 && eventsDay.length != maxEventLines) {
-                        var evt = document.createElement("div");
+                        const evt = document.createElement("div");
                         evt.classList.add("evtMore");
                         evt.textContent = '+' + (eventsDay.length-j);
                         cCell.appendChild(evt);
                         break;
                     }
-                    var evt = document.createElement("div");
+                    const evt = document.createElement("div");
                     evt.classList.add("evtSmall");
                     evt.textContent = eventsDay[j].summary;
-                    evt.style.backgroundColor = validateColor(eventsDay[j].color);
+                    evt.style.backgroundColor = tools.validateColor(eventsDay[j].color);
                     cCell.appendChild(evt);
                 }
                 cCell.onclick = () => {
-                    let day = Number.parseInt(cCell.getElementsByClassName("dayNumber")[0].textContent);
+                    const day = Number.parseInt(cCell.getElementsByClassName("dayNumber")[0].textContent);
                     cal.renderAndSelectDay(cal.selYear, cal.selMonth, day);
                 };
             }
@@ -389,37 +396,37 @@ var cal = {
 
     renderAndSelectDay: (year, month, day) => {
         cal.selDay = day;
-        let dayEvents = cal.getEventsForDay(year, month, day);
+        const dayEvents = cal.getEventsForDay(year, month, day);
 
-        removeAllChildren(cal.eventBoxes);
+        tools.removeAllChildren(cal.eventBoxes);
         if (dayEvents.length > 0) {
-            for (event of dayEvents) {
-                var eventBox = document.createElement("div");
-                eventBox.style.backgroundColor = validateColor(event.color);
+            for (const event of dayEvents) {
+                const eventBox = document.createElement("div");
+                eventBox.style.backgroundColor = tools.validateColor(event.color);
 
-                var eventMeta = document.createElement("div");
+                const eventMeta = document.createElement("div");
                 eventMeta.classList.add("eventMeta");
 
-                var info = document.createElement("div");
-                var str = icsDateStringToLocalTimeString(event.dtStart);
+                const info = document.createElement("div");
+                let str = tools.icsDateStringToLocalTimeString(event.dtStart);
                 if (event.creator != '') {
                     str += (str == '' ? '' : ', ') + event.creator;
                 }
                 info.textContent = str;
 
-                var exportButton = document.createElement("span");
+                const exportButton = document.createElement("span");
                 exportButton.innerText = 'Share';
                 exportButton.setAttribute("class", "eventAction");
                 exportButton.setAttribute("data-id", event.uid);
                 exportButton.onclick = (ev) => cal.sendToChat(ev.currentTarget.getAttribute("data-id"));
 
-                var editButton = document.createElement("span");
+                const editButton = document.createElement("span");
                 editButton.innerText = 'Edit';
                 editButton.setAttribute("class", "eventAction");
                 editButton.setAttribute("data-id", event.uid);
                 editButton.onclick = (ev) => cal.showEditEvent(ev.currentTarget.getAttribute("data-id"));
 
-                var summary = document.createElement("div");
+                const summary = document.createElement("div");
                 summary.textContent = event.summary;
 
                 eventMeta.appendChild(editButton);
@@ -430,13 +437,13 @@ var cal = {
                 cal.eventBoxes.appendChild(eventBox);
             }
         } else {
-            var p = document.createElement("p");
+            const p = document.createElement("p");
             p.setAttribute("class", "noEvents");
             p.innerText = 'Tap "New Event" to add events.';
             cal.eventBoxes.appendChild(p);
         }
 
-        cal.dayTitle.textContent = getDateString(year, month, day, {weekday: "short", year: "numeric"});
+        cal.dayTitle.textContent = tools.getDateString(year, month, day, {weekday: "short", year: "numeric"});
         cal.dayScreen.classList.remove("hidden");
     },
 
@@ -455,12 +462,12 @@ var cal = {
         const colorButtons = document.getElementsByClassName("colorBtns");
         document.getElementById("editEventCancelButton").onclick = cal.closeEditEvent;
 
-        for (button of colorButtons) {
+        for (const button of colorButtons) {
             button.onclick = (ev) => selectColor(ev.target);
         }
         function selectColor(el) {
             cal.color = el.getAttribute("data-color");
-            for (button of colorButtons) {
+            for (const button of colorButtons) {
                 if (button.getAttribute("data-color") == cal.color) {
                     button.style.backgroundColor = cal.color;
                     button.style.color = "white";
@@ -477,12 +484,12 @@ var cal = {
         if (editUid) {
             const event = cal.events.find((e) => e.uid === editUid);
             cal.editEventText.value = event.summary;
-            for (button of colorButtons) {
+            for (const button of colorButtons) {
                 if (button.getAttribute("data-color") == event.color) {
                     selectColor(button);
                 }
             }
-            cal.editEventStartTime.value = icsDateStringToLocalTimeString(event.dtStart, { editable: true });
+            cal.editEventStartTime.value = tools.icsDateStringToLocalTimeString(event.dtStart, { editable: true });
             cal.editEventUseTime.checked = cal.editEventStartTime.value != '';
             deleteButton.classList.remove("hidden");
             deleteButton.onclick = (ev) => cal.deleteEvent(editUid);
@@ -504,7 +511,7 @@ var cal = {
         }
 
         if (!cal.editEventUseTime.checked) {
-            cal.editEventStartTime.value = addLeadingZeros(new Date().getHours(), 2) + ':00';
+            cal.editEventStartTime.value = tools.addLeadingZeros(new Date().getHours(), 2) + ':00';
         }
 
         cal.eventBoxes.classList.add("hidden");
@@ -514,26 +521,26 @@ var cal = {
 
     /** adds (editUid undefined) or edits an event (editUid defined) */
     doEditEvent: (editUid) => {
-        var event = new CalEvent();
-        event.uid       = editUid ? editUid : generateUid();
+        const event     = new CalEvent();
+        event.uid       = editUid ? editUid : tools.generateUid();
         event.summary   = cal.editEventText.value;
         event.color     = cal.color;
         event.creator   = window.webxdc.selfName;
 
-        var time   = cal.editEventStartTime.value.split(':');
-        var hour   = parseInt(time[0]);
-        var minute = parseInt(time[1]);
+        const time   = cal.editEventStartTime.value.split(':');
+        const hour   = parseInt(time[0]);
+        const minute = parseInt(time[1]);
         if (cal.editEventUseTime.checked && time.length == 2 && hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
-            event.dtStart = dateToIcsDateString(new Date(cal.selYear, cal.selMonth, cal.selDay, hour, minute, 0));
+            event.dtStart = tools.dateToIcsDateString(new Date(cal.selYear, cal.selMonth, cal.selDay, hour, minute, 0));
             event.dtEnd   = '';
         } else {
-            event.dtStart = ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
-            var end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
-            event.dtEnd   = ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
+            event.dtStart = tools.ymdToIcsDateString(cal.selYear, cal.selMonth, cal.selDay);
+            const end = new Date(cal.selYear, cal.selMonth, cal.selDay + 1); // Date() takes care of overflows
+            event.dtEnd   = tools.ymdToIcsDateString(end.getFullYear(), end.getMonth(), end.getDate());
         }
 
-        const info = window.webxdc.selfName + (editUid ? " edited \"" : " created \"") + simplifyString(cal.editEventText.value) +
-               "\" on " + getDateString(cal.selYear, cal.selMonth, cal.selDay);
+        const info = window.webxdc.selfName + (editUid ? " edited \"" : " created \"") + tools.simplifyString(cal.editEventText.value) +
+              "\" on " + tools.getDateString(cal.selYear, cal.selMonth, cal.selDay);
         if (editUid) {
             const old = cal.events.find((e) => e.uid === editUid);
             if (event.summary   === old.summary
@@ -563,9 +570,9 @@ var cal = {
 
     deleteEvent: (uid) => {
         const eventToDelete = cal.events.find((e) => e.uid === uid);
-        cal.showAlert("Delete '" + simplifyString(eventToDelete.summary) + "'?", "Delete", "Cancel", () => {
-            const info = window.webxdc.selfName + " deleted \"" + simplifyString(eventToDelete.summary)
-                + "\" from " + getDateString(cal.selYear, cal.selMonth, cal.selDay);
+        cal.showAlert("Delete '" + tools.simplifyString(eventToDelete.summary) + "'?", "Delete", "Cancel", () => {
+            const info = window.webxdc.selfName + " deleted \"" + tools.simplifyString(eventToDelete.summary)
+                + "\" from " + tools.getDateString(cal.selYear, cal.selMonth, cal.selDay);
             window.webxdc.sendUpdate({
                     payload: { actions: [{ action: 'delete', uid: uid }]},
                     info: info,
@@ -601,12 +608,12 @@ var cal = {
             return;
         }
 
-        var data = '';
-        var title = '';
+        let data = '';
+        let title = '';
         if (uid === undefined) {
             data = eventArrayToIcsString(cal.events);
         } else {
-            let event = cal.events.filter((e) => e.uid === uid);
+            const event = cal.events.filter((e) => e.uid === uid);
             data = eventArrayToIcsString(event);
             if (event.length === 1) {
                 title = event[0].summary;
@@ -629,7 +636,7 @@ var cal = {
 
         const [file] = await window.webxdc.importFiles({mimeTypes: ["text/calendar"], extensions: [".ics"]});
         const text = await file.text();
-        const events = icsStringToEventArray(text);
+        const events = icsStringToEventArray(text, newEvent);
 
         if (events.length == 0) {
             cal.showAlert('"' + file.name + '" cannot be read. No events were added to your calendar.', 'OK');
@@ -637,13 +644,13 @@ var cal = {
             return;
         }
 
-        var actions = [];
-        var notDuplicateEvents = 0;
+        const actions = [];
+        let notDuplicateEvents = 0;
         for (const event of events) {
             if (cal.events.find((e) => e.uid === event.uid) === undefined) {
                 notDuplicateEvents++;
             }
-            // also send send duplicates: this may have some sync advantages (receiver checks for duplicates as well)
+            // also send duplicates: this may have some sync advantages (receiver checks for duplicates as well)
             actions.push({ action: 'add', event});
         }
         const info = window.webxdc.selfName + ' imported ' + actions.length + ' events';

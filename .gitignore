@@ -1,2 +1,4 @@
-*.xdc
+node_modules
+dist
+dist-xdc
 *~

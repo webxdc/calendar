@@ -1,5 +1,6 @@
+import { generateUid, icsDateStringToIsoString, dateToIcsDateString } from "./tools";
 
-function icsStringToEventArray(icsString) {
+export function icsStringToEventArray(icsString, newEvent) {
     const keyMap = {
         ['UID']: "uid",
         ['DTSTART']: "dtStart",
@@ -10,10 +11,10 @@ function icsStringToEventArray(icsString) {
         ['DESCRIPTION']: "description", // will be added to summary
         ['LOCATION']: "location",       // will be added to summary
     };
-    let currentObj = new CalEvent();
+    let currentObj = newEvent();
     let lastKey = "";
     let isAlarm = false;
-    var ret = [];
+    const ret = [];
     const lines = icsString.split(/\r\n|\n|\r/);
 
     for (const line of lines) {
@@ -32,7 +33,7 @@ function icsStringToEventArray(icsString) {
             continue;
         }
         let key = line.substring(0, colonPos);
-        let param = {};
+        const param = {};
         const value = line.substring(colonPos + 1);
         if (key.indexOf(";") !== -1) {
             const keyParts = key.split(";");
@@ -45,7 +46,7 @@ function icsStringToEventArray(icsString) {
         switch (key) {
             case 'BEGIN':
                 if (value === 'VEVENT') {
-                    currentObj = new CalEvent();
+                    currentObj = newEvent();
                 } else if (value === 'VALARM') {
                     isAlarm = true; // VEVENT may include VALARM: ignore DESCRIPTION of VALARM
                 }
@@ -97,6 +98,42 @@ function icsStringToEventArray(icsString) {
     }
 
     return ret;
+}
+
+function getTimezoneOffsetMilliseconds(timeZoneStr) {
+    let minutesOffset = 0;
+    try {
+        // get timezone specific date for "now" as `MM/DD/YYYY, GMT+HH:mm`
+        const dateStr = Intl.DateTimeFormat('en-US', {timeZone: timeZoneStr, timeZoneName: "longOffset"}).format(new Date());
+        const gmtStr = dateStr.split(" ")[1].slice(3) || '+0'; // `+0` is needed when the timezone is missing the number part. Ex. Africa/Bamako -> GMT
+        minutesOffset = parseInt(gmtStr.split(':')[0])*60;
+        if (gmtStr.includes(":")) {
+           minutesOffset = minutesOffset + parseInt(gmtStr.split(':')[1]);
+        }
+    } catch(e) {
+        console.error(e);
+    }
+    return minutesOffset * 60 * 1000;
+}
+
+function unifyIcsDateString(icsDateString, param = {}) {
+    try {
+        icsDateString = icsDateString.trim();
+        if (icsDateString.length >= 15) {
+            let dateObj = new Date(icsDateStringToIsoString(icsDateString));
+            if (icsDateString.substr(15, 1) != 'Z' && typeof param.TZID == 'string') {
+                let unixTimestamp = dateObj.getTime();
+                unixTimestamp -= getTimezoneOffsetMilliseconds(param.TZID);
+                dateObj = new Date(unixTimestamp);
+            }
+            return dateToIcsDateString(dateObj);
+        } else {
+            return icsDateString.substring(0, 8);
+        }
+    } catch (e) {
+        console.error(e);
+        return dateToIcsDateString(new Date())
+    }
 }
 
 function unescapeIcsValue(str) {
