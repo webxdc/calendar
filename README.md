@@ -3,7 +3,7 @@
 This is a simple calendar app for WebXDC.
 You can create and delete events to share with other people.
 
-<img width=250 src=https://github.com/webxdc/calendar/assets/9800740/db3693b7-0bd4-4efc-912a-d5fe075a8f79>
+<img width=250 src=https://github.com/webxdc/calendar/assets/9800740/ec264289-c8ad-4eb3-9637-cfdac8f6d2cd>
 
 ## Get the app
 
