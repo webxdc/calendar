@@ -1,17 +1,13 @@
 # Calendar app [![CI](https://github.com/webxdc/calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/webxdc/calendar/actions/workflows/ci.yml) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 This is a simple calendar app for WebXDC.
+Download [calendar.xdc](https://github.com/webxdc/calendar/releases/latest/download/calendar.xdc) file
+from [Release Assets](https://github.com/webxdc/calendar/releases), 
+attach it to a group chat and share events!
 You can create and delete events to share with other people.
+Or try out an [Online Demo](https://webxdc.github.io/calendar/). 
 
 <img width=250 src=https://github.com/webxdc/calendar/assets/9800740/ec264289-c8ad-4eb3-9637-cfdac8f6d2cd>
-
-## Get the app
-
-Download [calendar.xdc](https://github.com/webxdc/calendar/releases/latest/download/calendar.xdc) file
-from [Release Assets](https://github.com/webxdc/calendar/releases), attach to a Delta Chat group
-and share events!
-
-[Online Demo](https://webxdc.github.io/calendar/)
 
 ## Import/Export compatibility
 
