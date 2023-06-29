@@ -2,10 +2,10 @@
 
 This is a simple calendar app for WebXDC.
 Download [calendar.xdc](https://github.com/webxdc/calendar/releases/latest/download/calendar.xdc) file
-from [Release Assets](https://github.com/webxdc/calendar/releases), 
+from [Release Assets](https://github.com/webxdc/calendar/releases),
 attach it to a group chat and share events!
 You can create and delete events to share with other people.
-Or try out an [Online Demo](https://webxdc.github.io/calendar/). 
+Or try out an [Online Demo](https://webxdc.github.io/calendar/).
 
 <img width=250 src=https://github.com/webxdc/calendar/assets/9800740/ec264289-c8ad-4eb3-9637-cfdac8f6d2cd>
 
